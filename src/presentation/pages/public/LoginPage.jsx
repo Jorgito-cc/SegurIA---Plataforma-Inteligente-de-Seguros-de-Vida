@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../application/context/AuthContext';
 import { notify } from '../../components/notifications/notify';
+import { getDashboardRouteByRole } from '../../routes/roleUtils';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -20,11 +21,7 @@ export default function LoginPage() {
         password: form.password,
       });
       notify.success('Inicio de sesion correcto');
-
-      const rol = data?.usuario?.rol;
-      if (rol === 'Administrador') navigate('/admin/dashboard');
-      else if (rol === 'Agente') navigate('/agente/dashboard');
-      else navigate('/cliente/dashboard');
+      navigate(getDashboardRouteByRole(data?.usuario?.rol));
     } catch (error) {
       notify.error(error.message || 'No se pudo iniciar sesion');
     } finally {

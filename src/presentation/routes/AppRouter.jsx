@@ -4,6 +4,8 @@ import DashboardLayout from '../layouts/DashboardLayout';
 import RequireAuth from './guards/RequireAuth';
 import RequireRole from './guards/RequireRole';
 import RedirectIfAuth from './guards/RedirectIfAuth';
+import { getDashboardRouteByRole } from './roleUtils';
+import { useAuth } from '../../application/context/AuthContext';
 
 import HomePage from '../pages/public/HomePage';
 import LoginPage from '../pages/public/LoginPage';
@@ -23,6 +25,11 @@ import AgenteClientesPage from '../pages/agente/AgenteClientesPage';
 
 import ClienteDashboardPage from '../pages/client/ClienteDashboardPage';
 import ClientePerfilPage from '../pages/client/ClientePerfilPage';
+
+function PanelIndexRedirect() {
+  const { user } = useAuth();
+  return <Navigate to={getDashboardRouteByRole(user?.rol)} replace />;
+}
 
 export default function AppRouter() {
   return (
@@ -47,7 +54,7 @@ export default function AppRouter() {
         {/* Privadas */}
         <Route element={<RequireAuth />}>
           <Route path='/panel' element={<DashboardLayout />}>
-            <Route index element={<Navigate to='/cliente/dashboard' replace />} />
+            <Route index element={<PanelIndexRedirect />} />
           </Route>
 
           {/* Admin */}
