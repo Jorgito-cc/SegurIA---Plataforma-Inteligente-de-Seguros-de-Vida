@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE = import.meta.env.VITE_API_URL;
+const FALLBACK_API_BASE = 'https://backend-seguros-de-vida-production.up.railway.app/api';
+const rawApiBase = import.meta.env.VITE_API_URL || FALLBACK_API_BASE;
+const API_BASE = rawApiBase.replace(/\/+$/, '');
 
 const apiClient = axios.create({
   baseURL: API_BASE,
