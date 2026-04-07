@@ -15,7 +15,10 @@ export default function LoginPage() {
     e.preventDefault();
     try {
       setLoading(true);
-      const data = await login(form);
+      const data = await login({
+        email: form.email.trim(),
+        password: form.password,
+      });
       notify.success('Inicio de sesion correcto');
 
       const rol = data?.usuario?.rol;

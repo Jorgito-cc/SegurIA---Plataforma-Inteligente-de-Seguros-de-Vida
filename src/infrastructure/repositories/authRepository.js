@@ -3,7 +3,11 @@ import { ENDPOINTS } from '../api/endpoints';
 
 export const authRepository = {
   async login(payload) {
-    const { data } = await apiClient.post(ENDPOINTS.auth.login, payload);
+    const loginPayload = {
+      email: (payload?.email || '').trim().toLowerCase(),
+      password: payload?.password || '',
+    };
+    const { data } = await apiClient.post(ENDPOINTS.auth.login, loginPayload);
     return data;
   },
 
