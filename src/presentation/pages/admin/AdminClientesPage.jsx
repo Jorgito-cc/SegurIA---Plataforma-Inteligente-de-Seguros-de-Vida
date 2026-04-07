@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { clientRepository } from '../../../infrastructure/repositories/clientRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { notify } from '../../components/notifications/notify';
-import { FaPlus, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 
 export default function AdminClientesPage() {
   const crud = useCrudManager(clientRepository);
@@ -53,6 +54,49 @@ export default function AdminClientesPage() {
     }
   };
 
+  const buildExportRows = () =>
+    crud.items.map((item) => ({
+      Usuario: item.username,
+      Correo: item.email,
+      Nombre: `${item.first_name || ''} ${item.last_name || ''}`.trim(),
+      Cedula: item.ci || '-',
+      Telefono: item.telefono || '-',
+      Direccion: item.direccion || '-',
+      FechaNacimiento: item.fecha_nacimiento || '-',
+      Genero: item.genero || '-',
+      Profesion: item.profesion_oficio || '-',
+      EsFumador: item.es_fumador ? 'Si' : 'No',
+      Ingresos: item.ingresos_mensuales ?? '-',
+      Estado: item.is_active ? 'Activo' : 'Inactivo',
+    }));
+
+  const handleExportExcel = () => {
+    exportToExcel('clientes', 'Clientes', buildExportRows());
+  };
+
+  const handleExportPdf = () => {
+    const rows = buildExportRows();
+    exportToPdf(
+      'Reporte de Clientes',
+      'clientes',
+      ['Usuario', 'Correo', 'Nombre', 'Cedula', 'Telefono', 'Direccion', 'FechaNacimiento', 'Genero', 'Profesion', 'EsFumador', 'Ingresos', 'Estado'],
+      rows.map((r) => [
+        r.Usuario,
+        r.Correo,
+        r.Nombre,
+        r.Cedula,
+        r.Telefono,
+        r.Direccion,
+        r.FechaNacimiento,
+        r.Genero,
+        r.Profesion,
+        r.EsFumador,
+        r.Ingresos,
+        r.Estado,
+      ])
+    );
+  };
+
   const handleEdit = (item) => {
     setFormData({
       username: item.username ?? '',
@@ -99,15 +143,23 @@ export default function AdminClientesPage() {
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Gestión de Clientes</h1>
-        <button
-          onClick={() => {
-            resetForm();
-            crud.setShowForm(true);
-          }}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-        >
-          <FaPlus /> Crear Cliente
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExportExcel} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2">
+            <FaFileExcel /> Excel
+          </button>
+          <button onClick={handleExportPdf} className="px-3 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition flex items-center gap-2">
+            <FaFilePdf /> PDF
+          </button>
+          <button
+            onClick={() => {
+              resetForm();
+              crud.setShowForm(true);
+            }}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+          >
+            <FaPlus /> Crear Cliente
+          </button>
+        </div>
       </div>
 
       {crud.error && (

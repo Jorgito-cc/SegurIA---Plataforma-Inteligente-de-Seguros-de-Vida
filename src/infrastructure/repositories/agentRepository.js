@@ -24,7 +24,11 @@ export const agentRepository = {
 
   // Actualizar agente
   async update(id, payload) {
-    const { data } = await apiClient.put(`${ENDPOINTS.agentes}${id}/`, payload);
+    const updatePayload = { ...payload };
+    if (!updatePayload.password) {
+      delete updatePayload.password;
+    }
+    const { data } = await apiClient.patch(`${ENDPOINTS.agentes}${id}/`, updatePayload);
     return data;
   },
 

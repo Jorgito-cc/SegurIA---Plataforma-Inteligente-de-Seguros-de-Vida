@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { tipoSeguroRepository } from '../../../infrastructure/repositories/tipoSeguroRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { notify } from '../../components/notifications/notify';
-import { FaPlus, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 
 export default function AdminPlanesPage() {
   const crud = useCrudManager(tipoSeguroRepository);
@@ -55,13 +56,43 @@ export default function AdminPlanesPage() {
     crud.setShowForm(false);
   };
 
+  const buildExportRows = () =>
+    crud.items.map((item) => ({
+      Codigo: item.codigo_interno,
+      Nombre: item.nombre,
+      Descripcion: item.descripcion || '-',
+      Estado: item.estado ? 'Activo' : 'Inactivo',
+    }));
+
+  const handleExportExcel = () => {
+    exportToExcel('tipos-seguro', 'TiposSeguro', buildExportRows());
+  };
+
+  const handleExportPdf = () => {
+    const rows = buildExportRows();
+    exportToPdf(
+      'Reporte de Tipos de Seguro',
+      'tipos-seguro',
+      ['Codigo', 'Nombre', 'Descripcion', 'Estado'],
+      rows.map((r) => [r.Codigo, r.Nombre, r.Descripcion, r.Estado])
+    );
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Tipos de Seguro</h1>
-        <button onClick={() => { resetForm(); crud.setShowForm(true); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
-          <FaPlus /> Crear Tipo
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExportExcel} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2">
+            <FaFileExcel /> Excel
+          </button>
+          <button onClick={handleExportPdf} className="px-3 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition flex items-center gap-2">
+            <FaFilePdf /> PDF
+          </button>
+          <button onClick={() => { resetForm(); crud.setShowForm(true); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+            <FaPlus /> Crear Tipo
+          </button>
+        </div>
       </div>
 
       {crud.error && <div className="p-4 bg-red-100 text-red-800 rounded-lg mb-4">{crud.error}</div>}

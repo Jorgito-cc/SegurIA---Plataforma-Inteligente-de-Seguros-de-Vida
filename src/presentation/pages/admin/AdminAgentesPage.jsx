@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { agentRepository } from '../../../infrastructure/repositories/agentRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { notify } from '../../components/notifications/notify';
-import { FaPlus, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 
 export default function AdminAgentesPage() {
   const crud = useCrudManager(agentRepository);
@@ -35,7 +36,11 @@ export default function AdminAgentesPage() {
     e.preventDefault();
     try {
       if (crud.editingId) {
-        const success = await crud.handleUpdate(crud.editingId, formData);
+        const updatePayload = { ...formData };
+        if (!updatePayload.password) {
+          delete updatePayload.password;
+        }
+        const success = await crud.handleUpdate(crud.editingId, updatePayload);
         if (success) {
           notify.success('Agente actualizado');
           resetForm();
@@ -50,6 +55,47 @@ export default function AdminAgentesPage() {
     } catch (err) {
       notify.error(err.message || 'Error procesando agente');
     }
+  };
+
+  const buildExportRows = () =>
+    crud.items.map((item) => ({
+      Usuario: item.username,
+      Correo: item.email,
+      Nombre: `${item.first_name || ''} ${item.last_name || ''}`.trim(),
+      Cedula: item.ci || '-',
+      Telefono: item.telefono || '-',
+      Licencia: item.codigo_licencia || '-',
+      FechaIngreso: item.fecha_ingreso || '-',
+      Nivel: item.nivel || '-',
+      Comision: item.comision_base_porcentaje ?? '-',
+      Sucursal: item.sucursal || '-',
+      Estado: item.is_active ? 'Activo' : 'Inactivo',
+    }));
+
+  const handleExportExcel = () => {
+    exportToExcel('agentes', 'Agentes', buildExportRows());
+  };
+
+  const handleExportPdf = () => {
+    const rows = buildExportRows();
+    exportToPdf(
+      'Reporte de Agentes',
+      'agentes',
+      ['Usuario', 'Correo', 'Nombre', 'Cedula', 'Telefono', 'Licencia', 'FechaIngreso', 'Nivel', 'Comision', 'Sucursal', 'Estado'],
+      rows.map((r) => [
+        r.Usuario,
+        r.Correo,
+        r.Nombre,
+        r.Cedula,
+        r.Telefono,
+        r.Licencia,
+        r.FechaIngreso,
+        r.Nivel,
+        r.Comision,
+        r.Sucursal,
+        r.Estado,
+      ])
+    );
   };
 
   const handleEdit = (item) => {
@@ -85,15 +131,23 @@ export default function AdminAgentesPage() {
     <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Gestión de Agentes</h1>
-        <button
-          onClick={() => {
-            resetForm();
-            crud.setShowForm(true);
-          }}
-          className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
-        >
-          <FaPlus /> Crear Agente
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExportExcel} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2">
+            <FaFileExcel /> Excel
+          </button>
+          <button onClick={handleExportPdf} className="px-3 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition flex items-center gap-2">
+            <FaFilePdf /> PDF
+          </button>
+          <button
+            onClick={() => {
+              resetForm();
+              crud.setShowForm(true);
+            }}
+            className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2"
+          >
+            <FaPlus /> Crear Agente
+          </button>
+        </div>
       </div>
 
       {crud.error && (

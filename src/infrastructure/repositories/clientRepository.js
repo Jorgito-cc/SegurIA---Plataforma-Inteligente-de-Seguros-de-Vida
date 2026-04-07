@@ -18,13 +18,44 @@ export const clientRepository = {
 
   // Crear cliente (CRUD)
   async create(payload) {
-    const { data } = await apiClient.post(ENDPOINTS.clientes, payload);
+    const createPayload = {
+      email: payload.email,
+      username: payload.username,
+      password: payload.password,
+      first_name: payload.first_name,
+      last_name: payload.last_name,
+      ci: payload.ci,
+      telefono: payload.telefono,
+      direccion: payload.direccion,
+      fecha_nacimiento: payload.fecha_nacimiento || null,
+      genero: payload.genero || null,
+      profesion_oficio: payload.profesion_oficio || null,
+      es_fumador: Boolean(payload.es_fumador),
+      ingresos_mensuales:
+        payload.ingresos_mensuales === '' || payload.ingresos_mensuales == null
+          ? null
+          : payload.ingresos_mensuales,
+    };
+    const { data } = await apiClient.post(ENDPOINTS.auth.registerClient, createPayload);
     return data;
   },
 
   // Actualizar cliente
   async update(id, payload) {
-    const { data } = await apiClient.put(`${ENDPOINTS.clientes}${id}/`, payload);
+    const updatePayload = {
+      telefono: payload.telefono || '',
+      direccion: payload.direccion || '',
+      fecha_nacimiento: payload.fecha_nacimiento || null,
+      genero: payload.genero || null,
+      profesion_oficio: payload.profesion_oficio || null,
+      es_fumador: Boolean(payload.es_fumador),
+      ingresos_mensuales:
+        payload.ingresos_mensuales === '' || payload.ingresos_mensuales == null
+          ? null
+          : payload.ingresos_mensuales,
+      is_active: Boolean(payload.is_active),
+    };
+    const { data } = await apiClient.patch(`${ENDPOINTS.clientes}${id}/`, updatePayload);
     return data;
   },
 

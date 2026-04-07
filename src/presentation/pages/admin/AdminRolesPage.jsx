@@ -2,8 +2,9 @@ import { useState, useEffect } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { roleRepository } from '../../../infrastructure/repositories/roleRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
+import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { notify } from '../../components/notifications/notify';
-import { FaPlus, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 
 export default function AdminRolesPage() {
   const crud = useCrudManager(roleRepository);
@@ -69,13 +70,42 @@ export default function AdminRolesPage() {
     crud.setShowForm(false);
   };
 
+  const buildExportRows = () =>
+    crud.items.map((item) => ({
+      ID: item.id,
+      Nombre: item.name,
+      CantidadPermisos: Array.isArray(item.permissions) ? item.permissions.length : 0,
+    }));
+
+  const handleExportExcel = () => {
+    exportToExcel('roles', 'Roles', buildExportRows());
+  };
+
+  const handleExportPdf = () => {
+    const rows = buildExportRows();
+    exportToPdf(
+      'Reporte de Roles',
+      'roles',
+      ['ID', 'Nombre', 'CantidadPermisos'],
+      rows.map((r) => [r.ID, r.Nombre, r.CantidadPermisos])
+    );
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Roles y Permisos</h1>
-        <button onClick={() => { resetForm(); crud.setShowForm(true); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
-          <FaPlus /> Crear Rol
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={handleExportExcel} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2">
+            <FaFileExcel /> Excel
+          </button>
+          <button onClick={handleExportPdf} className="px-3 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition flex items-center gap-2">
+            <FaFilePdf /> PDF
+          </button>
+          <button onClick={() => { resetForm(); crud.setShowForm(true); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
+            <FaPlus /> Crear Rol
+          </button>
+        </div>
       </div>
 
       {crud.error && <div className="p-4 bg-red-100 text-red-800 rounded-lg mb-4">{crud.error}</div>}
