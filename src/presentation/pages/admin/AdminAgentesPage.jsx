@@ -344,9 +344,13 @@ export default function AdminAgentesPage() {
                 <th className="px-4 py-3 text-left text-sm font-semibold">Usuario</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Correo</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Nombre</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Cédula</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Teléfono</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Licencia</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Fecha ingreso</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Nivel</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Comisión</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Sucursal</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Estado</th>
                 <th className="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
               </tr>
@@ -357,9 +361,13 @@ export default function AdminAgentesPage() {
                   <td className="px-4 py-3 text-sm">{item.username}</td>
                   <td className="px-4 py-3 text-sm">{item.email}</td>
                   <td className="px-4 py-3 text-sm">{item.first_name} {item.last_name}</td>
+                  <td className="px-4 py-3 text-sm">{item.ci}</td>
+                  <td className="px-4 py-3 text-sm">{item.telefono || '-'}</td>
                   <td className="px-4 py-3 text-sm">{item.codigo_licencia}</td>
+                  <td className="px-4 py-3 text-sm">{item.fecha_ingreso || '-'}</td>
                   <td className="px-4 py-3 text-sm">{item.nivel}</td>
                   <td className="px-4 py-3 text-sm">{item.comision_base_porcentaje}%</td>
+                  <td className="px-4 py-3 text-sm">{item.sucursal || '-'}</td>
                   <td className="px-4 py-3 text-sm">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {item.is_active ? 'Activo' : 'Inactivo'}

@@ -367,7 +367,14 @@ export default function AdminClientesPage() {
                 <th className="px-4 py-3 text-left font-semibold">Usuario</th>
                 <th className="px-4 py-3 text-left font-semibold">Correo</th>
                 <th className="px-4 py-3 text-left font-semibold">Nombre</th>
+                <th className="px-4 py-3 text-left font-semibold">Cédula</th>
                 <th className="px-4 py-3 text-left font-semibold">Teléfono</th>
+                <th className="px-4 py-3 text-left font-semibold">Dirección</th>
+                <th className="px-4 py-3 text-left font-semibold">Nacimiento</th>
+                <th className="px-4 py-3 text-left font-semibold">Género</th>
+                <th className="px-4 py-3 text-left font-semibold">Profesión</th>
+                <th className="px-4 py-3 text-left font-semibold">Fumador</th>
+                <th className="px-4 py-3 text-left font-semibold">Ingresos</th>
                 <th className="px-4 py-3 text-left font-semibold">Estado</th>
                 <th className="px-4 py-3 text-center font-semibold">Acciones</th>
               </tr>
@@ -378,7 +385,14 @@ export default function AdminClientesPage() {
                   <td className="px-4 py-3">{item.username}</td>
                   <td className="px-4 py-3">{item.email}</td>
                   <td className="px-4 py-3">{item.first_name} {item.last_name}</td>
+                  <td className="px-4 py-3">{item.ci}</td>
                   <td className="px-4 py-3">{item.telefono || '-'}</td>
+                  <td className="px-4 py-3">{item.direccion || '-'}</td>
+                  <td className="px-4 py-3">{item.fecha_nacimiento || '-'}</td>
+                  <td className="px-4 py-3">{item.genero || '-'}</td>
+                  <td className="px-4 py-3">{item.profesion_oficio || '-'}</td>
+                  <td className="px-4 py-3">{item.es_fumador ? 'Sí' : 'No'}</td>
+                  <td className="px-4 py-3">{item.ingresos_mensuales ?? '-'}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded text-xs font-semibold ${item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {item.is_active ? 'Activo' : 'Inactivo'}
