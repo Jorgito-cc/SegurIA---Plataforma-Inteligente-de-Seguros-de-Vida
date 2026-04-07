@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { tipoSeguroRepository } from '../../../infrastructure/repositories/tipoSeguroRepository';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
 import { FaPlus, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
 
@@ -89,6 +90,16 @@ export default function AdminPlanesPage() {
         </div>
       )}
 
+      <ConfirmDialog
+        open={crud.deleteConfirm.open}
+        title="Eliminar Tipo de Seguro"
+        message="¿Estás seguro de que deseas eliminar este tipo de seguro? Esta acción no se puede deshacer."
+        onConfirm={() => crud.handleDeleteConfirm(crud.deleteConfirm.id)}
+        onCancel={() => crud.setDeleteConfirm({ open: false, id: null })}
+        isLoading={crud.loading}
+        isDangerous={true}
+      />
+
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         {crud.loading ? (
           <div className="p-8 text-center"><p>Cargando tipos de seguro...</p></div>
@@ -112,7 +123,7 @@ export default function AdminPlanesPage() {
                   <td className="px-4 py-3 text-sm"><span className={`px-2 py-1 rounded text-xs font-semibold ${item.estado ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{item.estado ? 'Activo' : 'Inactivo'}</span></td>
                   <td className="px-4 py-3 text-center flex justify-center gap-2">
                     <button onClick={() => handleEdit(item)} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"><FaEdit size={14} /></button>
-                    <button onClick={() => crud.handleDelete(item.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"><FaTrash size={14} /></button>
+                    <button onClick={() => crud.handleDeleteClick(item.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"><FaTrash size={14} /></button>
                   </td>
                 </tr>
               ))}

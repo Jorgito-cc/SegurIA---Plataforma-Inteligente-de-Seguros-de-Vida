@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { roleRepository } from '../../../infrastructure/repositories/roleRepository';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
 import { FaPlus, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
 
@@ -108,6 +109,16 @@ export default function AdminRolesPage() {
         </div>
       )}
 
+      <ConfirmDialog
+        open={crud.deleteConfirm.open}
+        title="Eliminar Rol"
+        message="¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer."
+        onConfirm={() => crud.handleDeleteConfirm(crud.deleteConfirm.id)}
+        onCancel={() => crud.setDeleteConfirm({ open: false, id: null })}
+        isLoading={crud.loading}
+        isDangerous={true}
+      />
+
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         {crud.loading ? (
           <div className="p-8 text-center"><p>Cargando roles...</p></div>
@@ -133,7 +144,7 @@ export default function AdminRolesPage() {
                     <button onClick={() => handleEdit(item)} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
                       <FaEdit size={14} />
                     </button>
-                    <button onClick={() => crud.handleDelete(item.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
+                    <button onClick={() => crud.handleDeleteClick(item.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
                       <FaTrash size={14} />
                     </button>
                   </td>

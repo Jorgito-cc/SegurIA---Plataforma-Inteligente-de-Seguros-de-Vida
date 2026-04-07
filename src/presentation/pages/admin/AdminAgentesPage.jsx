@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { agentRepository } from '../../../infrastructure/repositories/agentRepository';
+import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
 import { FaPlus, FaTimes, FaEdit, FaTrash } from 'react-icons/fa';
 
@@ -13,16 +14,21 @@ export default function AdminAgentesPage() {
     first_name: '',
     last_name: '',
     ci: '',
+    telefono: '',
     codigo_licencia: '',
     fecha_ingreso: new Date().toISOString().split('T')[0],
     nivel: 'Junior',
     comision_base_porcentaje: '0',
     sucursal: '',
+    is_active: true,
   });
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -47,7 +53,10 @@ export default function AdminAgentesPage() {
   };
 
   const handleEdit = (item) => {
-    setFormData(item);
+    setFormData({
+      ...item,
+      password: '', // No mostrar password actual
+    });
     crud.setEditingId(item.id);
     crud.setShowForm(true);
   };
@@ -60,18 +69,20 @@ export default function AdminAgentesPage() {
       first_name: '',
       last_name: '',
       ci: '',
+      telefono: '',
       codigo_licencia: '',
       fecha_ingreso: new Date().toISOString().split('T')[0],
       nivel: 'Junior',
       comision_base_porcentaje: '0',
       sucursal: '',
+      is_active: true,
     });
     crud.setEditingId(null);
     crud.setShowForm(false);
   };
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Gestión de Agentes</h1>
         <button
@@ -86,15 +97,13 @@ export default function AdminAgentesPage() {
       </div>
 
       {crud.error && (
-        <div className="p-4 bg-red-100 text-red-800 rounded-lg mb-4">
-          {crud.error}
-        </div>
+        <div className="p-4 bg-red-100 text-red-800 rounded-lg mb-4">{crud.error}</div>
       )}
 
       {/* Formulario Modal */}
       {crud.showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white">
               <h2 className="text-xl font-bold">
                 {crud.editingId ? 'Editar Agente' : 'Crear Agente'}
@@ -108,123 +117,189 @@ export default function AdminAgentesPage() {
             </div>
 
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
+              {/* Fila 1: Datos básicos */}
               <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  name="username"
-                  placeholder="Usuario"
-                  value={formData.username}
-                  onChange={handleInputChange}
-                  required
-                  disabled={crud.editingId}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
-                <input
-                  type="email"
-                  name="email"
-                  placeholder="Correo"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  required
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Usuario</label>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="usuario"
+                    value={formData.username}
+                    onChange={handleInputChange}
+                    required
+                    disabled={crud.editingId}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 disabled:bg-gray-100"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Correo</label>
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="email@seguria.com"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
               </div>
 
-              {!crud.editingId && (
+              {/* Password */}
+              <div>
+                <label className="block text-sm font-semibold mb-1">
+                  Contraseña {crud.editingId && '(dejar vacío para no cambiar)'}
+                </label>
                 <input
                   type="password"
                   name="password"
                   placeholder="Contraseña (mín 8 caracteres)"
                   value={formData.password}
                   onChange={handleInputChange}
-                  required
+                  required={!crud.editingId}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
                 />
-              )}
-
-              <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  name="first_name"
-                  placeholder="Nombre"
-                  value={formData.first_name}
-                  onChange={handleInputChange}
-                  required
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
-                <input
-                  type="text"
-                  name="last_name"
-                  placeholder="Apellido"
-                  value={formData.last_name}
-                  onChange={handleInputChange}
-                  required
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
               </div>
 
+              {/* Fila 2: Nombres */}
               <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="text"
-                  name="ci"
-                  placeholder="Cédula"
-                  value={formData.ci}
-                  onChange={handleInputChange}
-                  required
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
-                <input
-                  type="text"
-                  name="codigo_licencia"
-                  placeholder="Código Licencia"
-                  value={formData.codigo_licencia}
-                  onChange={handleInputChange}
-                  required
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Nombre</label>
+                  <input
+                    type="text"
+                    name="first_name"
+                    placeholder="Nombre"
+                    value={formData.first_name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Apellido</label>
+                  <input
+                    type="text"
+                    name="last_name"
+                    placeholder="Apellido"
+                    value={formData.last_name}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
               </div>
 
+              {/* Fila 3: Documento y teléfono */}
               <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="date"
-                  name="fecha_ingreso"
-                  value={formData.fecha_ingreso}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
-                <select
-                  name="nivel"
-                  value={formData.nivel}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                >
-                  <option value="Junior">Junior</option>
-                  <option value="Senior">Senior</option>
-                  <option value="Gerente">Gerente</option>
-                </select>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Cédula</label>
+                  <input
+                    type="text"
+                    name="ci"
+                    placeholder="Cédula de identidad"
+                    value={formData.ci}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Teléfono</label>
+                  <input
+                    type="text"
+                    name="telefono"
+                    placeholder="Teléfono"
+                    value={formData.telefono}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
               </div>
 
+              {/* Fila 4: Licencia */}
               <div className="grid grid-cols-2 gap-4">
-                <input
-                  type="number"
-                  name="comision_base_porcentaje"
-                  placeholder="Comisión %"
-                  value={formData.comision_base_porcentaje}
-                  onChange={handleInputChange}
-                  step="0.01"
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
-                <input
-                  type="text"
-                  name="sucursal"
-                  placeholder="Sucursal"
-                  value={formData.sucursal}
-                  onChange={handleInputChange}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                />
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Código de Licencia</label>
+                  <input
+                    type="text"
+                    name="codigo_licencia"
+                    placeholder="Ej: LIC-V-2026-009"
+                    value={formData.codigo_licencia}
+                    onChange={handleInputChange}
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Fecha de Ingreso</label>
+                  <input
+                    type="date"
+                    name="fecha_ingreso"
+                    value={formData.fecha_ingreso}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
               </div>
 
-              <div className="flex gap-3 justify-end pt-4">
+              {/* Fila 5: Nivel y Comisión */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Nivel</label>
+                  <select
+                    name="nivel"
+                    value={formData.nivel}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  >
+                    <option value="Junior">Junior</option>
+                    <option value="Senior">Senior</option>
+                    <option value="Gerente">Gerente</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Comisión Base (%)</label>
+                  <input
+                    type="number"
+                    name="comision_base_porcentaje"
+                    placeholder="12.50"
+                    value={formData.comision_base_porcentaje}
+                    onChange={handleInputChange}
+                    step="0.01"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+              </div>
+
+              {/* Fila 6: Sucursal y estado */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold mb-1">Sucursal</label>
+                  <input
+                    type="text"
+                    name="sucursal"
+                    placeholder="Sucursal where agent works"
+                    value={formData.sucursal}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      name="is_active"
+                      checked={formData.is_active}
+                      onChange={handleInputChange}
+                      className="w-4 h-4"
+                    />
+                    <span className="text-sm font-semibold">Activo</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex gap-3 justify-end pt-4 border-t">
                 <button
                   type="button"
                   onClick={resetForm}
@@ -245,46 +320,63 @@ export default function AdminAgentesPage() {
         </div>
       )}
 
+      {/* Modal de confirmación de eliminación */}
+      <ConfirmDialog
+        open={crud.deleteConfirm.open}
+        title="Eliminar Agente"
+        message="¿Estás seguro de que deseas eliminar este agente? Esta acción no se puede deshacer."
+        onConfirm={() => crud.handleDeleteConfirm(crud.deleteConfirm.id)}
+        onCancel={() => crud.setDeleteConfirm({ open: false, id: null })}
+        isLoading={crud.loading}
+        isDangerous={true}
+      />
+
       {/* Tabla */}
       <div className="bg-white rounded-lg shadow overflow-x-auto">
         {crud.loading ? (
           <div className="p-8 text-center"><p>Cargando agentes...</p></div>
         ) : crud.items.length === 0 ? (
-          <div className="p-8 text-center text-gray-600">
-            No hay agentes registrados
-          </div>
+          <div className="p-8 text-center text-gray-600">No hay agentes registrados</div>
         ) : (
           <table className="w-full">
             <thead className="bg-gray-100 border-b">
               <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold">ID</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Usuario</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Correo</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Nombre</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Licencia</th>
                 <th className="px-4 py-3 text-left text-sm font-semibold">Nivel</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Comisión</th>
+                <th className="px-4 py-3 text-left text-sm font-semibold">Estado</th>
                 <th className="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {crud.items.map((item) => (
-                <tr key={item.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm">{item.id}</td>
+                <tr key={item.id} className="border-b hover:bg-gray-50 transition">
                   <td className="px-4 py-3 text-sm">{item.username}</td>
                   <td className="px-4 py-3 text-sm">{item.email}</td>
                   <td className="px-4 py-3 text-sm">{item.first_name} {item.last_name}</td>
                   <td className="px-4 py-3 text-sm">{item.codigo_licencia}</td>
                   <td className="px-4 py-3 text-sm">{item.nivel}</td>
+                  <td className="px-4 py-3 text-sm">{item.comision_base_porcentaje}%</td>
+                  <td className="px-4 py-3 text-sm">
+                    <span className={`px-2 py-1 rounded text-xs font-semibold ${item.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                      {item.is_active ? 'Activo' : 'Inactivo'}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 text-center flex justify-center gap-2">
                     <button
                       onClick={() => handleEdit(item)}
-                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                      className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm transition"
+                      title="Editar"
                     >
                       <FaEdit size={14} />
                     </button>
                     <button
-                      onClick={() => crud.handleDelete(item.id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm"
+                      onClick={() => crud.handleDeleteClick(item.id)}
+                      className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm transition"
+                      title="Eliminar"
                     >
                       <FaTrash size={14} />
                     </button>

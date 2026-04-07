@@ -13,6 +13,7 @@ export function useCrudManager(repository, pageSize = 20) {
   const [totalCount, setTotalCount] = useState(0);
   const [editingId, setEditingId] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
 
   // Cargar lista
   const loadItems = useCallback(async (page = 1) => {
@@ -70,13 +71,17 @@ export function useCrudManager(repository, pageSize = 20) {
   }, [repository, currentPage, loadItems]);
 
   // Eliminar
-  const handleDelete = useCallback(async (id) => {
-    if (!window.confirm('¿Estás seguro de que deseas eliminar este registro?')) return;
+  const handleDeleteClick = useCallback((id) => {
+    setDeleteConfirm({ open: true, id });
+  }, []);
+
+  const handleDeleteConfirm = useCallback(async (id) => {
     setLoading(true);
     setError(null);
     try {
       await repository.delete(id);
       await loadItems(currentPage);
+      setDeleteConfirm({ open: false, id: null });
       return true;
     } catch (err) {
       setError(err.message || 'Error eliminando registro');
@@ -95,11 +100,14 @@ export function useCrudManager(repository, pageSize = 20) {
     totalPages: Math.ceil(totalCount / pageSize),
     editingId,
     showForm,
+    deleteConfirm,
     setEditingId,
     setShowForm,
+    setDeleteConfirm,
     loadItems,
     handleCreate,
     handleUpdate,
-    handleDelete,
+    handleDeleteClick,
+    handleDeleteConfirm,
   };
 }
