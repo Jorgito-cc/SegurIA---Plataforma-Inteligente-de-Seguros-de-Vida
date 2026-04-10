@@ -12,6 +12,14 @@ export const BRAND = 'SegurIA Panel';
 export const sidebarByRole = {
   Administrador: [
     {
+      key: 'cuenta',
+      icon: <FaUsers />,
+      title: 'Cuenta',
+      items: [
+        { label: 'Mi Perfil', to: '/admin/perfil' },
+      ],
+    },
+    {
       key: 'gestion',
       icon: <FaUserShield />,
       title: 'Gestion',

@@ -1,15 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { roleRepository } from '../../../infrastructure/repositories/roleRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
 import { notify } from '../../components/notifications/notify';
-import { FaPlus, FaTimes, FaEdit, FaTrash, FaFileExcel, FaFilePdf } from 'react-icons/fa';
+import CreateRoleForm from '../../components/forms/CreateRoleForm';
+import { FaPlus, FaEdit, FaTrash, FaFileExcel, FaFilePdf, FaSpinner } from 'react-icons/fa';
 
 export default function AdminRolesPage() {
   const crud = useCrudManager(roleRepository);
-  const [permissions, setPermissions] = useState([]);
-  const [formData, setFormData] = useState({ name: '', permissions: [] });
+  const [loadingPermissions, setLoadingPermissions] = useState(true);
 
   useEffect(() => {
     loadPermissions();
@@ -17,40 +17,29 @@ export default function AdminRolesPage() {
 
   const loadPermissions = async () => {
     try {
-      const data = await roleRepository.getPermissions();
-      setPermissions(Array.isArray(data) ? data : data.results || []);
-    } catch (err) {
-      notify.error('No se pudieron cargar permisos');
+      setLoadingPermissions(true);
+      await roleRepository.getPermissions();
+    } catch (error) {
+      notify.error('Error al cargar permisos');
+    } finally {
+      setLoadingPermissions(false);
     }
   };
 
-  const handleInputChange = (e) => {
-    setFormData(prev => ({ ...prev, name: e.target.value }));
-  };
-
-  const handlePermissionChange = (permId) => {
-    setFormData(prev => ({
-      ...prev,
-      permissions: prev.permissions.includes(permId)
-        ? prev.permissions.filter(p => p !== permId)
-        : [...prev.permissions, permId]
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handleFormSubmit = async (formData) => {
     try {
       if (crud.editingId) {
         const success = await crud.handleUpdate(crud.editingId, formData);
         if (success) {
-          notify.success('Rol actualizado');
-          resetForm();
+          notify.success('Rol actualizado exitosamente');
+          crud.setShowForm(false);
+          crud.setEditingId(null);
         }
       } else {
         const success = await crud.handleCreate(formData);
         if (success) {
-          notify.success('Rol creado');
-          resetForm();
+          notify.success('Rol creado exitosamente');
+          crud.setShowForm(false);
         }
       }
     } catch (err) {
@@ -59,22 +48,19 @@ export default function AdminRolesPage() {
   };
 
   const handleEdit = (item) => {
-    setFormData({ name: item.name, permissions: item.permissions || [] });
     crud.setEditingId(item.id);
+    crud.setEditingData(item);
     crud.setShowForm(true);
-  };
-
-  const resetForm = () => {
-    setFormData({ name: '', permissions: [] });
-    crud.setEditingId(null);
-    crud.setShowForm(false);
   };
 
   const buildExportRows = () =>
     crud.items.map((item) => ({
       ID: item.id,
       Nombre: item.name,
-      CantidadPermisos: Array.isArray(item.permissions) ? item.permissions.length : 0,
+      'Número de Permisos': Array.isArray(item.permissions) ? item.permissions.length : 0,
+      Permisos: Array.isArray(item.permissions)
+        ? item.permissions.map((p) => (typeof p === 'object' ? p.name : p)).join(', ')
+        : '',
     }));
 
   const handleExportExcel = () => {
@@ -86,104 +72,178 @@ export default function AdminRolesPage() {
     exportToPdf(
       'Reporte de Roles',
       'roles',
-      ['ID', 'Nombre', 'CantidadPermisos'],
-      rows.map((r) => [r.ID, r.Nombre, r.CantidadPermisos])
+      ['ID', 'Nombre', 'Número de Permisos'],
+      rows.map((r) => [r.ID, r.Nombre, r['Número de Permisos']])
     );
   };
 
+  if (crud.loading || loadingPermissions) {
+    return (
+      <div className="p-8 flex items-center justify-center">
+        <FaSpinner className="animate-spin mr-3 text-2xl text-violet-600" />
+        <span className="text-lg text-slate-600">Cargando roles...</span>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Roles y Permisos</h1>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900">Gestión de Roles</h1>
+          <p className="text-sm text-slate-600 mt-1">{crud.items.length} rol(es) en el sistema</p>
+        </div>
         <div className="flex items-center gap-2">
-          <button onClick={handleExportExcel} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2">
+          <button
+            onClick={handleExportExcel}
+            className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
+          >
             <FaFileExcel /> Excel
           </button>
-          <button onClick={handleExportPdf} className="px-3 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition flex items-center gap-2">
+          <button
+            onClick={handleExportPdf}
+            className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+          >
             <FaFilePdf /> PDF
           </button>
-          <button onClick={() => { resetForm(); crud.setShowForm(true); }} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition flex items-center gap-2">
-            <FaPlus /> Crear Rol
+          <button
+            onClick={() => {
+              crud.setEditingId(null);
+              crud.setEditingData(null);
+              crud.setShowForm(true);
+            }}
+            className="px-4 py-2 bg-violet-600 text-white font-medium rounded-lg hover:bg-violet-700 transition flex items-center gap-2"
+          >
+            <FaPlus /> Nuevo Rol
           </button>
         </div>
       </div>
 
-      {crud.error && <div className="p-4 bg-red-100 text-red-800 rounded-lg mb-4">{crud.error}</div>}
+      {crud.error && (
+        <div className="p-4 bg-red-100 border border-red-300 text-red-800 rounded-lg">{crud.error}</div>
+      )}
 
+      {/* Modal del Formulario */}
       {crud.showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg max-w-2xl w-full max-h-96 overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b sticky top-0 bg-white">
-              <h2 className="text-xl font-bold">{crud.editingId ? 'Editar Rol' : 'Crear Rol'}</h2>
-              <button onClick={resetForm} className="text-gray-600 hover:text-gray-800"><FaTimes size={20} /></button>
-            </div>
-            <form onSubmit={handleSubmit} className="p-6 space-y-4">
-              <input type="text" placeholder="Nombre del Rol" value={formData.name} onChange={handleInputChange} required className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500" />
-              <div>
-                <label className="block text-sm font-semibold mb-3">Permisos:</label>
-                <div className="grid grid-cols-2 gap-3 max-h-48 overflow-y-auto p-3 border border-gray-200 rounded-lg">
-                  {permissions.map((perm) => (
-                    <label key={perm.id} className="flex items-center gap-2 cursor-pointer">
-                      <input type="checkbox" checked={formData.permissions.includes(perm.id)} onChange={() => handlePermissionChange(perm.id)} className="w-4 h-4" />
-                      <span className="text-sm">{perm.name}</span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-              <div className="flex gap-3 justify-end pt-4">
-                <button type="button" onClick={resetForm} className="px-4 py-2 bg-gray-300 text-gray-800 rounded-lg hover:bg-gray-400 transition">Cancelar</button>
-                <button type="submit" disabled={crud.loading} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50">{crud.loading ? 'Procesando...' : 'Guardar'}</button>
-              </div>
-            </form>
+          <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+            <CreateRoleForm
+              editingData={crud.editingId ? crud.items.find((r) => r.id === crud.editingId) : null}
+              onSubmit={handleFormSubmit}
+              onCancel={() => {
+                crud.setShowForm(false);
+                crud.setEditingId(null);
+              }}
+              loading={crud.creating || crud.updating}
+            />
           </div>
         </div>
       )}
 
-      <ConfirmDialog
-        open={crud.deleteConfirm.open}
-        title="Eliminar Rol"
-        message="¿Estás seguro de que deseas eliminar este rol? Esta acción no se puede deshacer."
-        onConfirm={() => crud.handleDeleteConfirm(crud.deleteConfirm.id)}
-        onCancel={() => crud.setDeleteConfirm({ open: false, id: null })}
-        isLoading={crud.loading}
-        isDangerous={true}
-      />
-
-      <div className="bg-white rounded-lg shadow overflow-x-auto">
-        {crud.loading ? (
-          <div className="p-8 text-center"><p>Cargando roles...</p></div>
-        ) : crud.items.length === 0 ? (
-          <div className="p-8 text-center text-gray-600">No hay roles registrados</div>
+      {/* Tabla de Roles */}
+      <div className="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden">
+        {crud.items.length === 0 ? (
+          <div className="p-8 text-center text-slate-500">
+            <p>No hay roles registrados. Cree uno para comenzar.</p>
+          </div>
         ) : (
-          <table className="w-full">
-            <thead className="bg-gray-100 border-b">
-              <tr>
-                <th className="px-4 py-3 text-left text-sm font-semibold">ID</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Nombre</th>
-                <th className="px-4 py-3 text-left text-sm font-semibold">Permisos</th>
-                <th className="px-4 py-3 text-center text-sm font-semibold">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {crud.items.map((item) => (
-                <tr key={item.id} className="border-b hover:bg-gray-50">
-                  <td className="px-4 py-3 text-sm">{item.id}</td>
-                  <td className="px-4 py-3 text-sm font-semibold">{item.name}</td>
-                  <td className="px-4 py-3 text-sm">{Array.isArray(item.permissions) ? item.permissions.length : 0} permisos</td>
-                  <td className="px-4 py-3 text-center flex justify-center gap-2">
-                    <button onClick={() => handleEdit(item)} className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm">
-                      <FaEdit size={14} />
-                    </button>
-                    <button onClick={() => crud.handleDeleteClick(item.id)} className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 text-sm">
-                      <FaTrash size={14} />
-                    </button>
-                  </td>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-slate-50 border-b border-slate-200">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-bold text-slate-700">ID</th>
+                  <th className="px-6 py-3 text-left text-sm font-bold text-slate-700">Nombre del Rol</th>
+                  <th className="px-6 py-3 text-left text-sm font-bold text-slate-700">Cantidad de Permisos</th>
+                  <th className="px-6 py-3 text-left text-sm font-bold text-slate-700">Permisos Asignados</th>
+                  <th className="px-6 py-3 text-right text-sm font-bold text-slate-700">Acciones</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-200">
+                {crud.items.map((item) => {
+                  const permissionsArray = Array.isArray(item.permissions) ? item.permissions : [];
+                  const permissionCount = permissionsArray.length;
+
+                  return (
+                    <tr key={item.id} className="hover:bg-slate-50 transition">
+                      <td className="px-6 py-4 text-sm text-slate-800 font-mono font-semibold">{item.id}</td>
+                      <td className="px-6 py-4 text-sm text-slate-600 font-medium">{item.name}</td>
+                      <td className="px-6 py-4 text-sm">
+                        <span className="inline-flex items-center justify-center bg-violet-100 text-violet-800 px-3 py-1 rounded-full text-xs font-bold min-w-[2.5rem]">
+                          {permissionCount}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-sm text-slate-600">
+                        <div className="flex flex-wrap gap-1 max-w-xs">
+                          {permissionCount === 0 ? (
+                            <span className="text-slate-400 italic">Sin permisos</span>
+                          ) : permissionCount <= 3 ? (
+                            permissionsArray.map((perm) => (
+                              <span
+                                key={typeof perm === 'object' ? perm.id : perm}
+                                className="inline-block bg-violet-50 text-violet-700 px-2 py-1 rounded text-xs"
+                              >
+                                {typeof perm === 'object' ? perm.name : perm}
+                              </span>
+                            ))
+                          ) : (
+                            <>
+                              {permissionsArray.slice(0, 2).map((perm) => (
+                                <span
+                                  key={typeof perm === 'object' ? perm.id : perm}
+                                  className="inline-block bg-violet-50 text-violet-700 px-2 py-1 rounded text-xs"
+                                >
+                                  {typeof perm === 'object' ? perm.name : perm}
+                                </span>
+                              ))}
+                              <span className="inline-block bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs">
+                                +{permissionCount - 2}
+                              </span>
+                            </>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          onClick={() => handleEdit(item)}
+                          className="text-violet-600 hover:text-violet-800 mr-3"
+                        >
+                          <FaEdit />
+                        </button>
+                        <button
+                          onClick={() =>
+                            crud.setDeleteConfirm({
+                              show: true,
+                              id: item.id,
+                              name: item.name,
+                            })
+                          }
+                          className="text-red-600 hover:text-red-800"
+                        >
+                          <FaTrash />
+                        </button>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
+
+      {/* Confirmación de Eliminación */}
+      {crud.deleteConfirm.show && (
+        <ConfirmDialog
+          title="Eliminar Rol"
+          message={`¿Está seguro de que desea eliminar el rol "${crud.deleteConfirm.name}"?`}
+          onConfirm={() => {
+            crud.handleDelete(crud.deleteConfirm.id);
+            crud.setDeleteConfirm({ show: false, id: null, name: '' });
+          }}
+          onCancel={() => crud.setDeleteConfirm({ show: false, id: null, name: '' })}
+          loading={crud.deleting}
+        />
+      )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { FaUserTie, FaUsers, FaShieldAlt, FaListUl, FaKey, FaSpinner, FaFileExcel, FaFilePdf } from 'react-icons/fa';
+import { FaUserTie, FaUsers, FaShieldAlt, FaListUl, FaKey, FaSpinner, FaFileExcel, FaFilePdf, FaDownload } from 'react-icons/fa';
 import { agentRepository } from '../../../infrastructure/repositories/agentRepository';
 import { clientRepository } from '../../../infrastructure/repositories/clientRepository';
 import { tipoSeguroRepository } from '../../../infrastructure/repositories/tipoSeguroRepository';
@@ -171,17 +171,31 @@ export default function AdminDashboardPage() {
 	}, [stats.bitacora.acciones]);
 
 	const handleExportDashboardExcel = () => {
-		const excelData = [
-			{ Métrica: 'Total Agentes', Cantidad: stats.agentes.total },
-			{ Métrica: 'Agentes Activos', Cantidad: stats.agentes.activos },
-			{ Métrica: 'Clientes Totales', Cantidad: stats.clientes.total },
-			{ Métrica: 'Clientes Activos', Cantidad: stats.clientes.activos },
-			{ Métrica: 'Tipos de Seguro Activos', Cantidad: stats.tipos.activos },
-			{ Métrica: 'Roles Configurados', Cantidad: stats.roles.total },
-			{ Métrica: 'Permisos Totales', Cantidad: stats.roles.permisosTotales },
-			{ Métrica: 'Eventos Bitácora', Cantidad: stats.bitacora.total },
+		const data = [
+			['RESUMEN DEL SISTEMA - DASHBOARD ADMINISTRADOR'],
+			['Generado el:', new Date().toLocaleDateString('es-ES')],
+			[''],
+			['ESTADÍSTICAS GENERALES'],
+			['Métrica', 'Cantidad'],
+			['Total Agentes', stats.agentes.total],
+			['Agentes Activos', stats.agentes.activos],
+			['Agentes Inactivos', stats.agentes.inactivos],
+			['Total Clientes', stats.clientes.total],
+			['Clientes Activos', stats.clientes.activos],
+			['Clientes Inactivos', stats.clientes.inactivos],
+			['Clientes Fumadores', stats.clientes.fumadores],
+			['Tipos de Seguro', stats.tipos.total],
+			['Tipos Activos', stats.tipos.activos],
+			['Total Roles', stats.roles.total],
+			['Permisos Totales', stats.roles.permisosTotales],
+			['Promedio Permisos/Rol', stats.roles.promedioPorRol],
+			['Eventos Bitácora', stats.bitacora.total],
+			[''],
+			['DESGLOSE DE ACTIVIDAD'],
+			['Acción', 'Cantidad'],
+			...Object.entries(stats.bitacora.acciones).map(([key, val]) => [key, val]),
 		];
-		exportToExcel('dashboard', 'Dashboard Resumen', excelData);
+		exportToExcel('dashboard_resumen', 'Dashboard Resumen', data.map((row) => ({ data: row.join(' - ') })));
 	};
 
 	const handleExportDashboardPdf = () => {
@@ -192,10 +206,13 @@ export default function AdminDashboardPage() {
 			['Agentes Inactivos', stats.agentes.inactivos],
 			['Total Clientes', stats.clientes.total],
 			['Clientes Activos', stats.clientes.activos],
+			['Clientes Inactivos', stats.clientes.inactivos],
 			['Clientes Fumadores', stats.clientes.fumadores],
 			['Tipos de Seguro Activos', stats.tipos.activos],
-			['Roles Totales', stats.roles.total],
+			['Tipos de Seguro Inactivos', stats.tipos.inactivos],
+			['Total Roles', stats.roles.total],
 			['Permisos Totales', stats.roles.permisosTotales],
+			['Promedio Permisos por Rol', stats.roles.promedioPorRol],
 			['Eventos Bitácora', stats.bitacora.total],
 		];
 		exportToPdf('Reporte Dashboard Administrador', 'dashboard', headers, rows);
@@ -211,23 +228,25 @@ export default function AdminDashboardPage() {
 
 	return (
 		<section className="p-6 space-y-6">
-			<div className="flex justify-between items-start flex-col md:flex-row gap-4">
+			<div className="flex justify-between items-start">
 				<div>
-					<h1 className="text-4xl font-black text-slate-900">Dashboard Administrador</h1>
-					<p className="mt-2 text-slate-600">Resumen de operación en tiempo real del sistema de seguros</p>
+					<h1 className="text-4xl md:text-4xl font-black text-slate-900">Dashboard Administrador</h1>
+					<p className="mt-2 text-slate-600">
+						Resumen de operación en tiempo real del sistema de seguros SegurIA
+					</p>
 				</div>
 				<div className="flex gap-2">
 					<button
 						onClick={handleExportDashboardExcel}
 						className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
 					>
-						<FaFileExcel /> Excel
+						<FaFileExcel size={16} /> Excel
 					</button>
 					<button
 						onClick={handleExportDashboardPdf}
 						className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition flex items-center gap-2"
 					>
-						<FaFilePdf /> PDF
+						<FaFilePdf size={16} /> PDF
 					</button>
 				</div>
 			</div>
@@ -257,10 +276,31 @@ export default function AdminDashboardPage() {
 				<HorizontalBars title="Actividad en Bitácora" data={accionesData} />
 			</div>
 
+			{/* Tres metros pequeños */}
+			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
+					<h4 className="text-slate-500 text-sm font-medium">Tipos de seguro activos</h4>
+					<p className="text-3xl font-black text-slate-900 mt-2">{stats.tipos.activos}</p>
+					<p className="text-xs mt-1 text-slate-500">Inactivos: {stats.tipos.inactivos}</p>
+				</div>
+
+				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
+					<h4 className="text-slate-500 text-sm font-medium">Promedio permisos por rol</h4>
+					<p className="text-3xl font-black text-slate-900 mt-2">{stats.roles.promedioPorRol}</p>
+					<p className="text-xs mt-1 text-slate-500">En {stats.roles.total} roles totales</p>
+				</div>
+
+				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
+					<h4 className="text-slate-500 text-sm font-medium">Eventos en bitácora</h4>
+					<p className="text-3xl font-black text-slate-900 mt-2">{stats.bitacora.total}</p>
+					<p className="text-xs mt-1 text-slate-500">Últimos registros analizados</p>
+				</div>
+			</div>
+
 			{/* Gráficos de Barras */}
 			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 				<SimpleBarChart
-					title="Distribución de Agentes"
+					title="Distribución de Agentes por Estado"
 					data={[
 						{ label: 'Activos', value: stats.agentes.activos },
 						{ label: 'Inactivos', value: stats.agentes.inactivos },
@@ -269,7 +309,7 @@ export default function AdminDashboardPage() {
 				/>
 
 				<SimpleBarChart
-					title="Distribución de Clientes"
+					title="Distribución de Clientes por Estado"
 					data={[
 						{ label: 'Activos', value: stats.clientes.activos },
 						{ label: 'Inactivos', value: stats.clientes.inactivos },
@@ -279,40 +319,59 @@ export default function AdminDashboardPage() {
 				/>
 			</div>
 
-			{/* Tres metros pequeños */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
-					<h4 className="text-slate-500 text-sm">Tipos de seguro activos</h4>
-					<p className="text-3xl font-black text-slate-900 mt-2">{stats.tipos.activos}</p>
-					<p className="text-xs mt-1 text-slate-500">Inactivos: {stats.tipos.inactivos}</p>
+			{/* Tablas información adicional */}
+			<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+				{/* Tabla Bitácora */}
+				<div className="bg-white border border-slate-200 rounded-2xl shadow overflow-hidden">
+					<div className="bg-slate-50 border-b border-slate-200 p-4">
+						<h3 className="font-bold text-slate-800">Acciones Registradas</h3>
+					</div>
+					<div className="p-4">
+						<div className="space-y-2">
+							{accionesData.map((item) => (
+								<div key={item.label} className="flex justify-between items-center py-2 border-b border-slate-100 last:border-0">
+									<span className="text-sm font-medium text-slate-700">{item.label}</span>
+									<span className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-bold">
+										{item.value}
+									</span>
+								</div>
+							))}
+						</div>
+					</div>
 				</div>
 
-				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
-					<h4 className="text-slate-500 text-sm">Promedio permisos por rol</h4>
-					<p className="text-3xl font-black text-slate-900 mt-2">{stats.roles.promedioPorRol}</p>
-					<p className="text-xs mt-1 text-slate-500">Basado en {stats.roles.total} roles</p>
-				</div>
-
-				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
-					<h4 className="text-slate-500 text-sm">Eventos en bitácora</h4>
-					<p className="text-3xl font-black text-slate-900 mt-2">{stats.bitacora.total}</p>
-					<p className="text-xs mt-1 text-slate-500">Últimos registros analizados</p>
-				</div>
-			</div>
-
-			{/* Tabla de Acciones */}
-			<div className="bg-white border border-slate-200 rounded-2xl shadow overflow-hidden">
-				<div className="bg-slate-50 border-b border-slate-200 p-5">
-					<h3 className="font-bold text-slate-800 text-lg">Acciones Registradas en el Sistema</h3>
-				</div>
-				<div className="p-5">
-					<div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-						{accionesData.map((item) => (
-							<div key={item.label} className="text-center p-4 bg-slate-50 rounded-lg border border-slate-200">
-								<p className="text-sm font-medium text-slate-600">{item.label}</p>
-								<p className="text-2xl font-black text-slate-900 mt-2">{item.value}</p>
+				{/* Info Sistema */}
+				<div className="bg-white border border-slate-200 rounded-2xl shadow overflow-hidden">
+					<div className="bg-slate-50 border-b border-slate-200 p-4">
+						<h3 className="font-bold text-slate-800">Información del Sistema</h3>
+					</div>
+					<div className="p-4 space-y-3">
+						<div className="flex justify-between">
+							<span className="text-slate-600 font-medium">Agentes Totales:</span>
+							<span className="font-bold text-slate-900">{stats.agentes.total}</span>
+						</div>
+						<div className="flex justify-between">
+							<span className="text-slate-600 font-medium">Clientes Totales:</span>
+							<span className="font-bold text-slate-900">{stats.clientes.total}</span>
+						</div>
+						<div className="flex justify-between">
+							<span className="text-slate-600 font-medium">Tipos de Seguro:</span>
+							<span className="font-bold text-slate-900">{stats.tipos.total}</span>
+						</div>
+						<div className="flex justify-between">
+							<span className="text-slate-600 font-medium">Roles Configurados:</span>
+							<span className="font-bold text-slate-900">{stats.roles.total}</span>
+						</div>
+						<div className="flex justify-between">
+							<span className="text-slate-600 font-medium">Permisos Disponibles:</span>
+							<span className="font-bold text-slate-900">{stats.roles.permisosTotales}</span>
+						</div>
+						<div className="border-t border-slate-200 pt-3">
+							<div className="flex justify-between">
+								<span className="text-slate-600 font-medium">Fecha Reporte:</span>
+								<span className="text-sm text-slate-500">{new Date().toLocaleDateString('es-ES')}</span>
 							</div>
-						))}
+						</div>
 					</div>
 				</div>
 			</div>

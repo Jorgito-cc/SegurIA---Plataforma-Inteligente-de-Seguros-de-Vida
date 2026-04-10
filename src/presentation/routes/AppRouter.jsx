@@ -20,6 +20,7 @@ import AdminClientesPage from '../pages/admin/AdminClientesPage';
 import AdminPlanesPage from '../pages/admin/AdminPlanesPage';
 import AdminRolesPage from '../pages/admin/AdminRolesPage';
 import AdminPermisosPage from '../pages/admin/AdminPermisosPage';
+import AdminProfilePage from '../pages/admin/AdminProfilePage';
 
 import AgenteDashboardPage from '../pages/agente/AgenteDashboardPage';
 import AgenteClientesPage from '../pages/agente/AgenteClientesPage';
@@ -68,6 +69,7 @@ export default function AppRouter() {
             }
           >
             <Route path='dashboard' element={<AdminDashboardPage />} />
+            <Route path='perfil' element={<AdminProfilePage />} />
             <Route path='bitacora' element={<AdminBitacoraPage />} />
             <Route path='agentes' element={<AdminAgentesPage />} />
             <Route path='clientes' element={<AdminClientesPage />} />
