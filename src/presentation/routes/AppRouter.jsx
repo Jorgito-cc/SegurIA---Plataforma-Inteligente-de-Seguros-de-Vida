@@ -19,6 +19,7 @@ import AdminAgentesPage from '../pages/admin/AdminAgentesPage';
 import AdminClientesPage from '../pages/admin/AdminClientesPage';
 import AdminPlanesPage from '../pages/admin/AdminPlanesPage';
 import AdminRolesPage from '../pages/admin/AdminRolesPage';
+import AdminPermisosPage from '../pages/admin/AdminPermisosPage';
 
 import AgenteDashboardPage from '../pages/agente/AgenteDashboardPage';
 import AgenteClientesPage from '../pages/agente/AgenteClientesPage';
@@ -72,6 +73,7 @@ export default function AppRouter() {
             <Route path='clientes' element={<AdminClientesPage />} />
             <Route path='planes' element={<AdminPlanesPage />} />
             <Route path='roles' element={<AdminRolesPage />} />
+            <Route path='permisos' element={<AdminPermisosPage />} />
           </Route>
 
           {/* Agente */}
