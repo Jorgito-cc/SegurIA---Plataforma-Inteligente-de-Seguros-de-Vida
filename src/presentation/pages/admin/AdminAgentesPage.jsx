@@ -1,4 +1,4 @@
-import { useCrudManager } from '../../../application/hooks/useCrudManager';
+ï»¿import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { agentRepository } from '../../../infrastructure/repositories/agentRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
@@ -11,18 +11,18 @@ export default function AdminAgentesPage() {
   const handleFormSubmit = async (formData) => {
     try {
       if (crud.editingId) {
-        const updatePayload = { ...formData };
-        if (!updatePayload.password) delete updatePayload.password;
-        const success = await crud.handleUpdate(crud.editingId, updatePayload);
-        if (success) {
-          notify.success('Agente actualizado exitosamente');
+        const payload = { ...formData };
+        if (!payload.password) delete payload.password;
+        const ok = await crud.handleUpdate(crud.editingId, payload);
+        if (ok) {
+          notify.success('Agente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
         }
       } else {
-        const success = await crud.handleCreate(formData);
-        if (success) {
-          notify.success('Agente creado exitosamente');
+        const ok = await crud.handleCreate(formData);
+        if (ok) {
+          notify.success('Agente creado');
           crud.setShowForm(false);
         }
       }
@@ -31,7 +31,7 @@ export default function AdminAgentesPage() {
     }
   };
 
-  const handleEdit = (item) => {
+  const openEdit = (item) => {
     crud.setEditingId(item.id);
     crud.setShowForm(true);
   };
@@ -48,22 +48,17 @@ export default function AdminAgentesPage() {
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-black text-slate-900">Gestión de Agentes</h1>
-          <p className="text-sm text-slate-600 mt-1">{crud.items.length} agente(s)</p>
-        </div>
+        <h1 className="text-3xl font-black text-slate-900">Gestion de Agentes</h1>
         <button
           onClick={() => {
             crud.setEditingId(null);
             crud.setShowForm(true);
           }}
-          className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700"
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
         >
           <FaPlus /> Nuevo
         </button>
       </div>
-
-      {crud.error && <div className="p-4 bg-red-100 border border-red-300 text-red-800 rounded-lg">{crud.error}</div>}
 
       {crud.showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -71,50 +66,48 @@ export default function AdminAgentesPage() {
             <CreateAgentForm
               editingData={crud.editingId ? crud.items.find((a) => a.id === crud.editingId) : null}
               onSubmit={handleFormSubmit}
-              onCancel={() => { crud.setShowForm(false); crud.setEditingId(null); }}
+              onCancel={() => {
+                crud.setShowForm(false);
+                crud.setEditingId(null);
+              }}
               loading={crud.loading}
             />
           </div>
         </div>
       )}
 
-      <div className="bg-white border border-slate-200 rounded-xl shadow-md overflow-hidden">
-        {crud.items.length === 0 ? (
-          <div className="p-8 text-center text-slate-500"><p>No hay agentes.</p></div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-3 text-left text-sm font-bold">Usuario</th>
-                  <th className="px-6 py-3 text-left text-sm font-bold">Nombre</th>
-                  <th className="px-6 py-3 text-left text-sm font-bold">Correo</th>
-                  <th className="px-6 py-3 text-left text-sm font-bold">Teléfono</th>
-                  <th className="px-6 py-3 text-right text-sm font-bold">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200">
-                {crud.items.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50">
-                    <td className="px-6 py-4 text-sm">{item.username}</td>
-                    <td className="px-6 py-4 text-sm">{item.first_name}</td>
-                    <td className="px-6 py-4 text-sm">{item.email}</td>
-                    <td className="px-6 py-4 text-sm">{item.telefono}</td>
-                    <td className="px-6 py-4 text-right">
-                      <button onClick={() => handleEdit(item)} className="text-blue-600 hover:text-blue-800 mr-3"><FaEdit /></button>
-                      <button onClick={() => crud.handleDeleteClick(item.id)} className="text-red-600 hover:text-red-800"><FaTrash /></button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+        <table className="w-full">
+          <thead className="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th className="px-6 py-3 text-left text-sm font-bold">Usuario</th>
+              <th className="px-6 py-3 text-left text-sm font-bold">Correo</th>
+              <th className="px-6 py-3 text-right text-sm font-bold">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-200">
+            {crud.items.map((item) => (
+              <tr key={item.id}>
+                <td className="px-6 py-4 text-sm">{item.username}</td>
+                <td className="px-6 py-4 text-sm">{item.email}</td>
+                <td className="px-6 py-4 text-right">
+                  <button onClick={() => openEdit(item)} className="text-blue-600 hover:text-blue-800 mr-3"><FaEdit /></button>
+                  <button onClick={() => crud.handleDeleteClick(item.id)} className="text-red-600 hover:text-red-800"><FaTrash /></button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
 
-      {crud.deleteConfirm.open && (
-        <ConfirmDialog title="Confirmar" message="¿Está seguro?" onConfirm={() => crud.handleDeleteConfirm(crud.deleteConfirm.id)} onCancel={() => crud.setDeleteConfirm({ open: false, id: null })} loading={crud.loading} />
-      )}
+      <ConfirmDialog
+        open={crud.deleteConfirm.open}
+        title="Eliminar Agente"
+        message="Esta accion no se puede deshacer."
+        onConfirm={() => crud.handleDeleteConfirm(crud.deleteConfirm.id)}
+        onCancel={() => crud.setDeleteConfirm({ open: false, id: null })}
+        isLoading={crud.loading}
+      />
     </div>
   );
 }
