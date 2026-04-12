@@ -3,7 +3,8 @@ import { tipoSeguroRepository } from '../../../infrastructure/repositories/tipoS
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
 import CreateTipoSeguroForm from '../../components/forms/CreateTipoSeguroForm';
-import { FaPlus, FaEdit, FaTrash, FaSpinner } from 'react-icons/fa';
+import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
+import { FaFileExcel, FaFilePdf, FaPlus, FaEdit, FaTrash, FaSpinner } from 'react-icons/fa';
 
 export default function AdminPlanesPage() {
   const crud = useCrudManager(tipoSeguroRepository);
@@ -29,6 +30,33 @@ export default function AdminPlanesPage() {
     }
   };
 
+  const handleExportExcel = () => {
+    exportToExcel(
+      'tipos-seguro-gestion',
+      'TiposSeguro',
+      crud.items.map((item) => ({
+        Codigo: item.codigo_interno || '-',
+        Nombre: item.nombre || '-',
+        Descripcion: item.descripcion || '-',
+        Estado: item.estado ? 'Activo' : 'Inactivo',
+      }))
+    );
+  };
+
+  const handleExportPdf = () => {
+    exportToPdf(
+      'Reporte de Tipos de Seguro',
+      'tipos-seguro-gestion',
+      ['Codigo', 'Nombre', 'Descripcion', 'Estado'],
+      crud.items.map((item) => [
+        item.codigo_interno || '-',
+        item.nombre || '-',
+        item.descripcion || '-',
+        item.estado ? 'Activo' : 'Inactivo',
+      ])
+    );
+  };
+
   if (crud.loading) {
     return (
       <div className="p-8 flex items-center justify-center">
@@ -40,16 +68,35 @@ export default function AdminPlanesPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-black text-slate-900">Gestion de Planes</h1>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900">Gestion de Planes</h1>
+          <p className="text-sm text-slate-600 mt-1">Catálogo de tipos de seguro con descripción y estado</p>
+        </div>
+
         <button
           onClick={() => {
             crud.setEditingId(null);
             crud.setShowForm(true);
           }}
-          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2"
+          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 flex items-center gap-2 justify-center"
         >
           <FaPlus /> Nuevo
+        </button>
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        <button
+          onClick={handleExportExcel}
+          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
+        >
+          <FaFileExcel /> Excel
+        </button>
+        <button
+          onClick={handleExportPdf}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
+        >
+          <FaFilePdf /> PDF
         </button>
       </div>
 
@@ -69,12 +116,14 @@ export default function AdminPlanesPage() {
         </div>
       )}
 
-      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <table className="w-full">
+      <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full min-w-[1000px]">
           <thead className="bg-slate-50 border-b border-slate-200">
             <tr>
               <th className="px-6 py-3 text-left text-sm font-bold">Codigo</th>
               <th className="px-6 py-3 text-left text-sm font-bold">Nombre</th>
+              <th className="px-6 py-3 text-left text-sm font-bold">Descripcion</th>
               <th className="px-6 py-3 text-left text-sm font-bold">Estado</th>
               <th className="px-6 py-3 text-right text-sm font-bold">Acciones</th>
             </tr>
@@ -84,6 +133,7 @@ export default function AdminPlanesPage() {
               <tr key={item.id}>
                 <td className="px-6 py-4 text-sm">{item.codigo_interno || '-'}</td>
                 <td className="px-6 py-4 text-sm">{item.nombre || '-'}</td>
+                <td className="px-6 py-4 text-sm text-slate-600 max-w-[420px]">{item.descripcion || '-'}</td>
                 <td className="px-6 py-4 text-sm">{item.estado ? 'Activo' : 'Inactivo'}</td>
                 <td className="px-6 py-4 text-right">
                   <button onClick={() => { crud.setEditingId(item.id); crud.setShowForm(true); }} className="text-orange-600 hover:text-orange-800 mr-3"><FaEdit /></button>
@@ -93,6 +143,7 @@ export default function AdminPlanesPage() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
 
       <ConfirmDialog
