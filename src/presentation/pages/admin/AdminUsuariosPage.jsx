@@ -161,13 +161,9 @@ export default function AdminUsuariosPage() {
             is_active: Boolean(formData.is_active),
           };
           const updatedUser = await repository.update(editingUser.id, payload);
-          applyUpdatedUser(editingUser._role, editingUser.id, updatedUser, payload);
+          applyUpdatedUser(editingUser._role, editingUser.id, { ...payload, ...updatedUser });
           notify.success(`${editingUser._role} actualizado`);
           setEditingUser(null);
-          
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
     } catch (err) {
       notify.error(err.message || 'Error actualizando usuario');
     } finally {
@@ -205,7 +201,7 @@ export default function AdminUsuariosPage() {
             is_active: !user.is_active,
           };
           const updatedUser = await repository.update(user.id, payload);
-          applyUpdatedUser(user._role, user.id, updatedUser, payload);
+          applyUpdatedUser(user._role, user.id, { ...payload, ...updatedUser });
       notify.success(`${user._role} ${user.is_active ? 'deshabilitado' : 'habilitado'}`);
     } catch (err) {
       notify.error(err.message || 'Error cambiando estado');
