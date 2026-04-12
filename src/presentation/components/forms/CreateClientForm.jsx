@@ -29,13 +29,27 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
     reset,
   } = useForm({
     defaultValues: editingData || defaultValues,
-    mode: 'onTouched',
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
   });
 
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    reset(editingData || defaultValues);
+    if (editingData) {
+      reset({
+        ...defaultValues,
+        ...editingData,
+        first_name: editingData.first_name || '',
+        last_name: editingData.last_name || '',
+        username: editingData.username || '',
+        email: editingData.email || '',
+        ci: editingData.ci || '',
+      });
+      return;
+    }
+
+    reset(defaultValues);
   }, [editingData, reset]);
 
   const onSubmitForm = async (data) => {
@@ -74,8 +88,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('username', {
-              required: 'Usuario es requerido',
-              minLength: { value: 3, message: 'Mínimo 3 caracteres' },
+              required: isEditing ? false : 'Usuario es requerido',
+              minLength: isEditing ? undefined : { value: 3, message: 'Mínimo 3 caracteres' },
             })}
             type="text"
             placeholder="cliente123"
@@ -92,8 +106,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('email', {
-              required: 'Correo es requerido',
-              pattern: {
+              required: isEditing ? false : 'Correo es requerido',
+              pattern: isEditing ? undefined : {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: 'Correo inválido',
               },
@@ -148,8 +162,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('first_name', {
-              required: 'Nombre es requerido',
-              minLength: { value: 2, message: 'Mínimo 2 caracteres' },
+              required: isEditing ? false : 'Nombre es requerido',
+              minLength: isEditing ? undefined : { value: 2, message: 'Mínimo 2 caracteres' },
             })}
             type="text"
             placeholder="Carlos"
@@ -166,8 +180,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('last_name', {
-              required: 'Apellido es requerido',
-              minLength: { value: 2, message: 'Mínimo 2 caracteres' },
+              required: isEditing ? false : 'Apellido es requerido',
+              minLength: isEditing ? undefined : { value: 2, message: 'Mínimo 2 caracteres' },
             })}
             type="text"
             placeholder="García"
@@ -184,8 +198,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('ci', {
-              required: 'Cédula es requerida',
-              pattern: {
+              required: isEditing ? false : 'Cédula es requerida',
+              pattern: isEditing ? undefined : {
                 value: /^\d{6,15}$/,
                 message: 'Solo números, entre 6 y 15 dígitos',
               },
@@ -210,6 +224,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
                 value: /^[\d\-\s\+]{7,20}$/,
                 message: 'Entre 7 y 20 caracteres (números, espacios, + o -)',
               },
+              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="+58 212 123 4567"
@@ -227,6 +242,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             {...register('direccion', {
               required: 'Dirección es requerida',
               minLength: { value: 5, message: 'Mínimo 5 caracteres' },
+              maxLength: { value: 160, message: 'Máximo 160 caracteres' },
+              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="Calle 5, Casa 123"
@@ -244,7 +261,9 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             {...register('fecha_nacimiento', {
               required: 'Fecha es requerida',
               validate: (value) => {
+                if (!value) return 'Fecha es requerida';
                 const birthDate = new Date(value);
+                if (Number.isNaN(birthDate.getTime())) return 'Fecha inválida';
                 const age = new Date().getFullYear() - birthDate.getFullYear();
                 return age >= 18 || 'Debe ser mayor de 18 años';
               },
@@ -286,6 +305,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             {...register('profesion_oficio', {
               required: 'Profesión es requerida',
               minLength: { value: 3, message: 'Mínimo 3 caracteres' },
+              maxLength: { value: 80, message: 'Máximo 80 caracteres' },
+              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="Ingeniero"
@@ -306,6 +327,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
               required: 'Ingresos es requerido',
               min: { value: 0, message: 'No puede ser negativo' },
               validate: (value) => parseFloat(value) > 0 || 'Debe ser mayor que 0',
+              setValueAs: (value) => (value === '' || value == null ? null : Number(value)),
             })}
             type="number"
             step="0.01"

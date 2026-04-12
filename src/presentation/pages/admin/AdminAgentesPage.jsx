@@ -110,7 +110,7 @@ export default function AdminAgentesPage() {
     );
   };
 
-  if (crud.loading) {
+  if (crud.loading && crud.items.length === 0) {
     return (
       <div className="p-8 flex items-center justify-center">
         <FaSpinner className="animate-spin mr-3 text-2xl text-blue-600" />
