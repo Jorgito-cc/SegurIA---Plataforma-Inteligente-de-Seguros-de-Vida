@@ -61,6 +61,9 @@ export function useCrudManager(repository, pageSize = 20) {
     try {
       const updatedItem = await repository.update(id, payload);
 
+      // TEMPORAL: Mostrar alerta para depuración
+      alert("BACKEND RESPONDE DATA CORRECTAMENTE: " + JSON.stringify(updatedItem));
+
       // Reflejar de inmediato en UI. Asegurar que agregamos el payload al estado 
       // incluso si backend no devuelve el objeto completo.
       setItems((prevItems) =>
@@ -69,8 +72,6 @@ export function useCrudManager(repository, pageSize = 20) {
 
       setEditingId(null);
       await loadItems(currentPage);
-
-      setEditingId(null);
 
       return true;
     } catch (err) {
