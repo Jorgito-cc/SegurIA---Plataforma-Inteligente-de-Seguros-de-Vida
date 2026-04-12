@@ -64,8 +64,11 @@ export function useCrudManager(repository, pageSize = 20) {
       // Reflejar de inmediato en UI. Asegurar que agregamos el payload al estado 
       // incluso si backend no devuelve el objeto completo.
       setItems((prevItems) =>
-        prevItems.map((item) => (item.id === id ? { ...item, ...(updatedItem || {}), ...payload } : item))
+        prevItems.map((item) => (String(item.id) === String(id) ? { ...item, ...(updatedItem || {}), ...payload } : item))
       );
+
+      setEditingId(null);
+      await loadItems(currentPage);
 
       setEditingId(null);
 

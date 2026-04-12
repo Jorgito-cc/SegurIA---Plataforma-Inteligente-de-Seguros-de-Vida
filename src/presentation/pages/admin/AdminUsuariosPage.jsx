@@ -107,7 +107,7 @@ export default function AdminUsuariosPage() {
     if (role === 'Agente') {
       setAgents((prev) =>
         prev.map((item) =>
-          item.id === id ? normalizeUserForRole('Agente', { ...item, ...(updatedUser || {}), ...payload }) : item
+          String(item.id) === String(id) ? normalizeUserForRole('Agente', { ...item, ...(updatedUser || {}), ...payload }) : item
         )
       );
       return;
@@ -115,7 +115,7 @@ export default function AdminUsuariosPage() {
 
     setClients((prev) =>
       prev.map((item) =>
-        item.id === id ? normalizeUserForRole('Cliente', { ...item, ...(updatedUser || {}), ...payload }) : item
+        String(item.id) === String(id) ? normalizeUserForRole('Cliente', { ...item, ...(updatedUser || {}), ...payload }) : item
       )
     );
   };
