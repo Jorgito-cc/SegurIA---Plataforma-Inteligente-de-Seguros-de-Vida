@@ -19,12 +19,16 @@ export default function AdminAgentesPage() {
           notify.success('Agente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
+        } else {
+          notify.error(crud.error || 'No se pudo actualizar el agente');
         }
       } else {
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Agente creado');
           crud.setShowForm(false);
+        } else {
+          notify.error(crud.error || 'No se pudo crear el agente');
         }
       }
     } catch (err) {
@@ -55,6 +59,8 @@ export default function AdminAgentesPage() {
       });
       if (ok) {
         notify.success(item.is_active ? 'Agente deshabilitado' : 'Agente habilitado');
+      } else {
+        notify.error(crud.error || 'No se pudo actualizar el estado del agente');
       }
     } catch (err) {
       notify.error(err.message || 'Error cambiando estado');

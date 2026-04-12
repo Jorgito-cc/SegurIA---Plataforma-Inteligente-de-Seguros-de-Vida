@@ -96,6 +96,8 @@ export default function AdminClientesPage() {
       });
       if (ok) {
         notify.success(item.is_active ? 'Cliente deshabilitado' : 'Cliente habilitado');
+      } else {
+        notify.error(crud.error || 'No se pudo actualizar el cliente');
       }
     } catch (err) {
       notify.error(err.message || 'Error cambiando estado');
@@ -120,12 +122,16 @@ export default function AdminClientesPage() {
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
+        } else {
+          notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
       } else {
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Cliente creado');
           crud.setShowForm(false);
+        } else {
+          notify.error(crud.error || 'No se pudo crear el cliente');
         }
       }
     } catch (err) {
