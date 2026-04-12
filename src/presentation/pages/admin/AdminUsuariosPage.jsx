@@ -40,11 +40,9 @@ export default function AdminUsuariosPage() {
   }, []);
 
   const loadUsers = async () => {
-    console.log(`[AdminUsuariosPage.loadUsers] Starting to load users`);
     setLoading(true);
     setError(null);
     try {
-      console.log(`[AdminUsuariosPage.loadUsers] Fetching agents and clients in parallel`);
       const [agentsResponse, clientsResponse] = await Promise.all([
         agentRepository.list(1, 500),
         clientRepository.list(1, 500),
@@ -61,12 +59,9 @@ export default function AdminUsuariosPage() {
         _displayName: `${item.first_name || ''} ${item.last_name || ''}`.trim() || item.username,
       }));
 
-      console.log(`[AdminUsuariosPage.loadUsers] Setting agents (${agentsList.length}):`, agentsList);
       setAgents(agentsList);
-      console.log(`[AdminUsuariosPage.loadUsers] Setting clients (${clientsList.length}):`, clientsList);
       setClients(clientsList);
     } catch (err) {
-      console.error(`[AdminUsuariosPage.loadUsers] Error:`, err);
       setError(err.message || 'Error cargando usuarios');
       notify.error(err.message || 'Error cargando usuarios');
     } finally {
@@ -102,6 +97,38 @@ export default function AdminUsuariosPage() {
     setEditingUser(null);
   };
 
+  const normalizeUserForRole = (role, user) => ({
+    ...user,
+    _role: role,
+    _displayName: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username,
+  });
+
+  const applyUpdatedUser = (role, id, updatedUser) => {
+    if (role === 'Agente') {
+      setAgents((prev) =>
+        prev.map((item) =>
+          item.id === id ? normalizeUserForRole('Agente', { ...item, ...updatedUser }) : item
+        )
+      );
+      return;
+    }
+
+    setClients((prev) =>
+      prev.map((item) =>
+        item.id === id ? normalizeUserForRole('Cliente', { ...item, ...updatedUser }) : item
+      )
+    );
+  };
+
+  const removeUserFromState = (role, id) => {
+    if (role === 'Agente') {
+      setAgents((prev) => prev.filter((item) => item.id !== id));
+      return;
+    }
+
+    setClients((prev) => prev.filter((item) => item.id !== id));
+  };
+
   const handleSave = async (formData) => {
     if (!editingUser) return;
     setSaving(true);
@@ -133,10 +160,10 @@ export default function AdminUsuariosPage() {
             ingresos_mensuales: formData.ingresos_mensuales,
             is_active: Boolean(formData.is_active),
           };
-      await repository.update(editingUser.id, payload);
+          const updatedUser = await repository.update(editingUser.id, payload);
+          applyUpdatedUser(editingUser._role, editingUser.id, updatedUser);
       notify.success(`${editingUser._role} actualizado`);
       closeModal();
-      await loadUsers();
     } catch (err) {
       notify.error(err.message || 'Error actualizando usuario');
     } finally {
@@ -173,9 +200,9 @@ export default function AdminUsuariosPage() {
             ingresos_mensuales: user.ingresos_mensuales,
             is_active: !user.is_active,
           };
-      await repository.update(user.id, payload);
+          const updatedUser = await repository.update(user.id, payload);
+          applyUpdatedUser(user._role, user.id, updatedUser);
       notify.success(`${user._role} ${user.is_active ? 'deshabilitado' : 'habilitado'}`);
-      await loadUsers();
     } catch (err) {
       notify.error(err.message || 'Error cambiando estado');
     } finally {
@@ -189,9 +216,9 @@ export default function AdminUsuariosPage() {
     try {
       const repository = deleteTarget._role === 'Agente' ? agentRepository : clientRepository;
       await repository.delete(deleteTarget.id);
+      removeUserFromState(deleteTarget._role, deleteTarget.id);
       notify.success(`${deleteTarget._role} eliminado`);
       setDeleteTarget(null);
-      await loadUsers();
     } catch (err) {
       notify.error(err.message || 'Error eliminando usuario');
     } finally {

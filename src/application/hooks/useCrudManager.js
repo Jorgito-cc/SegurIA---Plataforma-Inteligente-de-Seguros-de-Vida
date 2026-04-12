@@ -20,17 +20,12 @@ export function useCrudManager(repository, pageSize = 20) {
     setLoading(true);
     setError(null);
     try {
-      console.log(`[loadItems] Fetching page ${page} with pageSize ${pageSize}`);
       const result = await repository.list(page, pageSize);
-      console.log(`[loadItems] Got result:`, result);
       const itemsArray = result.results || result;
-      console.log(`[loadItems] Setting items array:`, itemsArray);
       setItems(itemsArray);
       setTotalCount(result.count || result.length);
       setCurrentPage(page);
-      console.log(`[loadItems] Items state updated`);
     } catch (err) {
-      console.error(`[loadItems] Error:`, err);
       setError(err.message || 'Error cargando datos');
     } finally {
       setLoading(false);
@@ -61,29 +56,28 @@ export function useCrudManager(repository, pageSize = 20) {
 
   // Actualizar
   const handleUpdate = useCallback(async (id, payload) => {
-    console.log(`[handleUpdate] Starting update for id=${id} with payload:`, payload);
     setLoading(true);
     setError(null);
     try {
-      console.log(`[handleUpdate] Calling repository.update(${id}, ...)`);
-      const updateResult = await repository.update(id, payload);
-      console.log(`[handleUpdate] Update response:`, updateResult);
-      
-      console.log(`[handleUpdate] Now calling loadItems(${currentPage})`);
-      await loadItems(currentPage);
-      console.log(`[handleUpdate] loadItems returned, setting editingId to null`);
-      
+      const updatedItem = await repository.update(id, payload);
+
+      // Reflejar de inmediato en UI para evitar listas visualmente desfasadas.
+      if (updatedItem && updatedItem.id != null) {
+        setItems((prevItems) =>
+          prevItems.map((item) => (item.id === id ? { ...item, ...updatedItem } : item))
+        );
+      }
+
       setEditingId(null);
-      console.log(`[handleUpdate] Update completed successfully`);
+
       return true;
     } catch (err) {
-      console.error(`[handleUpdate] Error:`, err);
       setError(err.message || 'Error actualizando registro');
       return false;
     } finally {
       setLoading(false);
     }
-  }, [repository, currentPage, loadItems]);
+  }, [repository]);
 
   // Eliminar
   const handleDeleteClick = useCallback((id) => {

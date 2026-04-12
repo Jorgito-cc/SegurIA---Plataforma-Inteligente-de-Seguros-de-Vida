@@ -12,10 +12,7 @@ export default function AdminClientesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  console.log(`[AdminClientesPage] Rendering with crud.items.length=${crud.items.length}, showForm=${crud.showForm}, editingId=${crud.editingId}`);
-
   const filteredItems = useMemo(() => {
-    console.log(`[AdminClientesPage.useMemo] Recalculating filteredItems with ${crud.items.length} items`);
     const normalized = searchTerm.trim().toLowerCase();
 
     const result = crud.items.filter((item) => {
@@ -38,7 +35,6 @@ export default function AdminClientesPage() {
 
       return textMatches && activeMatches;
     });
-    console.log(`[AdminClientesPage.useMemo] Filtered result: ${result.length} items`);
     return result;
   }, [crud.items, searchTerm, statusFilter]);
 
@@ -111,7 +107,6 @@ export default function AdminClientesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      console.log(`[handleFormSubmit] editingId=${crud.editingId}, formData:`, formData);
       if (crud.editingId) {
         const payload = {
           telefono: formData.telefono,
@@ -123,10 +118,7 @@ export default function AdminClientesPage() {
           ingresos_mensuales: formData.ingresos_mensuales,
           is_active: Boolean(formData.is_active),
         };
-        console.log(`[handleFormSubmit] Constructed payload:`, payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
-        console.log(`[handleFormSubmit] handleUpdate returned ok=${ok}`);
-        console.log(`[handleFormSubmit] crud.items now:`, crud.items);
         if (ok) {
           notify.success('Cliente actualizado');
           crud.setShowForm(false);

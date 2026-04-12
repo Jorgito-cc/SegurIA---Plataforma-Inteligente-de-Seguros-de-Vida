@@ -9,18 +9,12 @@ import { FaPlus, FaEdit, FaTrash, FaSpinner, FaToggleOff, FaToggleOn, FaFileExce
 export default function AdminAgentesPage() {
   const crud = useCrudManager(agentRepository);
 
-  console.log(`[AdminAgentesPage] Rendering with crud.items.length=${crud.items.length}, showForm=${crud.showForm}, editingId=${crud.editingId}`);
-
   const handleFormSubmit = async (formData) => {
     try {
-      console.log(`[AdminAgentesPage.handleFormSubmit] editingId=${crud.editingId}, formData:`, formData);
       if (crud.editingId) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
-        console.log(`[AdminAgentesPage.handleFormSubmit] Constructed payload:`, payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
-        console.log(`[AdminAgentesPage.handleFormSubmit] handleUpdate returned ok=${ok}`);
-        console.log(`[AdminAgentesPage.handleFormSubmit] crud.items now:`, crud.items);
         if (ok) {
           notify.success('Agente actualizado');
           crud.setShowForm(false);
