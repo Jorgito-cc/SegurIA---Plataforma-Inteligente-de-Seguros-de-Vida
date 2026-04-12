@@ -61,12 +61,16 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
     }
   };
 
+  const onInvalidSubmit = () => {
+    notify.error('Formulario inválido. Revisa los campos marcados en rojo.');
+  };
+
   const today = new Date().toISOString().split('T')[0];
   const baseInputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none';
   const readonlyInputClass = `${baseInputClass} bg-slate-50 text-slate-500 cursor-not-allowed`;
 
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)} className="bg-white border border-slate-200 rounded-xl p-6 shadow-md">
+    <form onSubmit={handleSubmit(onSubmitForm, onInvalidSubmit)} className="bg-white border border-slate-200 rounded-xl p-6 shadow-md">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-bold text-slate-800">
           {isEditing ? 'Editar Cliente' : 'Crear Nuevo Cliente'}

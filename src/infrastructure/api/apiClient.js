@@ -27,10 +27,28 @@ apiClient.interceptors.response.use(
       localStorage.removeItem('auth_user');
     }
 
-    const message =
-      error?.response?.data?.detail ||
-      error?.response?.data?.error ||
-      'Error de red o servidor';
+    const data = error?.response?.data;
+
+    let message = 'Error de red o servidor';
+
+    if (typeof data === 'string' && data.trim()) {
+      message = data;
+    } else if (data?.detail) {
+      message = data.detail;
+    } else if (data?.error) {
+      message = data.error;
+    } else if (data && typeof data === 'object') {
+      const fieldErrors = Object.entries(data)
+        .map(([field, value]) => {
+          const text = Array.isArray(value) ? value.join(', ') : String(value);
+          return `${field}: ${text}`;
+        })
+        .join(' | ');
+
+      if (fieldErrors) {
+        message = fieldErrors;
+      }
+    }
 
     return Promise.reject(new Error(message));
   }

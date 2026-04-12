@@ -27,7 +27,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
     reset,
   } = useForm({
     defaultValues: editingData || defaultValues,
-    mode: 'onTouched',
+    mode: 'onSubmit',
+    reValidateMode: 'onChange',
   });
 
   const [showPassword, setShowPassword] = useState(false);
@@ -45,8 +46,12 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
     }
   };
 
+  const onInvalidSubmit = () => {
+    notify.error('Formulario inválido. Revisa los campos marcados en rojo.');
+  };
+
   return (
-    <form onSubmit={handleSubmit(onSubmitForm)} className="bg-white border border-slate-200 rounded-xl p-6 shadow-md">
+    <form onSubmit={handleSubmit(onSubmitForm, onInvalidSubmit)} className="bg-white border border-slate-200 rounded-xl p-6 shadow-md">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-bold text-slate-800">
           {editingData ? 'Editar Agente' : 'Crear Nuevo Agente'}
