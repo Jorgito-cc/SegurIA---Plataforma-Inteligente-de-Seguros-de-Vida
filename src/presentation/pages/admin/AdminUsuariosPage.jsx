@@ -99,13 +99,32 @@ export default function AdminUsuariosPage() {
     setSaving(true);
     try {
       const repository = editingUser._role === 'Agente' ? agentRepository : clientRepository;
-      const payload = { ...formData };
-      if (editingUser._role === 'Agente' && !payload.password) {
-        delete payload.password;
-      }
-      if (editingUser._role === 'Cliente' && !payload.password) {
-        delete payload.password;
-      }
+      const payload = editingUser._role === 'Agente'
+        ? {
+            username: formData.username,
+            email: formData.email,
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+            ci: formData.ci,
+            telefono: formData.telefono,
+            codigo_licencia: formData.codigo_licencia,
+            fecha_ingreso: formData.fecha_ingreso,
+            nivel: formData.nivel,
+            comision_base_porcentaje: formData.comision_base_porcentaje,
+            sucursal: formData.sucursal,
+            is_active: Boolean(formData.is_active),
+            ...(formData.password ? { password: formData.password } : {}),
+          }
+        : {
+            telefono: formData.telefono,
+            direccion: formData.direccion,
+            fecha_nacimiento: formData.fecha_nacimiento,
+            genero: formData.genero,
+            profesion_oficio: formData.profesion_oficio,
+            es_fumador: Boolean(formData.es_fumador),
+            ingresos_mensuales: formData.ingresos_mensuales,
+            is_active: Boolean(formData.is_active),
+          };
       await repository.update(editingUser.id, payload);
       notify.success(`${editingUser._role} actualizado`);
       closeModal();

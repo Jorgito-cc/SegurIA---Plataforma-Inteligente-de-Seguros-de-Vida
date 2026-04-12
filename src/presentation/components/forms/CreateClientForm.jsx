@@ -1,36 +1,41 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaTimes } from 'react-icons/fa';
 import { notify } from '../notifications/notify';
 
 export default function CreateClientForm({ editingData = null, onSubmit, onCancel, loading = false }) {
+  const defaultValues = {
+    username: '',
+    email: '',
+    password: '',
+    first_name: '',
+    last_name: '',
+    ci: '',
+    telefono: '',
+    direccion: '',
+    fecha_nacimiento: '',
+    genero: '',
+    profesion_oficio: '',
+    es_fumador: false,
+    ingresos_mensuales: '',
+    is_active: true,
+  };
+
   const {
     register,
     handleSubmit,
-    watch,
     formState: { errors },
     reset,
   } = useForm({
-    defaultValues: editingData || {
-      username: '',
-      email: '',
-      password: '',
-      first_name: '',
-      last_name: '',
-      ci: '',
-      telefono: '',
-      direccion: '',
-      fecha_nacimiento: '',
-      genero: '',
-      profesion_oficio: '',
-      es_fumador: false,
-      ingresos_mensuales: '',
-      is_active: true,
-    },
+    defaultValues: editingData || defaultValues,
     mode: 'onTouched',
   });
 
   const [showPassword, setShowPassword] = useState(false);
+
+  useEffect(() => {
+    reset(editingData || defaultValues);
+  }, [editingData, reset]);
 
   const onSubmitForm = async (data) => {
     try {
