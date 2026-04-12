@@ -6,10 +6,6 @@ export const clientRepository = {
   async list(page = 1, pageSize = 20) {
     const { data } = await apiClient.get(ENDPOINTS.clientes, {
       params: { page, page_size: pageSize, _ts: Date.now() },
-      headers: {
-        'Cache-Control': 'no-cache',
-        Pragma: 'no-cache',
-      },
     });
     return data;
   },
