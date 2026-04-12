@@ -4,7 +4,7 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
 import CreateAgentForm from '../../components/forms/CreateAgentForm';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
-import { FaPlus, FaEdit, FaTrash, FaSpinner, FaToggleOff, FaToggleOn, FaFileExcel, FaFilePdf } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaSpinner, FaSyncAlt, FaToggleOff, FaToggleOn, FaFileExcel, FaFilePdf } from 'react-icons/fa';
 
 export default function AdminAgentesPage() {
   const crud = useCrudManager(agentRepository);
@@ -146,6 +146,12 @@ export default function AdminAgentesPage() {
           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
         >
           <FaFilePdf /> PDF
+        </button>
+        <button
+          onClick={() => crud.loadItems(crud.currentPage)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+        >
+          <FaSyncAlt /> Recargar
         </button>
       </div>
 

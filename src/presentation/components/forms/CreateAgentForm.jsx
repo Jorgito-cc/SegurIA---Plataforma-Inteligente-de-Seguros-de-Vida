@@ -70,6 +70,11 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             {...register('username', {
               required: 'Usuario es requerido',
               minLength: { value: 3, message: 'Mínimo 3 caracteres' },
+              maxLength: { value: 30, message: 'Máximo 30 caracteres' },
+              pattern: {
+                value: /^[a-zA-Z0-9._-]+$/,
+                message: 'Solo letras, números, punto, guion y guion bajo',
+              },
             })}
             type="text"
             placeholder="username"
@@ -90,6 +95,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: 'Correo inválido',
               },
+              setValueAs: (value) => (value ? String(value).trim().toLowerCase() : ''),
             })}
             type="email"
             placeholder="agente@example.com"
@@ -135,6 +141,11 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             {...register('first_name', {
               required: 'Nombre es requerido',
               minLength: { value: 2, message: 'Mínimo 2 caracteres' },
+              maxLength: { value: 60, message: 'Máximo 60 caracteres' },
+              pattern: {
+                value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
+                message: 'Solo letras y espacios',
+              },
             })}
             type="text"
             placeholder="Juan"
@@ -152,6 +163,11 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             {...register('last_name', {
               required: 'Apellido es requerido',
               minLength: { value: 2, message: 'Mínimo 2 caracteres' },
+              maxLength: { value: 60, message: 'Máximo 60 caracteres' },
+              pattern: {
+                value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
+                message: 'Solo letras y espacios',
+              },
             })}
             type="text"
             placeholder="Pérez"
@@ -172,6 +188,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
                 value: /^\d{5,20}$/,
                 message: 'Solo números, entre 5 y 20 dígitos',
               },
+              setValueAs: (value) => (value ? String(value).replace(/\D/g, '') : ''),
             })}
             type="text"
             placeholder="12345678"
@@ -192,6 +209,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
                 value: /^[\d\-\s\+]{7,20}$/,
                 message: 'Formato de teléfono inválido',
               },
+              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="+58 212 123 4567"
@@ -214,6 +232,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
                 value: /^[A-Z0-9\-]+$/,
                 message: 'Solo mayúsculas, números y guiones',
               },
+              setValueAs: (value) => (value ? String(value).trim().toUpperCase() : ''),
             })}
             type="text"
             placeholder="AG-2024001"
@@ -268,6 +287,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
               required: 'Comisión es requerida',
               min: { value: 0, message: 'No puede ser negativo' },
               max: { value: 100, message: 'Máximo 100%' },
+              setValueAs: (value) => (value === '' || value == null ? 0 : Number(value)),
             })}
             type="number"
             step="0.01"
@@ -288,6 +308,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             {...register('sucursal', {
               required: 'Sucursal es requerida',
               minLength: { value: 2, message: 'Mínimo 2 caracteres' },
+              maxLength: { value: 80, message: 'Máximo 80 caracteres' },
+              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="Centro"

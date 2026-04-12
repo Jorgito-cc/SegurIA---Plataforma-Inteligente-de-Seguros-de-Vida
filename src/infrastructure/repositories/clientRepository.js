@@ -5,7 +5,11 @@ export const clientRepository = {
   // Listar clientes con paginación
   async list(page = 1, pageSize = 20) {
     const { data } = await apiClient.get(ENDPOINTS.clientes, {
-      params: { page, page_size: pageSize },
+      params: { page, page_size: pageSize, _ts: Date.now() },
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
     });
     return data;
   },

@@ -5,7 +5,7 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
 import CreateClientForm from '../../components/forms/CreateClientForm';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
-import { FaEdit, FaFileExcel, FaFilePdf, FaFilter, FaPlus, FaSpinner, FaToggleOff, FaToggleOn, FaTrash } from 'react-icons/fa';
+import { FaEdit, FaFileExcel, FaFilePdf, FaFilter, FaPlus, FaSpinner, FaSyncAlt, FaToggleOff, FaToggleOn, FaTrash } from 'react-icons/fa';
 
 export default function AdminClientesPage() {
   const crud = useCrudManager(clientRepository);
@@ -200,6 +200,12 @@ export default function AdminClientesPage() {
           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
         >
           <FaFilePdf /> PDF
+        </button>
+        <button
+          onClick={() => crud.loadItems(crud.currentPage)}
+          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+        >
+          <FaSyncAlt /> Recargar
         </button>
       </div>
 

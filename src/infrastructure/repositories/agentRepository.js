@@ -5,7 +5,11 @@ export const agentRepository = {
   // Listar agentes con paginación
   async list(page = 1, pageSize = 20) {
     const { data } = await apiClient.get(ENDPOINTS.agentes, {
-      params: { page, page_size: pageSize },
+      params: { page, page_size: pageSize, _ts: Date.now() },
+      headers: {
+        'Cache-Control': 'no-cache',
+        Pragma: 'no-cache',
+      },
     });
     return data;
   },

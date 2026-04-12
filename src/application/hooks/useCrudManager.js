@@ -70,6 +70,9 @@ export function useCrudManager(repository, pageSize = 20) {
 
       setEditingId(null);
 
+      // Sincroniza con backend para reflejar cambios externos (ej. Postman).
+      await loadItems(currentPage);
+
       return true;
     } catch (err) {
       setError(err.message || 'Error actualizando registro');
@@ -77,7 +80,7 @@ export function useCrudManager(repository, pageSize = 20) {
     } finally {
       setLoading(false);
     }
-  }, [repository]);
+  }, [repository, loadItems, currentPage]);
 
   // Eliminar
   const handleDeleteClick = useCallback((id) => {
