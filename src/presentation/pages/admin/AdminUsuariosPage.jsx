@@ -103,11 +103,11 @@ export default function AdminUsuariosPage() {
     _displayName: `${user.first_name || ''} ${user.last_name || ''}`.trim() || user.username,
   });
 
-  const applyUpdatedUser = (role, id, updatedUser) => {
+  const applyUpdatedUser = (role, id, updatedUser, payload = {}) => {
     if (role === 'Agente') {
       setAgents((prev) =>
         prev.map((item) =>
-          item.id === id ? normalizeUserForRole('Agente', { ...item, ...updatedUser }) : item
+          item.id === id ? normalizeUserForRole('Agente', { ...item, ...payload, ...(updatedUser || {}) }) : item
         )
       );
       return;
@@ -115,7 +115,7 @@ export default function AdminUsuariosPage() {
 
     setClients((prev) =>
       prev.map((item) =>
-        item.id === id ? normalizeUserForRole('Cliente', { ...item, ...updatedUser }) : item
+        item.id === id ? normalizeUserForRole('Cliente', { ...item, ...payload, ...(updatedUser || {}) }) : item
       )
     );
   };
@@ -161,7 +161,7 @@ export default function AdminUsuariosPage() {
             is_active: Boolean(formData.is_active),
           };
           const updatedUser = await repository.update(editingUser.id, payload);
-          applyUpdatedUser(editingUser._role, editingUser.id, updatedUser);
+          applyUpdatedUser(editingUser._role, editingUser.id, updatedUser, payload);
       notify.success(`${editingUser._role} actualizado`);
       closeModal();
     } catch (err) {
@@ -201,7 +201,7 @@ export default function AdminUsuariosPage() {
             is_active: !user.is_active,
           };
           const updatedUser = await repository.update(user.id, payload);
-          applyUpdatedUser(user._role, user.id, updatedUser);
+          applyUpdatedUser(user._role, user.id, updatedUser, payload);
       notify.success(`${user._role} ${user.is_active ? 'deshabilitado' : 'habilitado'}`);
     } catch (err) {
       notify.error(err.message || 'Error cambiando estado');
