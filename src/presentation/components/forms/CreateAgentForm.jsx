@@ -4,6 +4,7 @@ import { FaTimes } from 'react-icons/fa';
 import { notify } from '../notifications/notify';
 
 export default function CreateAgentForm({ editingData = null, onSubmit, onCancel, loading = false }) {
+  const isEditing = Boolean(editingData);
   const defaultValues = {
     username: '',
     email: '',
@@ -73,7 +74,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('username', {
-              required: 'Usuario es requerido',
+              required: isEditing ? false : 'Usuario es requerido',
               minLength: { value: 3, message: 'Mínimo 3 caracteres' },
               maxLength: { value: 30, message: 'Máximo 30 caracteres' },
               pattern: {
@@ -95,7 +96,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('email', {
-              required: 'Correo es requerido',
+              required: isEditing ? false : 'Correo es requerido',
               pattern: {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: 'Correo inválido',
@@ -144,7 +145,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('first_name', {
-              required: 'Nombre es requerido',
+              required: isEditing ? false : 'Nombre es requerido',
               minLength: { value: 2, message: 'Mínimo 2 caracteres' },
               maxLength: { value: 60, message: 'Máximo 60 caracteres' },
               pattern: {
@@ -166,7 +167,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('last_name', {
-              required: 'Apellido es requerido',
+              required: isEditing ? false : 'Apellido es requerido',
               minLength: { value: 2, message: 'Mínimo 2 caracteres' },
               maxLength: { value: 60, message: 'Máximo 60 caracteres' },
               pattern: {
@@ -188,7 +189,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('ci', {
-              required: 'Cédula es requerida',
+              required: isEditing ? false : 'Cédula es requerida',
               pattern: {
                 value: /^\d{5,20}$/,
                 message: 'Solo números, entre 5 y 20 dígitos',
@@ -209,7 +210,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('telefono', {
-              required: 'Teléfono es requerido',
+              required: isEditing ? false : 'Teléfono es requerido',
               pattern: {
                 value: /^[\d\-\s\+]{7,20}$/,
                 message: 'Formato de teléfono inválido',
@@ -230,7 +231,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('codigo_licencia', {
-              required: 'Código licencia es requerido',
+              required: isEditing ? false : 'Código licencia es requerido',
               minLength: { value: 1, message: 'Mínimo 1 carácter' },
               maxLength: { value: 10, message: 'Máximo 10 caracteres' },
               pattern: {
@@ -256,7 +257,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('fecha_ingreso', {
-              required: 'Fecha es requerida',
+              required: isEditing ? false : 'Fecha es requerida',
             })}
             type="date"
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
@@ -271,7 +272,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <select
             {...register('nivel', {
-              required: 'Nivel es requerido',
+              required: isEditing ? false : 'Nivel es requerido',
             })}
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
           >
@@ -289,7 +290,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('comision_base_porcentaje', {
-              required: 'Comisión es requerida',
+              required: isEditing ? false : 'Comisión es requerida',
               min: { value: 0, message: 'No puede ser negativo' },
               max: { value: 100, message: 'Máximo 100%' },
               setValueAs: (value) => (value === '' || value == null ? 0 : Number(value)),
@@ -311,7 +312,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           </label>
           <input
             {...register('sucursal', {
-              required: 'Sucursal es requerida',
+              required: isEditing ? false : 'Sucursal es requerida',
               minLength: { value: 2, message: 'Mínimo 2 caracteres' },
               maxLength: { value: 80, message: 'Máximo 80 caracteres' },
               setValueAs: (value) => (value ? String(value).trim() : ''),

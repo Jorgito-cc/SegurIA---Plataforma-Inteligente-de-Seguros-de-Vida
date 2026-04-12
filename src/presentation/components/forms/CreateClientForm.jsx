@@ -223,7 +223,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('telefono', {
-              required: 'Teléfono es requerido',
+              required: isEditing ? false : 'Teléfono es requerido',
               pattern: {
                 value: /^[\d\-\s\+]{7,20}$/,
                 message: 'Entre 7 y 20 caracteres (números, espacios, + o -)',
@@ -244,7 +244,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('direccion', {
-              required: 'Dirección es requerida',
+              required: isEditing ? false : 'Dirección es requerida',
               minLength: { value: 5, message: 'Mínimo 5 caracteres' },
               maxLength: { value: 160, message: 'Máximo 160 caracteres' },
               setValueAs: (value) => (value ? String(value).trim() : ''),
@@ -263,9 +263,10 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('fecha_nacimiento', {
-              required: 'Fecha es requerida',
+              required: isEditing ? false : 'Fecha es requerida',
               validate: (value) => {
-                if (!value) return 'Fecha es requerida';
+                if (!value && !isEditing) return 'Fecha es requerida';
+                if (!value && isEditing) return true;
                 const birthDate = new Date(value);
                 if (Number.isNaN(birthDate.getTime())) return 'Fecha inválida';
                 const age = new Date().getFullYear() - birthDate.getFullYear();
@@ -288,7 +289,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <select
             {...register('genero', {
-              required: 'Género es requerido',
+              required: isEditing ? false : 'Género es requerido',
             })}
             className={baseInputClass}
           >
@@ -307,7 +308,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('profesion_oficio', {
-              required: 'Profesión es requerida',
+              required: isEditing ? false : 'Profesión es requerida',
               minLength: { value: 3, message: 'Mínimo 3 caracteres' },
               maxLength: { value: 80, message: 'Máximo 80 caracteres' },
               setValueAs: (value) => (value ? String(value).trim() : ''),
@@ -328,9 +329,12 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
           </label>
           <input
             {...register('ingresos_mensuales', {
-              required: 'Ingresos es requerido',
+              required: isEditing ? false : 'Ingresos es requerido',
               min: { value: 0, message: 'No puede ser negativo' },
-              validate: (value) => parseFloat(value) > 0 || 'Debe ser mayor que 0',
+              validate: (value) => {
+                if ((value === '' || value == null) && isEditing) return true;
+                return parseFloat(value) > 0 || 'Debe ser mayor que 0';
+              },
               setValueAs: (value) => (value === '' || value == null ? null : Number(value)),
             })}
             type="number"

@@ -15,12 +15,6 @@ export function useCrudManager(repository, pageSize = 20) {
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
 
-  const normalizeValue = (value) => {
-    if (value === null || value === undefined) return '';
-    if (typeof value === 'boolean') return value ? 'true' : 'false';
-    return String(value).trim();
-  };
-
   // Cargar lista
   const loadItems = useCallback(async (page = 1) => {
     setLoading(true);
@@ -65,39 +59,12 @@ export function useCrudManager(repository, pageSize = 20) {
     setLoading(true);
     setError(null);
     try {
-      const previousItem = items.find((item) => item.id === id);
-      const payloadKeys = Object.keys(payload || {}).filter((key) => key !== 'password');
-      const changedKeys = previousItem
-        ? payloadKeys.filter(
-            (key) => normalizeValue(previousItem[key]) !== normalizeValue(payload[key])
-          )
-        : payloadKeys;
-
       const updatedItem = await repository.update(id, payload);
 
-      let syncedItem = updatedItem;
-      if (typeof repository.getById === 'function') {
-        try {
-          syncedItem = await repository.getById(id);
-        } catch {
-          // Si falla el GET puntual, mantenemos la respuesta del PATCH.
-        }
-      }
-
-      if (changedKeys.length > 0 && syncedItem) {
-        const nonPersistedKeys = changedKeys.filter(
-          (key) => normalizeValue(syncedItem[key]) !== normalizeValue(payload[key])
-        );
-
-        if (nonPersistedKeys.length === changedKeys.length) {
-          throw new Error('El servidor no aplico los cambios enviados. Verifica permisos o campos editables.');
-        }
-      }
-
       // Reflejar de inmediato en UI para evitar listas visualmente desfasadas.
-      if (syncedItem && syncedItem.id != null) {
+      if (updatedItem && updatedItem.id != null) {
         setItems((prevItems) =>
-          prevItems.map((item) => (item.id === id ? { ...item, ...payload, ...syncedItem } : item))
+          prevItems.map((item) => (item.id === id ? { ...item, ...payload, ...updatedItem } : item))
         );
       }
 
@@ -110,7 +77,7 @@ export function useCrudManager(repository, pageSize = 20) {
     } finally {
       setLoading(false);
     }
-  }, [repository, items]);
+  }, [repository]);
 
   // Eliminar
   const handleDeleteClick = useCallback((id) => {
