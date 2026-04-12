@@ -4,6 +4,7 @@ import { FaTimes } from 'react-icons/fa';
 import { notify } from '../notifications/notify';
 
 export default function CreateClientForm({ editingData = null, onSubmit, onCancel, loading = false }) {
+  const isEditing = Boolean(editingData);
   const defaultValues = {
     username: '',
     email: '',
@@ -47,12 +48,14 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
   };
 
   const today = new Date().toISOString().split('T')[0];
+  const baseInputClass = 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none';
+  const readonlyInputClass = `${baseInputClass} bg-slate-50 text-slate-500 cursor-not-allowed`;
 
   return (
     <form onSubmit={handleSubmit(onSubmitForm)} className="bg-white border border-slate-200 rounded-xl p-6 shadow-md">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-lg font-bold text-slate-800">
-          {editingData ? 'Editar Cliente' : 'Crear Nuevo Cliente'}
+          {isEditing ? 'Editar Cliente' : 'Crear Nuevo Cliente'}
         </h3>
         <button
           type="button"
@@ -76,7 +79,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="text"
             placeholder="cliente123"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? readonlyInputClass : baseInputClass}
           />
           {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>}
         </div>
@@ -96,10 +100,18 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="email"
             placeholder="cliente@example.com"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? readonlyInputClass : baseInputClass}
           />
           {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
         </div>
+
+        {isEditing && (
+          <div className="md:col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            En edición solo puedes modificar teléfono, dirección, fecha de nacimiento, género, profesión, fumador, ingresos y estado.
+            Usuario, correo, cédula, nombre y apellido quedan en solo lectura por el backend.
+          </div>
+        )}
 
         {/* Password */}
         {!editingData && (
@@ -141,7 +153,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="text"
             placeholder="Carlos"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? readonlyInputClass : baseInputClass}
           />
           {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name.message}</p>}
         </div>
@@ -158,7 +171,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="text"
             placeholder="García"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? readonlyInputClass : baseInputClass}
           />
           {errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name.message}</p>}
         </div>
@@ -178,7 +192,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="text"
             placeholder="12345678"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? readonlyInputClass : baseInputClass}
           />
           {errors.ci && <p className="text-red-500 text-sm mt-1">{errors.ci.message}</p>}
         </div>
@@ -198,7 +213,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="text"
             placeholder="+58 212 123 4567"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            className={baseInputClass}
           />
           {errors.telefono && <p className="text-red-500 text-sm mt-1">{errors.telefono.message}</p>}
         </div>
@@ -215,7 +230,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="text"
             placeholder="Calle 5, Casa 123"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            className={baseInputClass}
           />
           {errors.direccion && <p className="text-red-500 text-sm mt-1">{errors.direccion.message}</p>}
         </div>
@@ -236,7 +251,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="date"
             max={today}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            className={baseInputClass}
           />
           {errors.fecha_nacimiento && (
             <p className="text-red-500 text-sm mt-1">{errors.fecha_nacimiento.message}</p>
@@ -252,7 +267,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             {...register('genero', {
               required: 'Género es requerido',
             })}
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            className={baseInputClass}
           >
             <option value="">Seleccione</option>
             <option value="M">Masculino</option>
@@ -274,7 +289,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             })}
             type="text"
             placeholder="Ingeniero"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            className={baseInputClass}
           />
           {errors.profesion_oficio && (
             <p className="text-red-500 text-sm mt-1">{errors.profesion_oficio.message}</p>
@@ -295,7 +310,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             type="number"
             step="0.01"
             placeholder="1500"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none"
+            className={baseInputClass}
           />
           {errors.ingresos_mensuales && (
             <p className="text-red-500 text-sm mt-1">{errors.ingresos_mensuales.message}</p>
