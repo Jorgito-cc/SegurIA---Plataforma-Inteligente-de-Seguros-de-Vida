@@ -17,6 +17,7 @@ import AdminDashboardPage from '../pages/admin/AdminDashboardPage';
 import AdminBitacoraPage from '../pages/admin/AdminBitacoraPage';
 import AdminAgentesPage from '../pages/admin/AdminAgentesPage';
 import AdminClientesPage from '../pages/admin/AdminClientesPage';
+import AdminUsuariosPage from '../pages/admin/AdminUsuariosPage';
 import AdminPlanesPage from '../pages/admin/AdminPlanesPage';
 import AdminRolesPage from '../pages/admin/AdminRolesPage';
 import AdminPermisosPage from '../pages/admin/AdminPermisosPage';
@@ -70,6 +71,7 @@ export default function AppRouter() {
           >
             <Route path='dashboard' element={<AdminDashboardPage />} />
             <Route path='perfil' element={<AdminProfilePage />} />
+            <Route path='usuarios' element={<AdminUsuariosPage />} />
             <Route path='bitacora' element={<AdminBitacoraPage />} />
             <Route path='agentes' element={<AdminAgentesPage />} />
             <Route path='clientes' element={<AdminClientesPage />} />

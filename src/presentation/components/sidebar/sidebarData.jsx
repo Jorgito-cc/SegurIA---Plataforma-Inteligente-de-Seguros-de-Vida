@@ -25,6 +25,7 @@ export const sidebarByRole = {
       title: 'Gestion',
       items: [
         { label: 'Dashboard', to: '/admin/dashboard' },
+        { label: 'Usuarios', to: '/admin/usuarios' },
         { label: 'Agentes', to: '/admin/agentes' },
         { label: 'Clientes', to: '/admin/clientes' },
         { label: 'Planes / Tipos', to: '/admin/planes' },
