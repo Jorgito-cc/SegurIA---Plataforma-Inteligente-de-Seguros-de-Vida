@@ -1,4 +1,4 @@
-﻿import { useCrudManager } from '../../../application/hooks/useCrudManager';
+import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { agentRepository } from '../../../infrastructure/repositories/agentRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
@@ -19,6 +19,10 @@ export default function AdminAgentesPage() {
           notify.success('Agente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
+          
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         } else {
           notify.error(crud.error || 'No se pudo actualizar el agente');
         }

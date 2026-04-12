@@ -162,8 +162,12 @@ export default function AdminUsuariosPage() {
           };
           const updatedUser = await repository.update(editingUser.id, payload);
           applyUpdatedUser(editingUser._role, editingUser.id, updatedUser, payload);
-      notify.success(`${editingUser._role} actualizado`);
-      closeModal();
+          notify.success(`${editingUser._role} actualizado`);
+          setEditingUser(null);
+          
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
     } catch (err) {
       notify.error(err.message || 'Error actualizando usuario');
     } finally {

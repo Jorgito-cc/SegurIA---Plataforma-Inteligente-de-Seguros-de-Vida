@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useCrudManager } from '../../../application/hooks/useCrudManager';
 import { clientRepository } from '../../../infrastructure/repositories/clientRepository';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
@@ -123,6 +123,11 @@ export default function AdminClientesPage() {
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
+          
+          // Fuerza el refresh completo del navegador
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         } else {
           notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
