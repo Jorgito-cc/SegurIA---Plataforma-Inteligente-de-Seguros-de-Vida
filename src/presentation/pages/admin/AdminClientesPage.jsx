@@ -106,6 +106,7 @@ export default function AdminClientesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
+      console.log(`[handleFormSubmit] editingId=${crud.editingId}, formData:`, formData);
       if (crud.editingId) {
         const payload = {
           telefono: formData.telefono,
@@ -117,7 +118,10 @@ export default function AdminClientesPage() {
           ingresos_mensuales: formData.ingresos_mensuales,
           is_active: Boolean(formData.is_active),
         };
+        console.log(`[handleFormSubmit] Constructed payload:`, payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
+        console.log(`[handleFormSubmit] handleUpdate returned ok=${ok}`);
+        console.log(`[handleFormSubmit] crud.items now:`, crud.items);
         if (ok) {
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
