@@ -4,9 +4,16 @@ import { ENDPOINTS } from '../api/endpoints';
 export const agentRepository = {
   // Listar agentes con paginación
   async list(page = 1, pageSize = 20) {
+    console.log(`[agentRepository.list] Requesting page=${page}, pageSize=${pageSize}, endpoint=${ENDPOINTS.agentes}`);
     const { data } = await apiClient.get(ENDPOINTS.agentes, {
       params: { page, page_size: pageSize },
     });
+    console.log(`[agentRepository.list] Response data:`, data);
+    if (data.results) {
+      console.log(`[agentRepository.list] Returning ${data.results.length} results`);
+    } else if (Array.isArray(data)) {
+      console.log(`[agentRepository.list] Returning ${data.length} items`);
+    }
     return data;
   },
 

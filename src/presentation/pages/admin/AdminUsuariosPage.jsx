@@ -40,25 +40,33 @@ export default function AdminUsuariosPage() {
   }, []);
 
   const loadUsers = async () => {
+    console.log(`[AdminUsuariosPage.loadUsers] Starting to load users`);
     setLoading(true);
     setError(null);
     try {
+      console.log(`[AdminUsuariosPage.loadUsers] Fetching agents and clients in parallel`);
       const [agentsResponse, clientsResponse] = await Promise.all([
         agentRepository.list(1, 500),
         clientRepository.list(1, 500),
       ]);
 
-      setAgents((agentsResponse.results || agentsResponse || []).map((item) => ({
+      const agentsList = (agentsResponse.results || agentsResponse || []).map((item) => ({
         ...item,
         _role: 'Agente',
         _displayName: `${item.first_name || ''} ${item.last_name || ''}`.trim() || item.username,
-      })));
-      setClients((clientsResponse.results || clientsResponse || []).map((item) => ({
+      }));
+      const clientsList = (clientsResponse.results || clientsResponse || []).map((item) => ({
         ...item,
         _role: 'Cliente',
         _displayName: `${item.first_name || ''} ${item.last_name || ''}`.trim() || item.username,
-      })));
+      }));
+
+      console.log(`[AdminUsuariosPage.loadUsers] Setting agents (${agentsList.length}):`, agentsList);
+      setAgents(agentsList);
+      console.log(`[AdminUsuariosPage.loadUsers] Setting clients (${clientsList.length}):`, clientsList);
+      setClients(clientsList);
     } catch (err) {
+      console.error(`[AdminUsuariosPage.loadUsers] Error:`, err);
       setError(err.message || 'Error cargando usuarios');
       notify.error(err.message || 'Error cargando usuarios');
     } finally {

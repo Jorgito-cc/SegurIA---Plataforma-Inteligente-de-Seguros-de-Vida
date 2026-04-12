@@ -12,10 +12,13 @@ export default function AdminClientesPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
+  console.log(`[AdminClientesPage] Rendering with crud.items.length=${crud.items.length}, showForm=${crud.showForm}, editingId=${crud.editingId}`);
+
   const filteredItems = useMemo(() => {
+    console.log(`[AdminClientesPage.useMemo] Recalculating filteredItems with ${crud.items.length} items`);
     const normalized = searchTerm.trim().toLowerCase();
 
-    return crud.items.filter((item) => {
+    const result = crud.items.filter((item) => {
       const textMatches = !normalized || [
         item.username,
         item.email,
@@ -35,6 +38,8 @@ export default function AdminClientesPage() {
 
       return textMatches && activeMatches;
     });
+    console.log(`[AdminClientesPage.useMemo] Filtered result: ${result.length} items`);
+    return result;
   }, [crud.items, searchTerm, statusFilter]);
 
   const handleExportExcel = () => {

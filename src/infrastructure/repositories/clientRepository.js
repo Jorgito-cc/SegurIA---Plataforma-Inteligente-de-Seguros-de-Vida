@@ -4,9 +4,16 @@ import { ENDPOINTS } from '../api/endpoints';
 export const clientRepository = {
   // Listar clientes con paginación
   async list(page = 1, pageSize = 20) {
+    console.log(`[clientRepository.list] Requesting page=${page}, pageSize=${pageSize}, endpoint=${ENDPOINTS.clientes}`);
     const { data } = await apiClient.get(ENDPOINTS.clientes, {
       params: { page, page_size: pageSize },
     });
+    console.log(`[clientRepository.list] Response data:`, data);
+    if (data.results) {
+      console.log(`[clientRepository.list] Returning ${data.results.length} results`);
+    } else if (Array.isArray(data)) {
+      console.log(`[clientRepository.list] Returning ${data.length} items`);
+    }
     return data;
   },
 
