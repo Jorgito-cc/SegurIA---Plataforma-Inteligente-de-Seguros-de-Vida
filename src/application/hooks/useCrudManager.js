@@ -61,24 +61,12 @@ export function useCrudManager(repository, pageSize = 20) {
     try {
       const updatedItem = await repository.update(id, payload);
 
-      let syncedItem = updatedItem;
-      if (typeof repository.getById === 'function') {
-        try {
-          const latestItem = await repository.getById(id);
-          if (latestItem) {
-            syncedItem = latestItem;
-          }
-        } catch {
-          // Si falla el detalle, mantenemos lo devuelto por PATCH.
-        }
-      }
-
       // Reflejar de inmediato en UI. Asegurar que agregamos el payload al estado 
       // incluso si backend no devuelve el objeto completo.
       setItems((prevItems) =>
         prevItems.map((item) =>
           String(item.id) === String(id)
-            ? { ...item, ...payload, ...(syncedItem || {}) }
+            ? { ...item, ...(updatedItem || {}), ...payload }
             : item
         )
       );
