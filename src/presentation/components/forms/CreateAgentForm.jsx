@@ -75,9 +75,9 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('username', {
               required: isEditing ? false : 'Usuario es requerido',
-              minLength: { value: 3, message: 'Mínimo 3 caracteres' },
-              maxLength: { value: 30, message: 'Máximo 30 caracteres' },
-              pattern: {
+              minLength: isEditing ? undefined : { value: 3, message: 'Mínimo 3 caracteres' },
+              maxLength: isEditing ? undefined : { value: 30, message: 'Máximo 30 caracteres' },
+              pattern: isEditing ? undefined : {
                 value: /^[a-zA-Z0-9._-]+$/,
                 message: 'Solo letras, números, punto, guion y guion bajo',
               },
@@ -97,7 +97,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('email', {
               required: isEditing ? false : 'Correo es requerido',
-              pattern: {
+              pattern: isEditing ? undefined : {
                 value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
                 message: 'Correo inválido',
               },
@@ -146,9 +146,9 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('first_name', {
               required: isEditing ? false : 'Nombre es requerido',
-              minLength: { value: 2, message: 'Mínimo 2 caracteres' },
-              maxLength: { value: 60, message: 'Máximo 60 caracteres' },
-              pattern: {
+              minLength: isEditing ? undefined : { value: 2, message: 'Mínimo 2 caracteres' },
+              maxLength: isEditing ? undefined : { value: 60, message: 'Máximo 60 caracteres' },
+              pattern: isEditing ? undefined : {
                 value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                 message: 'Solo letras y espacios',
               },
@@ -168,9 +168,9 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('last_name', {
               required: isEditing ? false : 'Apellido es requerido',
-              minLength: { value: 2, message: 'Mínimo 2 caracteres' },
-              maxLength: { value: 60, message: 'Máximo 60 caracteres' },
-              pattern: {
+              minLength: isEditing ? undefined : { value: 2, message: 'Mínimo 2 caracteres' },
+              maxLength: isEditing ? undefined : { value: 60, message: 'Máximo 60 caracteres' },
+              pattern: isEditing ? undefined : {
                 value: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s'-]+$/,
                 message: 'Solo letras y espacios',
               },
@@ -190,7 +190,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('ci', {
               required: isEditing ? false : 'Cédula es requerida',
-              pattern: {
+              pattern: isEditing ? undefined : {
                 value: /^\d{5,20}$/,
                 message: 'Solo números, entre 5 y 20 dígitos',
               },
@@ -211,7 +211,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('telefono', {
               required: isEditing ? false : 'Teléfono es requerido',
-              pattern: {
+              pattern: isEditing ? undefined : {
                 value: /^[\d\-\s\+]{7,20}$/,
                 message: 'Formato de teléfono inválido',
               },
@@ -232,9 +232,9 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('codigo_licencia', {
               required: isEditing ? false : 'Código licencia es requerido',
-              minLength: { value: 1, message: 'Mínimo 1 carácter' },
-              maxLength: { value: 10, message: 'Máximo 10 caracteres' },
-              pattern: {
+              minLength: isEditing ? undefined : { value: 1, message: 'Mínimo 1 carácter' },
+              maxLength: isEditing ? undefined : { value: 10, message: 'Máximo 10 caracteres' },
+              pattern: isEditing ? undefined : {
                 value: /^[A-Z0-9\-]+$/,
                 message: 'Solo mayúsculas, números y guiones',
               },
@@ -291,8 +291,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('comision_base_porcentaje', {
               required: isEditing ? false : 'Comisión es requerida',
-              min: { value: 0, message: 'No puede ser negativo' },
-              max: { value: 100, message: 'Máximo 100%' },
+              min: isEditing ? undefined : { value: 0, message: 'No puede ser negativo' },
+              max: isEditing ? undefined : { value: 100, message: 'Máximo 100%' },
               setValueAs: (value) => (value === '' || value == null ? 0 : Number(value)),
             })}
             type="number"
@@ -313,8 +313,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
           <input
             {...register('sucursal', {
               required: isEditing ? false : 'Sucursal es requerida',
-              minLength: { value: 2, message: 'Mínimo 2 caracteres' },
-              maxLength: { value: 80, message: 'Máximo 80 caracteres' },
+              minLength: isEditing ? undefined : { value: 2, message: 'Mínimo 2 caracteres' },
+              maxLength: isEditing ? undefined : { value: 80, message: 'Máximo 80 caracteres' },
               setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
