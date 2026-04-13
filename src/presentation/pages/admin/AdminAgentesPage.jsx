@@ -22,7 +22,8 @@ export default function AdminAgentesPage() {
           notify.success('Agente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          setTimeout(() => window.location.reload(), 500);
+          // Recargar datos sin recargar la página
+          crud.loadItems(crud.currentPage);
         } else {
           notify.error(crud.error || 'No se pudo actualizar el agente');
         }

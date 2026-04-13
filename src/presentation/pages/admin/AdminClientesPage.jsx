@@ -121,6 +121,8 @@ export default function AdminClientesPage() {
       
       if (crud.editingId) {
         const payload = {
+          first_name: formData.first_name,
+          last_name: formData.last_name,
           telefono: formData.telefono,
           direccion: formData.direccion,
           fecha_nacimiento: formData.fecha_nacimiento,
@@ -135,9 +137,8 @@ export default function AdminClientesPage() {
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
+          // Recargar datos sin recargar la página
+          crud.loadItems(crud.currentPage);
         } else {
           notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
