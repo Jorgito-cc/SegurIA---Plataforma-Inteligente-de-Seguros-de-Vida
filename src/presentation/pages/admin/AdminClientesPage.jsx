@@ -148,19 +148,22 @@ export default function AdminClientesPage() {
           ingresos_mensuales: formData.ingresos_mensuales || null,
           is_active: Boolean(formData.is_active),
         };
-        console.log('📤 Payload EDIT (solo campos editables):', payload);
+        console.log('📤 Payload EDIT (solo campos editables):', JSON.stringify(payload, null, 2));
         const ok = await crud.handleUpdate(crud.editingId, payload);
+        console.log('📥 Respuesta de crud.handleUpdate:', ok);
+        
         if (ok) {
           console.log('✅ Actualización exitosa');
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
+          // El useCrudManager ya recargó la lista automáticamente
         } else {
           console.log('❌ Error:', crud.error);
           notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
       } else {
-        console.log('📤 Enviando formData a create():', formData);
+        console.log('📤 Creating new client - Sending formData:', formData);
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Cliente creado');
@@ -170,6 +173,7 @@ export default function AdminClientesPage() {
         }
       }
     } catch (err) {
+      console.error('❌ Error en handleFormSubmit:', err);
       notify.error(err.message || 'Error procesando cliente');
     }
   };

@@ -25,19 +25,22 @@ export default function AdminAgentesPage() {
           sucursal: formData.sucursal || '',
           is_active: Boolean(formData.is_active),
         };
-        console.log('📤 Payload PATCH (solo campos editables):', payload);
+        console.log('📤 Payload PATCH (solo campos editables):', JSON.stringify(payload, null, 2));
         const ok = await crud.handleUpdate(crud.editingId, payload);
+        console.log('📥 Respuesta de crud.handleUpdate:', ok);
+        
         if (ok) {
           console.log('✅ Actualización exitosa');
           notify.success('Agente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
+          // El useCrudManager ya recargó la lista automáticamente
         } else {
           console.log('❌ Error en actualización:', crud.error);
           notify.error(crud.error || 'No se pudo actualizar el agente');
         }
       } else {
-        console.log('📤 Payload POST (crear):', formData);
+        console.log('📤 Creating new agent - Sending formData:', formData);
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Agente creado');
@@ -47,6 +50,7 @@ export default function AdminAgentesPage() {
         }
       }
     } catch (err) {
+      console.error('❌ Error en handleFormSubmit:', err);
       notify.error(err.message || 'Error procesando agente');
     }
   };

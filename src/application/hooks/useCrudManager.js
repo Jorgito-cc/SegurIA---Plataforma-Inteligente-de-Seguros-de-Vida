@@ -66,27 +66,33 @@ export function useCrudManager(repository, pageSize = 20) {
     setLoading(true);
     setError(null);
     try {
-      console.log('🔄 [useCrudManager.handleUpdate] Actualizando ID:', id);
-      console.log('📦 Payload:', payload);
+      console.log('🔄 [useCrudManager.handleUpdate] ============');
+      console.log('🔄 ID a actualizar:', id, '(tipo:', typeof id, ')');
+      console.log('📦 Payload enviado:', JSON.stringify(payload, null, 2));
       
       // Llamar al backend
       const updatedItem = await repository.update(id, payload);
-      console.log('✅ [useCrudManager] Actualización exitosa. Respuesta:', updatedItem);
+      console.log('✅ [useCrudManager] Respuesta del backend:', updatedItem);
       
-      // Recargar la lista completa para asegurar sincronización
-      await loadItems(currentPage);
+      // Recargar la lista completa para asegurar sincronización (desde página 1)
+      console.log('🔄 [useCrudManager] Recargando lista desde página 1');
+      await loadItems(1);
+      console.log('✅ [useCrudManager] Lista recargada');
       
       setEditingId(null);
-      console.log('✅ [useCrudManager] Estado actualizado en UI');
+      console.log('✅ [useCrudManager] handleUpdate completado');
       return true;
     } catch (err) {
-      console.error('❌ [useCrudManager] Error en handleUpdate:', err);
+      console.error('❌ [useCrudManager] Error completo:', err);
+      console.error('❌ Status:', err?.response?.status);
+      console.error('❌ Data:', err?.response?.data);
+      console.error('❌ Message:', err?.message);
       setError(mapCrudError(err, 'Error actualizando registro'));
       return false;
     } finally {
       setLoading(false);
     }
-  }, [repository, currentPage, loadItems, mapCrudError]);
+  }, [repository, loadItems, mapCrudError]);
 
   // Eliminar
   const handleDeleteClick = useCallback((id) => {
