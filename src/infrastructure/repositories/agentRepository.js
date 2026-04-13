@@ -52,10 +52,10 @@ export const agentRepository = {
   // Actualizar agente
   async update(id, payload) {
     console.log('🔍 [agentRepository.update] Payload recibido:', payload);
+    // ⚠️ Backend AgenteSerializer SOLO acepta estos campos para PATCH:
+    // telefono, codigo_licencia, fecha_ingreso, nivel, comision_base_porcentaje, sucursal, is_active
+    // NO enviar: first_name, last_name, ci, username, email (son read_only)
     const updatePayload = {
-      first_name: payload.first_name?.trim() || '',
-      last_name: payload.last_name?.trim() || '',
-      ci: payload.ci?.trim() || '',
       telefono: payload.telefono?.trim() || '',
       codigo_licencia: payload.codigo_licencia?.trim() || '',
       fecha_ingreso: payload.fecha_ingreso || null,
@@ -64,9 +64,6 @@ export const agentRepository = {
       sucursal: payload.sucursal?.trim() || '',
       is_active: Boolean(payload.is_active),
     };
-    if (payload.password && payload.password?.trim()) {
-      updatePayload.password = payload.password.trim();
-    }
     console.log('📤 [agentRepository.update] Payload a enviar:', updatePayload);
     const { data } = await apiClient.patch(`${ENDPOINTS.agentes}${id}/`, updatePayload);
     console.log('✅ [agentRepository.update] Respuesta del backend:', data);
