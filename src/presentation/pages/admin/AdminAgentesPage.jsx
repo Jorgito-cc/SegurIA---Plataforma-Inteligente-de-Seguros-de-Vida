@@ -28,6 +28,9 @@ export default function AdminAgentesPage() {
         console.log('📤 Payload PATCH (solo campos editables):', JSON.stringify(payload, null, 2));
         const ok = await crud.handleUpdate(crud.editingId, payload);
         console.log('📥 Respuesta de crud.handleUpdate:', ok);
+        console.log('🔍 VERIFICAR: crud.items después de handleUpdate:', crud.items);
+        const itemActualizado = crud.items.find(a => String(a.id) === String(crud.editingId));
+        console.log('🔍 Agente actualizado en lista?', itemActualizado);
         
         if (ok) {
           console.log('✅ Actualización exitosa');
