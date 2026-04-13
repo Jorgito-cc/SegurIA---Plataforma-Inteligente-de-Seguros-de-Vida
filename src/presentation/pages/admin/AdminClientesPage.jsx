@@ -120,6 +120,7 @@ export default function AdminClientesPage() {
       });
       
       if (crud.editingId) {
+        console.log('✏️ Modo EDICIÓN - crud.editingId:', crud.editingId);
         const payload = {
           first_name: formData.first_name,
           last_name: formData.last_name,
@@ -132,14 +133,19 @@ export default function AdminClientesPage() {
           ingresos_mensuales: formData.ingresos_mensuales,
           is_active: Boolean(formData.is_active),
         };
+        console.log('📤 Llamando crud.handleUpdate con payload:', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
+        console.log('📥 Respuesta de crud.handleUpdate:', ok);
         if (ok) {
+          console.log('✅ Actualización exitosa - cerrando formulario');
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
           // Recargar datos sin recargar la página
+          console.log('🔄 Recargando datos con crud.loadItems');
           crud.loadItems(crud.currentPage);
         } else {
+          console.log('❌ Error en actualización:', crud.error);
           notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
       } else {

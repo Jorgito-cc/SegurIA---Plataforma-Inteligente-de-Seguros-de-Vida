@@ -66,22 +66,28 @@ export function useCrudManager(repository, pageSize = 20) {
     setLoading(true);
     setError(null);
     try {
+      console.log('🔄 [useCrudManager.handleUpdate] Llamando repository.update:', id, payload);
       const updatedItem = await repository.update(id, payload);
+      console.log('📦 [useCrudManager] Respuesta del backend:', updatedItem);
 
       // Reflejar de inmediato en UI. Asegurar que agregamos el payload al estado 
       // incluso si backend no devuelve el objeto completo.
-      setItems((prevItems) =>
-        prevItems.map((item) =>
+      setItems((prevItems) => {
+        const newItems = prevItems.map((item) =>
           String(item.id) === String(id)
             ? { ...item, ...(updatedItem || {}), ...payload }
             : item
-        )
-      );
+        );
+        console.log('✏️ [useCrudManager] Items actualizados en estado:', newItems);
+        return newItems;
+      });
 
       setEditingId(null);
+      console.log('✅ [useCrudManager] handleUpdate completado exitosamente');
 
       return true;
     } catch (err) {
+      console.error('❌ [useCrudManager] Error en handleUpdate:', err);
       setError(mapCrudError(err, 'Error actualizando registro'));
       return false;
     } finally {
