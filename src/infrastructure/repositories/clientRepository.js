@@ -61,9 +61,9 @@ export const clientRepository = {
   // Actualizar cliente
   async update(id, payload) {
     console.log('🔍 [clientRepository.update] Payload recibido:', payload);
+    // ⚠️ El backend ClienteSerializer NO acepta first_name ni last_name
+    // Solo acepta: telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
     const updatePayload = {
-      first_name: (payload.first_name || '').toString().trim(),
-      last_name: (payload.last_name || '').toString().trim(),
       telefono: trimString(payload.telefono || ''),
       direccion: trimString(payload.direccion || ''),
       fecha_nacimiento: payload.fecha_nacimiento ? trimString(payload.fecha_nacimiento) : null,
@@ -76,7 +76,7 @@ export const clientRepository = {
           : Number(payload.ingresos_mensuales),
       is_active: Boolean(payload.is_active),
     };
-    console.log('📤 [clientRepository.update] Payload a enviar:', updatePayload);
+    console.log('📤 [clientRepository.update] Payload filtrado (sin first_name/last_name):', updatePayload);
     const { data } = await apiClient.patch(`${ENDPOINTS.clientes}${id}/`, updatePayload);
     return data;
   },

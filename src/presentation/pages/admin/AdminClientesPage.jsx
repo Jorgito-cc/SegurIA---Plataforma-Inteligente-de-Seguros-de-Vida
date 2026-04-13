@@ -121,19 +121,19 @@ export default function AdminClientesPage() {
       
       if (crud.editingId) {
         console.log('✏️ Modo EDICIÓN - crud.editingId:', crud.editingId);
+        // ⚠️ El backend ClienteSerializer NO acepta first_name ni last_name
+        // Solo acepta: telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
         const payload = {
-          first_name: formData.first_name,
-          last_name: formData.last_name,
           telefono: formData.telefono,
           direccion: formData.direccion,
-          fecha_nacimiento: formData.fecha_nacimiento,
-          genero: formData.genero,
+          fecha_nacimiento: formData.fecha_nacimiento || null,
+          genero: formData.genero || null,
           profesion_oficio: formData.profesion_oficio,
           es_fumador: Boolean(formData.es_fumador),
-          ingresos_mensuales: formData.ingresos_mensuales,
+          ingresos_mensuales: formData.ingresos_mensuales || null,
           is_active: Boolean(formData.is_active),
         };
-        console.log('📤 Llamando crud.handleUpdate con payload:', payload);
+        console.log('📤 Payload EDIT (sin first_name/last_name):', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
         console.log('📥 Respuesta de crud.handleUpdate:', ok);
         if (ok) {
