@@ -60,7 +60,10 @@ export const clientRepository = {
 
   // Actualizar cliente
   async update(id, payload) {
+    console.log('🔍 [clientRepository.update] Payload recibido:', payload);
     const updatePayload = {
+      first_name: (payload.first_name || '').toString().trim(),
+      last_name: (payload.last_name || '').toString().trim(),
       telefono: trimString(payload.telefono || ''),
       direccion: trimString(payload.direccion || ''),
       fecha_nacimiento: payload.fecha_nacimiento ? trimString(payload.fecha_nacimiento) : null,
@@ -73,6 +76,7 @@ export const clientRepository = {
           : Number(payload.ingresos_mensuales),
       is_active: Boolean(payload.is_active),
     };
+    console.log('📤 [clientRepository.update] Payload a enviar:', updatePayload);
     const { data } = await apiClient.patch(`${ENDPOINTS.clientes}${id}/`, updatePayload);
     return data;
   },
