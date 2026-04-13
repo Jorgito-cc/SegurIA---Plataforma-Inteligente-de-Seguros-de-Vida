@@ -21,13 +21,38 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
     is_active: true,
   }), []);
 
+  // Calcular los valores iniciales: si estamos editando, usa editingData, si no usa defaultValues vacíos
+  const initialValues = useMemo(() => {
+    if (editingData) {
+      console.log('📝 useMemo: cálculando initialValues para EDICIÓN:', editingData);
+      return {
+        username: editingData.username || '',
+        email: editingData.email || '',
+        password: '', // No se rellena en edición
+        first_name: editingData.first_name || '',
+        last_name: editingData.last_name || '',
+        ci: editingData.ci || '',
+        telefono: editingData.telefono || '',
+        codigo_licencia: editingData.codigo_licencia || '',
+        fecha_ingreso: editingData.fecha_ingreso || new Date().toISOString().split('T')[0],
+        nivel: editingData.nivel || 'Junior',
+        comision_base_porcentaje: editingData.comision_base_porcentaje || '0',
+        sucursal: editingData.sucursal || '',
+        is_active: editingData.is_active !== undefined ? editingData.is_active : true,
+      };
+    } else {
+      console.log('📝 useMemo: cálculando initialValues para CREAR');
+      return defaultValues;
+    }
+  }, [editingData, defaultValues]);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     reset,
   } = useForm({
-    defaultValues: editingData || defaultValues,
+    defaultValues: initialValues,
     mode: 'onSubmit',
     reValidateMode: 'onChange',
   });
@@ -35,13 +60,10 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    if (editingData) {
-      reset({
-        ...defaultValues,
-        ...editingData,
-      });
-    }
-  }, [editingData, reset, defaultValues]);
+    console.log('📝 [CreateAgentForm] useEffect - editingData:', editingData);
+    console.log('📝 initialValues calculado:', initialValues);
+    reset(initialValues);
+  }, [initialValues, reset, editingData]);
 
   const onSubmitForm = async (data) => {
     try {
