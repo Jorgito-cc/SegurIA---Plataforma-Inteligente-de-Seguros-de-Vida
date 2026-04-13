@@ -60,6 +60,7 @@ export const clientRepository = {
 
   // Actualizar cliente
   async update(id, payload) {
+    console.log('🔍 [clientRepository.update] ID:', id, 'tipo:', typeof id);
     console.log('🔍 [clientRepository.update] Payload recibido:', payload);
     // ⚠️ Backend ClienteSerializer SOLO acepta estos campos:
     // telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
@@ -73,10 +74,16 @@ export const clientRepository = {
       ingresos_mensuales: payload.ingresos_mensuales === '' || !payload.ingresos_mensuales ? null : Number(payload.ingresos_mensuales),
       is_active: Boolean(payload.is_active),
     };
+    console.log('📤 [clientRepository.update] URL:', `${ENDPOINTS.clientes}${id}/`);
     console.log('📤 [clientRepository.update] Payload a enviar:', updatePayload);
-    const { data } = await apiClient.patch(`${ENDPOINTS.clientes}${id}/`, updatePayload);
-    console.log('✅ [clientRepository.update] Respuesta del backend:', data);
-    return data;
+    try {
+      const { data } = await apiClient.patch(`${ENDPOINTS.clientes}${id}/`, updatePayload);
+      console.log('✅ [clientRepository.update] Respuesta del backend:', data);
+      return data;
+    } catch (err) {
+      console.error('❌ [clientRepository.update] Error del backend:', err.response?.data || err.message);
+      throw err;
+    }
   },
 
   // Eliminar cliente

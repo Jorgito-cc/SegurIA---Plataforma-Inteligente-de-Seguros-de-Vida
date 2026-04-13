@@ -51,6 +51,7 @@ export const agentRepository = {
 
   // Actualizar agente
   async update(id, payload) {
+    console.log('🔍 [agentRepository.update] ID:', id, 'tipo:', typeof id);
     console.log('🔍 [agentRepository.update] Payload recibido:', payload);
     // ⚠️ Backend AgenteSerializer SOLO acepta estos campos para PATCH:
     // telefono, codigo_licencia, fecha_ingreso, nivel, comision_base_porcentaje, sucursal, is_active
@@ -64,10 +65,16 @@ export const agentRepository = {
       sucursal: payload.sucursal?.trim() || '',
       is_active: Boolean(payload.is_active),
     };
+    console.log('📤 [agentRepository.update] URL:', `${ENDPOINTS.agentes}${id}/`);
     console.log('📤 [agentRepository.update] Payload a enviar:', updatePayload);
-    const { data } = await apiClient.patch(`${ENDPOINTS.agentes}${id}/`, updatePayload);
-    console.log('✅ [agentRepository.update] Respuesta del backend:', data);
-    return data;
+    try {
+      const { data } = await apiClient.patch(`${ENDPOINTS.agentes}${id}/`, updatePayload);
+      console.log('✅ [agentRepository.update] Respuesta del backend:', data);
+      return data;
+    } catch (err) {
+      console.error('❌ [agentRepository.update] Error del backend:', err.response?.data || err.message);
+      throw err;
+    }
   },
 
   // Eliminar agente
