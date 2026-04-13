@@ -98,6 +98,13 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {isEditing && (
+          <div className="md:col-span-2 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            En edición solo puedes modificar teléfono, código de licencia, fecha de ingreso, nivel, comisión, sucursal y estado. 
+            Usuario, correo, cédula, nombre y apellido quedan en solo lectura por seguridad.
+          </div>
+        )}
+
         {/* Username */}
         <div>
           <label className="block text-sm font-medium text-slate-700 mb-1">
@@ -115,7 +122,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             })}
             type="text"
             placeholder="username"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? 'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed' : 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none'}
           />
           {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username.message}</p>}
         </div>
@@ -135,7 +143,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             })}
             type="email"
             placeholder="agente@example.com"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? 'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed' : 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none'}
           />
           {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>}
         </div>
@@ -185,7 +194,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             })}
             type="text"
             placeholder="Juan"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? 'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed' : 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none'}
           />
           {errors.first_name && <p className="text-red-500 text-sm mt-1">{errors.first_name.message}</p>}
         </div>
@@ -207,7 +217,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             })}
             type="text"
             placeholder="Pérez"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? 'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed' : 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none'}
           />
           {errors.last_name && <p className="text-red-500 text-sm mt-1">{errors.last_name.message}</p>}
         </div>
@@ -227,7 +238,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
             })}
             type="text"
             placeholder="12345678"
-            className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
+            readOnly={isEditing}
+            className={isEditing ? 'w-full px-3 py-2 border border-slate-200 rounded-lg bg-slate-50 text-slate-500 cursor-not-allowed' : 'w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none'}
           />
           {errors.ci && <p className="text-red-500 text-sm mt-1">{errors.ci.message}</p>}
         </div>

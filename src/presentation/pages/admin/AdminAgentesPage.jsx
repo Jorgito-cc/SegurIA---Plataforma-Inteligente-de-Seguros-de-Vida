@@ -11,13 +11,21 @@ export default function AdminAgentesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      console.log('� FormData recibido:', formData);
+      console.log('📦 FormData recibido:', formData);
       
       if (crud.editingId) {
         console.log('✏️ Modo EDICIÓN - crud.editingId:', crud.editingId);
-        const payload = { ...formData };
-        if (!payload.password) delete payload.password;
-        console.log('📤 Payload PATCH:', payload);
+        // ⚠️ En edición SOLO se envían estos campos (el backend solo acepta estos)
+        const payload = {
+          telefono: formData.telefono || '',
+          codigo_licencia: formData.codigo_licencia || '',
+          fecha_ingreso: formData.fecha_ingreso || '',
+          nivel: formData.nivel || '',
+          comision_base_porcentaje: formData.comision_base_porcentaje || '0',
+          sucursal: formData.sucursal || '',
+          is_active: Boolean(formData.is_active),
+        };
+        console.log('📤 Payload PATCH (solo campos editables):', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
         console.log('📥 Respuesta de crud.handleUpdate:', ok);
         if (ok) {
@@ -54,18 +62,14 @@ export default function AdminAgentesPage() {
 
   const handleToggleStatus = async (item) => {
     try {
+      // ⚠️ Solo enviamos los campos editables
       const ok = await crud.handleUpdate(item.id, {
-        username: item.username,
-        email: item.email,
-        first_name: item.first_name,
-        last_name: item.last_name,
-        ci: item.ci,
-        telefono: item.telefono,
-        codigo_licencia: item.codigo_licencia,
-        fecha_ingreso: item.fecha_ingreso,
-        nivel: item.nivel,
-        comision_base_porcentaje: item.comision_base_porcentaje,
-        sucursal: item.sucursal,
+        telefono: item.telefono || '',
+        codigo_licencia: item.codigo_licencia || '',
+        fecha_ingreso: item.fecha_ingreso || '',
+        nivel: item.nivel || '',
+        comision_base_porcentaje: item.comision_base_porcentaje || '0',
+        sucursal: item.sucursal || '',
         is_active: !item.is_active,
       });
       if (ok) {
