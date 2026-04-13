@@ -121,31 +121,29 @@ export default function AdminClientesPage() {
       
       if (crud.editingId) {
         console.log('✏️ Modo EDICIÓN - crud.editingId:', crud.editingId);
-        // ⚠️ El backend ClienteSerializer NO acepta first_name ni last_name
-        // Solo acepta: telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
+        // ⚠️ Backend ClienteSerializer SOLO acepta estos campos para PATCH:
+        // telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
         const payload = {
-          telefono: formData.telefono,
-          direccion: formData.direccion,
+          telefono: formData.telefono || '',
+          direccion: formData.direccion || '',
           fecha_nacimiento: formData.fecha_nacimiento || null,
           genero: formData.genero || null,
-          profesion_oficio: formData.profesion_oficio,
+          profesion_oficio: formData.profesion_oficio || '',
           es_fumador: Boolean(formData.es_fumador),
           ingresos_mensuales: formData.ingresos_mensuales || null,
           is_active: Boolean(formData.is_active),
         };
-        console.log('📤 Payload EDIT (sin first_name/last_name):', payload);
+        console.log('📤 Payload EDIT (solo campos editables):', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
         console.log('📥 Respuesta de crud.handleUpdate:', ok);
         if (ok) {
-          console.log('✅ Actualización exitosa - recargando datos');
+          console.log('✅ Actualización exitosa');
           notify.success('Cliente actualizado');
-          // ⚠️ ESPERAR A QUE loadItems termine antes de cerrar el form
           await crud.loadItems(crud.currentPage);
-          console.log('🔄 Datos recargados - cerrando formulario');
           crud.setShowForm(false);
           crud.setEditingId(null);
         } else {
-          console.log('❌ Error en actualización:', crud.error);
+          console.log('❌ Error:', crud.error);
           notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
       } else {

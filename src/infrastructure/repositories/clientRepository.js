@@ -61,23 +61,21 @@ export const clientRepository = {
   // Actualizar cliente
   async update(id, payload) {
     console.log('🔍 [clientRepository.update] Payload recibido:', payload);
-    // ⚠️ El backend ClienteSerializer NO acepta first_name ni last_name
-    // Solo acepta: telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
+    // ⚠️ Backend ClienteSerializer SOLO acepta estos campos:
+    // telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
     const updatePayload = {
-      telefono: trimString(payload.telefono || ''),
-      direccion: trimString(payload.direccion || ''),
-      fecha_nacimiento: payload.fecha_nacimiento ? trimString(payload.fecha_nacimiento) : null,
-      genero: payload.genero ? trimString(payload.genero) : null,
-      profesion_oficio: payload.profesion_oficio ? trimString(payload.profesion_oficio) : null,
+      telefono: payload.telefono?.trim() || '',
+      direccion: payload.direccion?.trim() || '',
+      fecha_nacimiento: payload.fecha_nacimiento === '' ? null : payload.fecha_nacimiento,
+      genero: payload.genero === '' ? null : payload.genero,
+      profesion_oficio: payload.profesion_oficio?.trim() || '',
       es_fumador: Boolean(payload.es_fumador),
-      ingresos_mensuales:
-        payload.ingresos_mensuales === '' || payload.ingresos_mensuales == null
-          ? null
-          : Number(payload.ingresos_mensuales),
+      ingresos_mensuales: payload.ingresos_mensuales === '' || !payload.ingresos_mensuales ? null : Number(payload.ingresos_mensuales),
       is_active: Boolean(payload.is_active),
     };
-    console.log('📤 [clientRepository.update] Payload filtrado (sin first_name/last_name):', updatePayload);
+    console.log('📤 [clientRepository.update] Payload a enviar:', updatePayload);
     const { data } = await apiClient.patch(`${ENDPOINTS.clientes}${id}/`, updatePayload);
+    console.log('✅ [clientRepository.update] Respuesta del backend:', data);
     return data;
   },
 

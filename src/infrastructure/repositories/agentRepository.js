@@ -53,22 +53,23 @@ export const agentRepository = {
   async update(id, payload) {
     console.log('🔍 [agentRepository.update] Payload recibido:', payload);
     const updatePayload = {
-      first_name: (payload.first_name || '').toString().trim(),
-      last_name: (payload.last_name || '').toString().trim(),
-      ci: (payload.ci || '').toString().trim(),
-      telefono: (payload.telefono || '').toString().trim(),
-      codigo_licencia: (payload.codigo_licencia || '').toString().trim(),
-      fecha_ingreso: payload.fecha_ingreso ? trimString(payload.fecha_ingreso) : null,
-      nivel: payload.nivel ? trimString(payload.nivel) : 'Junior',
+      first_name: payload.first_name?.trim() || '',
+      last_name: payload.last_name?.trim() || '',
+      ci: payload.ci?.trim() || '',
+      telefono: payload.telefono?.trim() || '',
+      codigo_licencia: payload.codigo_licencia?.trim() || '',
+      fecha_ingreso: payload.fecha_ingreso || null,
+      nivel: payload.nivel || 'Junior',
       comision_base_porcentaje: Number(payload.comision_base_porcentaje) || 0,
-      sucursal: (payload.sucursal || '').toString().trim(),
+      sucursal: payload.sucursal?.trim() || '',
       is_active: Boolean(payload.is_active),
     };
-    if (payload.password && payload.password.trim()) {
-      updatePayload.password = trimString(payload.password);
+    if (payload.password && payload.password?.trim()) {
+      updatePayload.password = payload.password.trim();
     }
     console.log('📤 [agentRepository.update] Payload a enviar:', updatePayload);
     const { data } = await apiClient.patch(`${ENDPOINTS.agentes}${id}/`, updatePayload);
+    console.log('✅ [agentRepository.update] Respuesta del backend:', data);
     return data;
   },
 
