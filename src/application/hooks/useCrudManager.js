@@ -15,6 +15,13 @@ export function useCrudManager(repository, pageSize = 20) {
   const [showForm, setShowForm] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState({ open: false, id: null });
 
+  const mapCrudError = useCallback((err, fallbackMessage) => {
+    if (err?.status === 401) return 'Sesion vencida. Vuelve a iniciar sesion.';
+    if (err?.status === 403) return 'No tienes permisos para esta operacion.';
+    if (err?.status === 405) return 'Metodo no permitido en el endpoint consumido.';
+    return err?.message || fallbackMessage;
+  }, []);
+
   // Cargar lista
   const loadItems = useCallback(async (page = 1) => {
     setLoading(true);
@@ -26,11 +33,11 @@ export function useCrudManager(repository, pageSize = 20) {
       setTotalCount(result.count || result.length);
       setCurrentPage(page);
     } catch (err) {
-      setError(err.message || 'Error cargando datos');
+      setError(mapCrudError(err, 'Error cargando datos'));
     } finally {
       setLoading(false);
     }
-  }, [repository, pageSize]);
+  }, [repository, pageSize, mapCrudError]);
 
   // Cargar al montar
   useEffect(() => {
@@ -47,12 +54,12 @@ export function useCrudManager(repository, pageSize = 20) {
       setShowForm(false);
       return true;
     } catch (err) {
-      setError(err.message || 'Error creando registro');
+      setError(mapCrudError(err, 'Error creando registro'));
       return false;
     } finally {
       setLoading(false);
     }
-  }, [repository, loadItems]);
+  }, [repository, loadItems, mapCrudError]);
 
   // Actualizar
   const handleUpdate = useCallback(async (id, payload) => {
@@ -75,12 +82,12 @@ export function useCrudManager(repository, pageSize = 20) {
 
       return true;
     } catch (err) {
-      setError(err.message || 'Error actualizando registro');
+      setError(mapCrudError(err, 'Error actualizando registro'));
       return false;
     } finally {
       setLoading(false);
     }
-  }, [repository]);
+  }, [repository, mapCrudError]);
 
   // Eliminar
   const handleDeleteClick = useCallback((id) => {
@@ -96,12 +103,12 @@ export function useCrudManager(repository, pageSize = 20) {
       setDeleteConfirm({ open: false, id: null });
       return true;
     } catch (err) {
-      setError(err.message || 'Error eliminando registro');
+      setError(mapCrudError(err, 'Error eliminando registro'));
       return false;
     } finally {
       setLoading(false);
     }
-  }, [repository, currentPage, loadItems]);
+  }, [repository, currentPage, loadItems, mapCrudError]);
 
   return {
     items,

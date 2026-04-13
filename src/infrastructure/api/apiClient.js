@@ -20,6 +20,7 @@ apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const status = error?.response?.status;
+    const requestUrl = error?.config?.url || '';
 
     if (status === 401) {
       localStorage.removeItem('access_token');
@@ -50,7 +51,20 @@ apiClient.interceptors.response.use(
       }
     }
 
-    return Promise.reject(new Error(message));
+    if (status === 401 && /agentes|clientes|administrador|bitacoras/i.test(requestUrl)) {
+      message = 'Sesion expirada o invalida. Inicia sesion nuevamente.';
+    } else if (status === 403) {
+      message = 'No tienes permisos para realizar esta accion.';
+    } else if (status === 405) {
+      message = 'Metodo HTTP no permitido para este endpoint.';
+    }
+
+    const apiError = new Error(message);
+    apiError.status = status;
+    apiError.data = data;
+    apiError.url = requestUrl;
+
+    return Promise.reject(apiError);
   }
 );
 
