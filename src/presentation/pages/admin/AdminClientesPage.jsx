@@ -133,16 +133,6 @@ export default function AdminClientesPage() {
   const handleFormSubmit = async (formData) => {
     try {
       console.log('🔍 FormData completo recibido:', formData);
-      console.log('Valores:', {
-        username: formData.username,
-        email: formData.email,
-        password: formData.password,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
-        ci: formData.ci,
-        telefono: formData.telefono,
-        direccion: formData.direccion,
-      });
       
       if (crud.editingId) {
         console.log('✏️ Modo EDICIÓN - crud.editingId:', crud.editingId);
@@ -160,11 +150,9 @@ export default function AdminClientesPage() {
         };
         console.log('📤 Payload EDIT (solo campos editables):', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
-        console.log('📥 Respuesta de crud.handleUpdate:', ok);
         if (ok) {
           console.log('✅ Actualización exitosa');
           notify.success('Cliente actualizado');
-          await crud.loadItems(crud.currentPage);
           crud.setShowForm(false);
           crud.setEditingId(null);
         } else {
@@ -258,7 +246,6 @@ export default function AdminClientesPage() {
       {crud.showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            {crud.editingId && console.log('🔍 [AdminClientesPage] Buscando cliente con editingId:', crud.editingId, 'tipo:', typeof crud.editingId)}
             <CreateClientForm
               key={crud.editingId ? `edit-${crud.editingId}` : 'create'}
               editingData={crud.editingId ? getProcessedClient(crud.editingId) : null}
