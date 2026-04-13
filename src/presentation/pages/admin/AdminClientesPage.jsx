@@ -107,33 +107,42 @@ export default function AdminClientesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      // Log para debug
-      console.log('📋 FormData recibido:', formData);
+      console.log('🔍 FormData completo recibido:', formData);
+      console.log('Valores:', {
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        ci: formData.ci,
+        telefono: formData.telefono,
+        direccion: formData.direccion,
+      });
       
       if (crud.editingId) {
         const payload = {
-          telefono: formData.telefono || '',
-          direccion: formData.direccion || '',
-          fecha_nacimiento: formData.fecha_nacimiento || null,
-          genero: formData.genero || null,
-          profesion_oficio: formData.profesion_oficio || '',
+          telefono: formData.telefono,
+          direccion: formData.direccion,
+          fecha_nacimiento: formData.fecha_nacimiento,
+          genero: formData.genero,
+          profesion_oficio: formData.profesion_oficio,
           es_fumador: Boolean(formData.es_fumador),
-          ingresos_mensuales: formData.ingresos_mensuales || null,
+          ingresos_mensuales: formData.ingresos_mensuales,
           is_active: Boolean(formData.is_active),
         };
-        console.log('📤 Payload PATCH:', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
         if (ok) {
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          setTimeout(() => window.location.reload(), 500);
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         } else {
           notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
       } else {
-        // Para crear, pasar el formData completo
-        console.log('📤 Payload POST (crear):', formData);
+        console.log('📤 Enviando formData a create():', formData);
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Cliente creado');
@@ -215,12 +224,6 @@ export default function AdminClientesPage() {
           <FaSyncAlt /> Recargar
         </button>
       </div>
-
-      {crud.error && (
-        <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-          {crud.error}
-        </div>
-      )}
 
       {crud.showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">

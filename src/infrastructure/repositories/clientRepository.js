@@ -2,14 +2,6 @@ import apiClient from '../api/apiClient';
 import { ENDPOINTS } from '../api/endpoints';
 
 const trimString = (val) => (typeof val === 'string' ? val.trim() : val);
-const validateRequiredFields = (payload, requiredFields) => {
-  const missing = requiredFields.filter(
-    (field) => !payload[field] || (typeof payload[field] === 'string' && !payload[field].trim())
-  );
-  if (missing.length > 0) {
-    throw new Error(`Campos requeridos vacios: ${missing.join(', ')}`);
-  }
-};
 
 export const clientRepository = {
   // Listar clientes con paginación
@@ -28,17 +20,28 @@ export const clientRepository = {
 
   // Crear cliente (CRUD)
   async create(payload) {
-    validateRequiredFields(payload, ['email', 'username', 'password', 'first_name', 'last_name', 'ci', 'telefono', 'direccion']);
+    console.log('🔍 [clientRepository.create] Payload recibido:', payload);
+    
+    // Debug: mostrar cada campo
+    console.log('📋 Campos recibidos:');
+    console.log('  username:', payload.username, '(tipo:', typeof payload.username, ')');
+    console.log('  email:', payload.email, '(tipo:', typeof payload.email, ')');
+    console.log('  password:', payload.password, '(tipo:', typeof payload.password, ')');
+    console.log('  first_name:', payload.first_name, '(tipo:', typeof payload.first_name, ')');
+    console.log('  last_name:', payload.last_name, '(tipo:', typeof payload.last_name, ')');
+    console.log('  ci:', payload.ci, '(tipo:', typeof payload.ci, ')');
+    console.log('  telefono:', payload.telefono, '(tipo:', typeof payload.telefono, ')');
+    console.log('  direccion:', payload.direccion, '(tipo:', typeof payload.direccion, ')');
     
     const createPayload = {
-      email: trimString(payload.email).toLowerCase(),
-      username: trimString(payload.username),
-      password: trimString(payload.password),
-      first_name: trimString(payload.first_name),
-      last_name: trimString(payload.last_name),
-      ci: trimString(payload.ci),
-      telefono: trimString(payload.telefono),
-      direccion: trimString(payload.direccion),
+      email: (payload.email || '').toString().trim().toLowerCase(),
+      username: (payload.username || '').toString().trim(),
+      password: (payload.password || '').toString().trim(),
+      first_name: (payload.first_name || '').toString().trim(),
+      last_name: (payload.last_name || '').toString().trim(),
+      ci: (payload.ci || '').toString().trim(),
+      telefono: (payload.telefono || '').toString().trim(),
+      direccion: (payload.direccion || '').toString().trim(),
       fecha_nacimiento: payload.fecha_nacimiento ? trimString(payload.fecha_nacimiento) : null,
       genero: payload.genero ? trimString(payload.genero) : null,
       profesion_oficio: payload.profesion_oficio ? trimString(payload.profesion_oficio) : null,
@@ -48,6 +51,9 @@ export const clientRepository = {
           ? null
           : Number(payload.ingresos_mensuales),
     };
+    
+    console.log('📤 [clientRepository.create] Payload a enviar:', createPayload);
+    
     const { data } = await apiClient.post(ENDPOINTS.auth.registerClient, createPayload);
     return data;
   },

@@ -228,7 +228,6 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
                 value: /^[\d\-\s\+]{7,20}$/,
                 message: 'Entre 7 y 20 caracteres (números, espacios, + o -)',
               },
-              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="+58 212 123 4567"
@@ -247,7 +246,6 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
               required: isEditing ? false : 'Dirección es requerida',
               minLength: isEditing ? undefined : { value: 5, message: 'Mínimo 5 caracteres' },
               maxLength: isEditing ? undefined : { value: 160, message: 'Máximo 160 caracteres' },
-              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="Calle 5, Casa 123"
@@ -312,7 +310,6 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
               required: isEditing ? false : 'Profesión es requerida',
               minLength: isEditing ? undefined : { value: 3, message: 'Mínimo 3 caracteres' },
               maxLength: isEditing ? undefined : { value: 80, message: 'Máximo 80 caracteres' },
-              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
             type="text"
             placeholder="Ingeniero"
@@ -335,7 +332,6 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
               validate: isEditing
                 ? undefined
                 : (value) => parseFloat(value) > 0 || 'Debe ser mayor que 0',
-              setValueAs: (value) => (value === '' || value == null ? null : Number(value)),
             })}
             type="number"
             step="0.01"
