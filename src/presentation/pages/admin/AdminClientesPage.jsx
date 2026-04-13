@@ -45,8 +45,8 @@ export default function AdminClientesPage() {
       filteredItems.map((item) => ({
         Usuario: item.username,
         Correo: item.email,
-        Nombre: item.first_name,
-        Apellido: item.last_name,
+        Nombre: item.nombre_completo || item.first_name || '-',
+        Apellido: item.last_name || '-',
         CI: item.ci,
         Telefono: item.telefono,
         Direccion: item.direccion,
@@ -68,8 +68,8 @@ export default function AdminClientesPage() {
       filteredItems.map((item) => [
         item.username,
         item.email,
-        item.first_name,
-        item.last_name,
+        item.nombre_completo || item.first_name || '-',
+        item.last_name || '-',
         item.ci,
         item.telefono,
         item.direccion,
@@ -81,6 +81,28 @@ export default function AdminClientesPage() {
         item.is_active ? 'Activo' : 'Inactivo',
       ])
     );
+  };
+
+  const openEdit = (item) => {
+    crud.setEditingId(item.id);
+    crud.setShowForm(true);
+  };
+
+  // Helper para procesar datos de cliente (parsear nombre_completo)
+  const getProcessedClient = (id) => {
+    const item = crud.items.find((c) => c.id === id);
+    if (!item) return null;
+    
+    // Si no tiene first_name/last_name, parsear de nombre_completo
+    if (!item.first_name && item.nombre_completo) {
+      const parts = item.nombre_completo.split(' ');
+      return {
+        ...item,
+        first_name: parts[0] || '',
+        last_name: parts.slice(1).join(' ') || '',
+      };
+    }
+    return item;
   };
 
   const handleToggleStatus = async (item) => {
@@ -235,7 +257,7 @@ export default function AdminClientesPage() {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <CreateClientForm
               key={crud.editingId ? `edit-${crud.editingId}` : 'create'}
-              editingData={crud.editingId ? crud.items.find((c) => c.id === crud.editingId) : null}
+              editingData={crud.editingId ? getProcessedClient(crud.editingId) : null}
               onSubmit={handleFormSubmit}
               onCancel={() => {
                 crud.setShowForm(false);
@@ -273,7 +295,7 @@ export default function AdminClientesPage() {
               <tr key={item.id}>
                 <td className="px-6 py-4 text-sm">{item.username}</td>
                 <td className="px-6 py-4 text-sm">{item.email}</td>
-                <td className="px-6 py-4 text-sm">{item.first_name || '-'}</td>
+                <td className="px-6 py-4 text-sm">{item.nombre_completo || item.first_name || '-'}</td>
                 <td className="px-6 py-4 text-sm">{item.last_name || '-'}</td>
                 <td className="px-6 py-4 text-sm">{item.ci || '-'}</td>
                 <td className="px-6 py-4 text-sm">{item.telefono || '-'}</td>
@@ -289,7 +311,7 @@ export default function AdminClientesPage() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right whitespace-nowrap">
-                  <button onClick={() => { crud.setEditingId(item.id); crud.setShowForm(true); }} className="text-emerald-600 hover:text-emerald-800 mr-3" title="Editar"><FaEdit /></button>
+                  <button onClick={() => openEdit(item)} className="text-emerald-600 hover:text-emerald-800 mr-3" title="Editar"><FaEdit /></button>
                   <button onClick={() => handleToggleStatus(item)} className="text-amber-600 hover:text-amber-800 mr-3" title={item.is_active ? 'Deshabilitar' : 'Habilitar'}>
                     {item.is_active ? <FaToggleOff /> : <FaToggleOn />}
                   </button>
