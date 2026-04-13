@@ -213,7 +213,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
                 value: /^[\d\-\s\+]{7,20}$/,
                 message: 'Formato de teléfono inválido',
               },
-              setValueAs: (value) => (value ? String(value).trim() : ''),
+            })}
             type="text"
             placeholder="+58 212 123 4567"
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
@@ -235,7 +235,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
                 value: /^[A-Z0-9\-]+$/,
                 message: 'Solo mayúsculas, números y guiones',
               },
-              setValueAs: (value) => (value ? String(value).trim().toUpperCase() : ''),
+            })}
             type="text"
             placeholder="AG-2024001"
             maxLength="10"
@@ -289,8 +289,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
               required: isEditing ? false : 'Comisión es requerida',
               min: isEditing ? undefined : { value: 0, message: 'No puede ser negativo' },
               max: isEditing ? undefined : { value: 100, message: 'Máximo 100%' },
-              setValueAs: (value) => (value === '' || value == null ? 0 : Number(value)),
             })}
+            type="number"
             step="0.01"
             placeholder="2.5"
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
@@ -310,8 +310,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
               required: isEditing ? false : 'Sucursal es requerida',
               minLength: isEditing ? undefined : { value: 2, message: 'Mínimo 2 caracteres' },
               maxLength: isEditing ? undefined : { value: 80, message: 'Máximo 80 caracteres' },
-              setValueAs: (value) => (value ? String(value).trim() : ''),
             })}
+            type="text"
             placeholder="Centro"
             className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-400 focus:border-transparent outline-none"
           />
