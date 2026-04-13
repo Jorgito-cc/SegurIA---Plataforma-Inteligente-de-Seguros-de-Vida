@@ -137,13 +137,13 @@ export default function AdminClientesPage() {
         const ok = await crud.handleUpdate(crud.editingId, payload);
         console.log('📥 Respuesta de crud.handleUpdate:', ok);
         if (ok) {
-          console.log('✅ Actualización exitosa - cerrando formulario');
+          console.log('✅ Actualización exitosa - recargando datos');
           notify.success('Cliente actualizado');
+          // ⚠️ ESPERAR A QUE loadItems termine antes de cerrar el form
+          await crud.loadItems(crud.currentPage);
+          console.log('🔄 Datos recargados - cerrando formulario');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          // Recargar datos sin recargar la página
-          console.log('🔄 Recargando datos con crud.loadItems');
-          crud.loadItems(crud.currentPage);
         } else {
           console.log('❌ Error en actualización:', crud.error);
           notify.error(crud.error || 'No se pudo actualizar el cliente');

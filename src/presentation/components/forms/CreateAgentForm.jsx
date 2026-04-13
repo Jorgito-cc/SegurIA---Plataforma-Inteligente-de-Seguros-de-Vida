@@ -25,20 +25,14 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
   const initialValues = useMemo(() => {
     if (editingData) {
       console.log('📝 useMemo: cálculando initialValues para EDICIÓN:', editingData);
-      // Parsear nombre_completo si viene del backend (en edición)
-      let first_name = editingData.first_name || '';
-      let last_name = editingData.last_name || '';
-      if (!first_name && !last_name && editingData.nombre_completo) {
-        const parts = editingData.nombre_completo.split(' ');
-        first_name = parts[0] || '';
-        last_name = parts.slice(1).join(' ') || '';
-      }
+      // El backend retorna first_name y last_name directamente
       return {
         username: editingData.username || '',
         email: editingData.email || '',
         password: '', // No se rellena en edición
-        first_name,
-        last_name,
+        first_name: editingData.first_name || '',
+        last_name: editingData.last_name || '',
+        ci: editingData.ci || '',
         telefono: editingData.telefono || '',
         codigo_licencia: editingData.codigo_licencia || '',
         fecha_ingreso: editingData.fecha_ingreso || new Date().toISOString().split('T')[0],
