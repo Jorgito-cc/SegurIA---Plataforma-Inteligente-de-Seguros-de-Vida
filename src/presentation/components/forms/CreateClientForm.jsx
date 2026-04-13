@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaTimes } from 'react-icons/fa';
 import { notify } from '../notifications/notify';
 
 export default function CreateClientForm({ editingData = null, onSubmit, onCancel, loading = false }) {
   const isEditing = Boolean(editingData);
-  const defaultValues = {
+  const defaultValues = useMemo(() => ({
     username: '',
     email: '',
     password: '',
@@ -20,7 +20,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
     es_fumador: false,
     ingresos_mensuales: '',
     is_active: true,
-  };
+  }), []);
 
   const {
     register,
@@ -35,28 +35,24 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
 
   const [showPassword, setShowPassword] = useState(false);
 
+  // Solo hacer reset cuando editingData CAMBIA (pasar de null a un objeto o viceversa)
   useEffect(() => {
     if (editingData) {
       reset({
         ...defaultValues,
         ...editingData,
-        first_name: editingData.first_name || '',
-        last_name: editingData.last_name || '',
-        username: editingData.username || '',
-        email: editingData.email || '',
-        ci: editingData.ci || '',
       });
-      return;
     }
-
-    reset(defaultValues);
-  }, [editingData, reset]);
+  }, [editingData, reset, defaultValues]);
 
   const onSubmitForm = async (data) => {
     try {
+      console.log('📋 Antes de onSubmit, data:', data);
       await onSubmit(data);
-      if (!editingData) reset();
+      console.log('✅ onSubmit exitoso');
+      // NO hacer reset aquí - dejar que el padre maneje la lógica
     } catch (err) {
+      console.error('❌ Error en onSubmitForm:', err);
       notify.error(err.message || 'Error procesando cliente');
     }
   };
@@ -225,7 +221,7 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
             {...register('telefono', {
               required: isEditing ? false : 'Teléfono es requerido',
               pattern: isEditing ? undefined : {
-                value: /^[\d\-\s\+]{7,20}$/,
+                value: /[\d\-\s+]{7,20}$/,
                 message: 'Entre 7 y 20 caracteres (números, espacios, + o -)',
               },
             })}

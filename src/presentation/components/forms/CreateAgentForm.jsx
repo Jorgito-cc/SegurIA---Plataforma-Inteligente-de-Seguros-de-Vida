@@ -1,11 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { FaTimes } from 'react-icons/fa';
 import { notify } from '../notifications/notify';
 
 export default function CreateAgentForm({ editingData = null, onSubmit, onCancel, loading = false }) {
   const isEditing = Boolean(editingData);
-  const defaultValues = {
+  const defaultValues = useMemo(() => ({
     username: '',
     email: '',
     password: '',
@@ -19,7 +19,7 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
     comision_base_porcentaje: '0',
     sucursal: '',
     is_active: true,
-  };
+  }), []);
 
   const {
     register,
@@ -35,14 +35,22 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
   const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
-    reset(editingData || defaultValues);
-  }, [editingData, reset]);
+    if (editingData) {
+      reset({
+        ...defaultValues,
+        ...editingData,
+      });
+    }
+  }, [editingData, reset, defaultValues]);
 
   const onSubmitForm = async (data) => {
     try {
+      console.log('📋 Antes de onSubmit, data:', data);
       await onSubmit(data);
-      if (!editingData) reset();
+      console.log('✅ onSubmit exitoso');
+      // NO hacer reset aquí - dejar que el padre maneje la lógica
     } catch (err) {
+      console.error('❌ Error en onSubmitForm:', err);
       notify.error(err.message || 'Error procesando agente');
     }
   };
