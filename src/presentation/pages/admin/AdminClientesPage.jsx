@@ -107,31 +107,33 @@ export default function AdminClientesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
+      // Log para debug
+      console.log('📋 FormData recibido:', formData);
+      
       if (crud.editingId) {
         const payload = {
-          telefono: formData.telefono,
-          direccion: formData.direccion,
-          fecha_nacimiento: formData.fecha_nacimiento,
-          genero: formData.genero,
-          profesion_oficio: formData.profesion_oficio,
+          telefono: formData.telefono || '',
+          direccion: formData.direccion || '',
+          fecha_nacimiento: formData.fecha_nacimiento || null,
+          genero: formData.genero || null,
+          profesion_oficio: formData.profesion_oficio || '',
           es_fumador: Boolean(formData.es_fumador),
-          ingresos_mensuales: formData.ingresos_mensuales,
+          ingresos_mensuales: formData.ingresos_mensuales || null,
           is_active: Boolean(formData.is_active),
         };
+        console.log('📤 Payload PATCH:', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
         if (ok) {
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          
-          // Fuerza el refresh completo del navegador
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
+          setTimeout(() => window.location.reload(), 500);
         } else {
           notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
       } else {
+        // Para crear, pasar el formData completo
+        console.log('📤 Payload POST (crear):', formData);
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Cliente creado');

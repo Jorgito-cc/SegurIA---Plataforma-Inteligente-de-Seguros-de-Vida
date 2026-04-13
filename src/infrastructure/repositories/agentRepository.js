@@ -1,6 +1,16 @@
 import apiClient from '../api/apiClient';
 import { ENDPOINTS } from '../api/endpoints';
 
+const trimString = (val) => (typeof val === 'string' ? val.trim() : val);
+const validateRequiredFields = (payload, requiredFields) => {
+  const missing = requiredFields.filter(
+    (field) => !payload[field] || (typeof payload[field] === 'string' && !payload[field].trim())
+  );
+  if (missing.length > 0) {
+    throw new Error(`Campos requeridos vacios: ${missing.join(', ')}`);
+  }
+};
+
 export const agentRepository = {
   // Listar agentes con paginación
   async list(page = 1, pageSize = 20) {
@@ -18,7 +28,24 @@ export const agentRepository = {
 
   // Crear agente
   async create(payload) {
-    const { data } = await apiClient.post(ENDPOINTS.agentes, payload);
+    validateRequiredFields(payload, ['username', 'email', 'password', 'first_name', 'last_name', 'ci', 'telefono', 'codigo_licencia', 'fecha_ingreso', 'nivel', 'comision_base_porcentaje', 'sucursal']);
+    
+    const createPayload = {
+      username: trimString(payload.username),
+      email: trimString(payload.email).toLowerCase(),
+      password: trimString(payload.password),
+      first_name: trimString(payload.first_name),
+      last_name: trimString(payload.last_name),
+      ci: trimString(payload.ci),
+      telefono: trimString(payload.telefono),
+      codigo_licencia: trimString(payload.codigo_licencia),
+      fecha_ingreso: payload.fecha_ingreso ? trimString(payload.fecha_ingreso) : new Date().toISOString().split('T')[0],
+      nivel: payload.nivel ? trimString(payload.nivel) : 'Junior',
+      comision_base_porcentaje: Number(payload.comision_base_porcentaje) || 0,
+      sucursal: trimString(payload.sucursal),
+      is_active: Boolean(payload.is_active),
+    };
+    const { data } = await apiClient.post(ENDPOINTS.agentes, createPayload);
     return data;
   },
 
@@ -28,6 +55,12 @@ export const agentRepository = {
     if (!updatePayload.password) {
       delete updatePayload.password;
     }
+    // Trimear strings
+    Object.keys(updatePayload).forEach((key) => {
+      if (typeof updatePayload[key] === 'string') {
+        updatePayload[key] = trimString(updatePayload[key]);
+      }
+    });
     const { data } = await apiClient.patch(`${ENDPOINTS.agentes}${id}/`, updatePayload);
     return data;
   },

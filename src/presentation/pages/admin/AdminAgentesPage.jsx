@@ -11,22 +11,23 @@ export default function AdminAgentesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
+      console.log('📋 FormData recibido:', formData);
+      
       if (crud.editingId) {
         const payload = { ...formData };
         if (!payload.password) delete payload.password;
+        console.log('📤 Payload PATCH:', payload);
         const ok = await crud.handleUpdate(crud.editingId, payload);
         if (ok) {
           notify.success('Agente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
+          setTimeout(() => window.location.reload(), 500);
         } else {
           notify.error(crud.error || 'No se pudo actualizar el agente');
         }
       } else {
+        console.log('📤 Payload POST (crear):', formData);
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Agente creado');
