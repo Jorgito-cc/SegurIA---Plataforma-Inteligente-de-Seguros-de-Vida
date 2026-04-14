@@ -88,26 +88,6 @@ export default function AdminClientesPage() {
     crud.setShowForm(true);
   };
 
-  // Helper para procesar datos de cliente (parsear nombre_completo)
-  const getProcessedClient = (id) => {
-    const item = crud.items.find((c) => String(c.id) === String(id));
-    if (!item) {
-      console.warn('⚠️ [getProcessedClient] No se encontró cliente con id:', id);
-      return null;
-    }
-    
-    // Si no tiene first_name/last_name, parsear de nombre_completo
-    if (!item.first_name && item.nombre_completo) {
-      const parts = item.nombre_completo.split(' ');
-      return {
-        ...item,
-        first_name: parts[0] || '',
-        last_name: parts.slice(1).join(' ') || '',
-      };
-    }
-    return item;
-  };
-
   const handleToggleStatus = async (item) => {
     try {
       const ok = await crud.handleUpdate(item.id, {
@@ -132,51 +112,21 @@ export default function AdminClientesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      console.log('🔍 FormData completo recibido:', formData);
-      
       if (crud.editingId) {
-        console.log('✏️ Modo EDICIÓN - crud.editingId:', crud.editingId);
-        // ⚠️ Backend ClienteSerializer SOLO acepta estos campos para PATCH:
-        // telefono, direccion, fecha_nacimiento, genero, profesion_oficio, es_fumador, ingresos_mensuales, is_active
-        const payload = {
-          telefono: formData.telefono || '',
-          direccion: formData.direccion || '',
-          fecha_nacimiento: formData.fecha_nacimiento || null,
-          genero: formData.genero || null,
-          profesion_oficio: formData.profesion_oficio || '',
-          es_fumador: Boolean(formData.es_fumador),
-          ingresos_mensuales: formData.ingresos_mensuales || null,
-          is_active: Boolean(formData.is_active),
-        };
-        console.log('📤 Payload EDIT (solo campos editables):', JSON.stringify(payload, null, 2));
-        const ok = await crud.handleUpdate(crud.editingId, payload);
-        console.log('📥 Respuesta de crud.handleUpdate:', ok);
-        console.log('🔍 VERIFICAR: crud.items después de handleUpdate:', crud.items);
-        const itemActualizado = crud.items.find(c => String(c.id) === String(crud.editingId));
-        console.log('🔍 Cliente actualizado en lista?', itemActualizado);
-        
+        const ok = await crud.handleUpdate(crud.editingId, formData);
         if (ok) {
-          console.log('✅ Actualización exitosa');
           notify.success('Cliente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          // El useCrudManager ya recargó la lista automáticamente
-        } else {
-          console.log('❌ Error:', crud.error);
-          notify.error(crud.error || 'No se pudo actualizar el cliente');
         }
       } else {
-        console.log('📤 Creating new client - Sending formData:', formData);
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Cliente creado');
           crud.setShowForm(false);
-        } else {
-          notify.error(crud.error || 'No se pudo crear el cliente');
         }
       }
     } catch (err) {
-      console.error('❌ Error en handleFormSubmit:', err);
       notify.error(err.message || 'Error procesando cliente');
     }
   };
@@ -255,7 +205,7 @@ export default function AdminClientesPage() {
           <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <CreateClientForm
               key={crud.editingId ? `edit-${crud.editingId}` : 'create'}
-              editingData={crud.editingId ? getProcessedClient(crud.editingId) : null}
+              editingData={crud.editingId ? crud.items.find((c) => String(c.id) === String(crud.editingId)) : null}
               onSubmit={handleFormSubmit}
               onCancel={() => {
                 crud.setShowForm(false);

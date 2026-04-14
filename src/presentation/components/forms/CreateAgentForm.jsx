@@ -69,9 +69,27 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
   const onSubmitForm = async (data) => {
     try {
       console.log('📋 Antes de onSubmit, data:', data);
-      await onSubmit(data);
+      
+      if (isEditing) {
+        // Solo enviar campos editables en modo edición
+        const editableFields = {
+          telefono: data.telefono || '',
+          codigo_licencia: data.codigo_licencia || '',
+          fecha_ingreso: data.fecha_ingreso || '',
+          nivel: data.nivel || '',
+          sucursal: data.sucursal || '',
+          comision_base_porcentaje: Number(data.comision_base_porcentaje) || 0,
+          is_active: Boolean(data.is_active),
+        };
+        console.log('✏️ EditMode: Enviando solo campos editables:', editableFields);
+        await onSubmit(editableFields);
+      } else {
+        // En creación, enviar todo
+        delete data.password;
+        await onSubmit(data);
+      }
+      
       console.log('✅ onSubmit exitoso');
-      // NO hacer reset aquí - dejar que el padre maneje la lógica
     } catch (err) {
       console.error('❌ Error en onSubmitForm:', err);
       notify.error(err.message || 'Error procesando agente');

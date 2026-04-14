@@ -72,9 +72,28 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
   const onSubmitForm = async (data) => {
     try {
       console.log('📋 Antes de onSubmit, data:', data);
-      await onSubmit(data);
+      
+      if (isEditing) {
+        // Solo enviar campos editables en modo edición
+        const editableFields = {
+          telefono: data.telefono || '',
+          direccion: data.direccion || '',
+          fecha_nacimiento: data.fecha_nacimiento || null,
+          genero: data.genero || '',
+          profesion_oficio: data.profesion_oficio || '',
+          es_fumador: Boolean(data.es_fumador),
+          ingresos_mensuales: data.ingresos_mensuales !== '' ? Number(data.ingresos_mensuales) : null,
+          is_active: Boolean(data.is_active),
+        };
+        console.log('✏️ EditMode: Enviando solo campos editables:', editableFields);
+        await onSubmit(editableFields);
+      } else {
+        // En creación, enviar todo excepto password vacío
+        delete data.password;
+        await onSubmit(data);
+      }
+      
       console.log('✅ onSubmit exitoso');
-      // NO hacer reset aquí - dejar que el padre maneje la lógica
     } catch (err) {
       console.error('❌ Error en onSubmitForm:', err);
       notify.error(err.message || 'Error procesando cliente');
@@ -366,7 +385,9 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
         {/* Fumador */}
         <div className="flex items-center pt-6">
           <input
-            {...register('es_fumador')}
+            {...register('es_fumador', {
+              shouldUnregister: false,
+            })}
             type="checkbox"
             className="w-4 h-4 accent-emerald-600 rounded"
           />
@@ -376,9 +397,10 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
         {/* Estado Activo */}
         <div className="flex items-center pt-6">
           <input
-            {...register('is_active')}
+            {...register('is_active', {
+              shouldUnregister: false,
+            })}
             type="checkbox"
-            defaultChecked
             className="w-4 h-4 accent-emerald-600 rounded"
           />
           <label className="ml-2 text-sm font-medium text-slate-700">Activo</label>

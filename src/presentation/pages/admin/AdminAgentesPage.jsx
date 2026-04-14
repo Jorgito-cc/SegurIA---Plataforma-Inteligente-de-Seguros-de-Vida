@@ -11,49 +11,21 @@ export default function AdminAgentesPage() {
 
   const handleFormSubmit = async (formData) => {
     try {
-      console.log('📦 FormData recibido:', formData);
-      
       if (crud.editingId) {
-        console.log('✏️ Modo EDICIÓN - crud.editingId:', crud.editingId);
-        // ⚠️ En edición SOLO se envían estos campos (el backend solo acepta estos)
-        const payload = {
-          telefono: formData.telefono || '',
-          codigo_licencia: formData.codigo_licencia || '',
-          fecha_ingreso: formData.fecha_ingreso || '',
-          nivel: formData.nivel || '',
-          comision_base_porcentaje: formData.comision_base_porcentaje || '0',
-          sucursal: formData.sucursal || '',
-          is_active: Boolean(formData.is_active),
-        };
-        console.log('📤 Payload PATCH (solo campos editables):', JSON.stringify(payload, null, 2));
-        const ok = await crud.handleUpdate(crud.editingId, payload);
-        console.log('📥 Respuesta de crud.handleUpdate:', ok);
-        console.log('🔍 VERIFICAR: crud.items después de handleUpdate:', crud.items);
-        const itemActualizado = crud.items.find(a => String(a.id) === String(crud.editingId));
-        console.log('🔍 Agente actualizado en lista?', itemActualizado);
-        
+        const ok = await crud.handleUpdate(crud.editingId, formData);
         if (ok) {
-          console.log('✅ Actualización exitosa');
           notify.success('Agente actualizado');
           crud.setShowForm(false);
           crud.setEditingId(null);
-          // El useCrudManager ya recargó la lista automáticamente
-        } else {
-          console.log('❌ Error en actualización:', crud.error);
-          notify.error(crud.error || 'No se pudo actualizar el agente');
         }
       } else {
-        console.log('📤 Creating new agent - Sending formData:', formData);
         const ok = await crud.handleCreate(formData);
         if (ok) {
           notify.success('Agente creado');
           crud.setShowForm(false);
-        } else {
-          notify.error(crud.error || 'No se pudo crear el agente');
         }
       }
     } catch (err) {
-      console.error('❌ Error en handleFormSubmit:', err);
       notify.error(err.message || 'Error procesando agente');
     }
   };
