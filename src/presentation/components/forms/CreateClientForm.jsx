@@ -88,8 +88,8 @@ export default function CreateClientForm({ editingData = null, onSubmit, onCance
         console.log('✏️ EditMode: Enviando solo campos editables:', editableFields);
         await onSubmit(editableFields);
       } else {
-        // En creación, enviar todo excepto password vacío
-        delete data.password;
+        // En creación, enviar todo incluyendo password
+        console.log('➕ CreateMode: Enviando todos los campos con password');
         await onSubmit(data);
       }
       

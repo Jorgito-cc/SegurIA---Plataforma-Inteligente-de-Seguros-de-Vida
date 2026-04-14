@@ -84,8 +84,8 @@ export default function CreateAgentForm({ editingData = null, onSubmit, onCancel
         console.log('✏️ EditMode: Enviando solo campos editables:', editableFields);
         await onSubmit(editableFields);
       } else {
-        // En creación, enviar todo
-        delete data.password;
+        // En creación, enviar todo incluyendo password
+        console.log('➕ CreateMode: Enviando todos los campos con password');
         await onSubmit(data);
       }
       
