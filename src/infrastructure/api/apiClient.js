@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const FALLBACK_API_BASE = 'https://backend-seguros-de-vida-production.up.railway.app/api';
+const FALLBACK_API_BASE = 'https://backendseguros-production.up.railway.app/api';
 const rawApiBase = import.meta.env.VITE_API_URL || FALLBACK_API_BASE;
 const API_BASE = rawApiBase.replace(/\/+$/, '');
 
