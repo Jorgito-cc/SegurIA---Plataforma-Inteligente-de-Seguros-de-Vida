@@ -58,9 +58,13 @@ export default function StripeCheckoutPage() {
         if (loginResponse.refresh) {
           localStorage.setItem("refresh_token", loginResponse.refresh);
         }
-        if (loginResponse.user) {
-          localStorage.setItem("auth_user", JSON.stringify(loginResponse.user));
-        }
+
+        // Guardar usuario con tenant_slug del registro
+        const userData = {
+          ...(loginResponse.user || {}),
+          tenant_slug: tenantResponse.slug, // Usar el slug del tenant registrado
+        };
+        localStorage.setItem("auth_user", JSON.stringify(userData));
 
         // Paso 3: Crear la sesión de checkout (ahora con autenticación)
         notify.info("Preparando sesión de pago...");
