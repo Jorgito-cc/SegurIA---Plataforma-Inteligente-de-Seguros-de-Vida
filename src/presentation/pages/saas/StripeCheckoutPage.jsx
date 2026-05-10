@@ -60,12 +60,13 @@ export default function StripeCheckoutPage() {
         }
 
         // Guardar usuario con tenant_slug que viene del login
-        // El backend debe incluir tenant_slug en la respuesta del login
-        if (loginResponse.user) {
+        // El backend devuelve los datos en "usuario" (no "user")
+        if (loginResponse.usuario) {
           const userData = {
-            ...loginResponse.user,
+            ...loginResponse.usuario,
             // Si el backend incluye tenant_slug, usarlo. Si no, usar el slug del registro
-            tenant_slug: loginResponse.user.tenant_slug || tenantResponse.slug,
+            tenant_slug:
+              loginResponse.usuario.tenant_slug || tenantResponse.slug,
           };
           localStorage.setItem("auth_user", JSON.stringify(userData));
         }
