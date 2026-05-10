@@ -18,7 +18,7 @@ export default function StripeCheckoutPage() {
         const selectedPlan = sessionStorage.getItem("selected_plan");
 
         if (!registrationData || !selectedPlan) {
-          notify("error", "Datos incompletos. Por favor, vuelve a intentar.");
+          notify.error("Datos incompletos. Por favor, vuelve a intentar.");
           navigate("/registro-agencia");
           return;
         }
@@ -42,7 +42,7 @@ export default function StripeCheckoutPage() {
         sessionStorage.setItem("stripe_session_id", mockResponse.session_id);
         setSessionData(mockResponse);
 
-        notify("success", "Sesión de pago creada");
+        notify.success("Sesión de pago creada");
 
         // En un caso real, aquí usarías Stripe.js para redirigir
         // window.location.href = `/verificar-pago?session_id=${mockResponse.session_id}`;
@@ -52,7 +52,7 @@ export default function StripeCheckoutPage() {
           navigate(`/verificar-pago?session_id=${mockResponse.session_id}`);
         }, 2000);
       } catch (error) {
-        notify("error", error.message);
+        notify.error(error.message);
       } finally {
         setLoading(false);
       }
@@ -109,7 +109,7 @@ export default function StripeCheckoutPage() {
         <button
           onClick={() => {
             // En producción, redirigir a Stripe Checkout
-            notify("info", "En demostración. Verificando pago...");
+            notify.info("En demostración. Verificando pago...");
             navigate(
               `/verificar-pago?session_id=${sessionStorage.getItem(
                 "stripe_session_id",

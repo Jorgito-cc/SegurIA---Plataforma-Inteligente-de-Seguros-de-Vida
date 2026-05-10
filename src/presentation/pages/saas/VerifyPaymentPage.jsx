@@ -15,7 +15,7 @@ export default function VerifyPaymentPage() {
 
         if (!sessionId) {
           setStatus("error");
-          notify("error", "Session ID no encontrado");
+          notify.error("Session ID no encontrado");
           return;
         }
 
@@ -63,7 +63,7 @@ export default function VerifyPaymentPage() {
 
             // Aquí el tenant ya está creado en la BD
             setStatus("success");
-            notify("success", "¡Pago verificado! Tu agencia ha sido creada.");
+            notify.success("¡Pago verificado! Tu agencia ha sido creada.");
 
             // Limpiar sessionStorage
             sessionStorage.removeItem("tenant_registration");
@@ -76,12 +76,12 @@ export default function VerifyPaymentPage() {
             }, 2000);
           } catch (error) {
             setStatus("error");
-            notify("error", error.message);
+            notify.error(error.message);
           }
         }, 2000);
       } catch (error) {
         setStatus("error");
-        notify("error", error.message);
+        notify.error(error.message);
       } finally {
         setLoading(false);
       }

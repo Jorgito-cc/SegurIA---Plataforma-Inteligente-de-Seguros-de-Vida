@@ -58,7 +58,7 @@ export default function SelectPlanPage() {
 
   const handleContinue = async () => {
     if (!selectedPlan) {
-      notify("error", "Selecciona un plan para continuar");
+      notify.error("Selecciona un plan para continuar");
       return;
     }
 
@@ -68,10 +68,10 @@ export default function SelectPlanPage() {
       // Guardar plan seleccionado en sessionStorage
       sessionStorage.setItem("selected_plan", selectedPlan);
 
-      notify("success", "Plan seleccionado. Procediendo al pago...");
+      notify.success("Plan seleccionado. Procediendo al pago...");
       navigate("/stripe-checkout");
     } catch (error) {
-      notify("error", error.message);
+      notify.error(error.message);
     } finally {
       setLoading(false);
     }

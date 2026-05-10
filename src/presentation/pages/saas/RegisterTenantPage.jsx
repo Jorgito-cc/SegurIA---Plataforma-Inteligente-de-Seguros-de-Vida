@@ -22,19 +22,19 @@ export default function RegisterTenantPage() {
 
     // Validaciones
     if (!formData.nombre_agencia.trim()) {
-      notify("error", "El nombre de la agencia es requerido");
+      notify.error("El nombre de la agencia es requerido");
       return;
     }
     if (!formData.email_admin.includes("@")) {
-      notify("error", "Email inválido");
+      notify.error("Email inválido");
       return;
     }
     if (formData.password.length < 8) {
-      notify("error", "La contraseña debe tener al menos 8 caracteres");
+      notify.error("La contraseña debe tener al menos 8 caracteres");
       return;
     }
     if (formData.password !== formData.confirmPassword) {
-      notify("error", "Las contraseñas no coinciden");
+      notify.error("Las contraseñas no coinciden");
       return;
     }
 
@@ -51,10 +51,10 @@ export default function RegisterTenantPage() {
         }),
       );
 
-      notify("success", "Información guardada. Selecciona tu plan...");
+      notify.success("Información guardada. Selecciona tu plan...");
       navigate("/planes-saas");
     } catch (error) {
-      notify("error", error.message);
+      notify.error(error.message);
     } finally {
       setLoading(false);
     }
