@@ -59,12 +59,16 @@ export default function StripeCheckoutPage() {
           localStorage.setItem("refresh_token", loginResponse.refresh);
         }
 
-        // Guardar usuario con tenant_slug del registro
-        const userData = {
-          ...(loginResponse.user || {}),
-          tenant_slug: tenantResponse.slug, // Usar el slug del tenant registrado
-        };
-        localStorage.setItem("auth_user", JSON.stringify(userData));
+        // Guardar usuario con tenant_slug que viene del login
+        // El backend debe incluir tenant_slug en la respuesta del login
+        if (loginResponse.user) {
+          const userData = {
+            ...loginResponse.user,
+            // Si el backend incluye tenant_slug, usarlo. Si no, usar el slug del registro
+            tenant_slug: loginResponse.user.tenant_slug || tenantResponse.slug,
+          };
+          localStorage.setItem("auth_user", JSON.stringify(userData));
+        }
 
         // Paso 3: Crear la sesión de checkout (ahora con autenticación)
         // El backend obtiene el plan desde request.tenant.plan del usuario autenticado
