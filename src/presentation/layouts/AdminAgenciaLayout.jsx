@@ -203,21 +203,6 @@ export default function AdminAgenciaLayout() {
     </div>
   );
 }
-
-  const menuItems = [
-    {
-      id: "dashboard",
-      label: "Dashboard",
-      icon: FiHome,
-      path: "/admin-agencia/dashboard",
-    },
-    {
-      id: "gestion",
-      label: "Gestión",
-      icon: FiSettings,
-      submenu: [
-        { label: "Planes/Tipos", path: "/admin-agencia/planes", icon: FiSettings },
-        { label: "Agentes", path: "/admin-agencia/agentes", icon: FiUsers },
       ],
     },
     {
