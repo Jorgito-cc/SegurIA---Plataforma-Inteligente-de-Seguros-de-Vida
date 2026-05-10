@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { tipoSeguroRepository } from "../../../infrastructure/repositories/tipoSeguroRepository";
+import tipoSeguroRepository from "../../../infrastructure/repositories/tipoSeguroRepository";
 import { notify } from "../../components/notifications/notify";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 

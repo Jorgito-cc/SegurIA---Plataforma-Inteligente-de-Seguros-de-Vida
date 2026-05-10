@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { agentRepository } from "../../../infrastructure/repositories/agentRepository";
+import agentRepository from "../../../infrastructure/repositories/agentRepository";
 import { notify } from "../../components/notifications/notify";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import CreateAgentForm from "../../components/forms/CreateAgentForm";
