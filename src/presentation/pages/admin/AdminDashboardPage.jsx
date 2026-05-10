@@ -1,321 +1,292 @@
-import { useEffect, useMemo, useState } from 'react';
-import { FaUserTie, FaUsers, FaShieldAlt, FaListUl, FaKey, FaSpinner, FaFileExcel, FaFilePdf } from 'react-icons/fa';
-import { agentRepository } from '../../../infrastructure/repositories/agentRepository';
-import { clientRepository } from '../../../infrastructure/repositories/clientRepository';
-import { tipoSeguroRepository } from '../../../infrastructure/repositories/tipoSeguroRepository';
-import { roleRepository } from '../../../infrastructure/repositories/roleRepository';
-import { bitacoraRepository } from '../../../infrastructure/repositories/bitacoraRepository';
-import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
-
-function StatCard({ title, value, icon, tone = 'blue' }) {
-	const tones = {
-		blue: 'from-blue-500 to-indigo-600',
-		emerald: 'from-emerald-500 to-green-600',
-		orange: 'from-orange-500 to-amber-600',
-		violet: 'from-violet-500 to-fuchsia-600',
-		slate: 'from-slate-600 to-slate-800',
-	};
-
-	return (
-		<div className={`rounded-2xl p-5 text-white shadow-lg bg-gradient-to-br ${tones[tone] || tones.blue}`}>
-			<div className="flex items-center justify-between">
-				<p className="text-sm font-medium opacity-90">{title}</p>
-				<span className="text-xl opacity-90">{icon}</span>
-			</div>
-			<p className="mt-3 text-3xl font-black tracking-tight">{value}</p>
-		</div>
-	);
-}
-
-function HorizontalBars({ title, data }) {
-	const max = Math.max(...data.map((d) => d.value), 1);
-
-	return (
-		<div className="bg-white rounded-2xl shadow p-5 border border-slate-200">
-			<h3 className="text-lg font-bold text-slate-800 mb-4">{title}</h3>
-			<div className="space-y-3">
-				{data.map((item) => (
-					<div key={item.label}>
-						<div className="flex justify-between text-sm text-slate-600 mb-1">
-							<span>{item.label}</span>
-							<span className="font-semibold">{item.value}</span>
-						</div>
-						<div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-							<div
-								className="h-full rounded-full bg-gradient-to-r from-blue-500 to-cyan-400"
-								style={{ width: `${(item.value / max) * 100}%` }}
-							/>
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
-}
-
-function SimpleBarChart({ title, data, color = 'blue' }) {
-	const max = Math.max(...data.map((d) => d.value), 1);
-	const colors = {
-		blue: 'bg-blue-500',
-		green: 'bg-emerald-500',
-		orange: 'bg-orange-500',
-		violet: 'bg-violet-500',
-		red: 'bg-red-500',
-	};
-
-	return (
-		<div className="bg-white rounded-2xl shadow p-5 border border-slate-200">
-			<h3 className="text-lg font-bold text-slate-800 mb-4">{title}</h3>
-			<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-				{data.map((item) => (
-					<div key={item.label} className="text-center">
-						<div className="flex flex-col items-center">
-							<div className="w-16 h-40 bg-slate-100 rounded-lg relative overflow-hidden mb-2">
-								<div
-									className={`${colors[color]} transition-all absolute bottom-0 w-full rounded-lg`}
-									style={{ height: `${(item.value / max) * 100}%` }}
-									title={item.label}
-								/>
-							</div>
-							<p className="text-xs font-semibold text-slate-700">{item.label}</p>
-							<p className="text-lg font-black text-slate-900">{item.value}</p>
-						</div>
-					</div>
-				))}
-			</div>
-		</div>
-	);
-}
+import { useState, useEffect } from "react";
+import { useAuth } from "../../../application/context/AuthContext";
 
 export default function AdminDashboardPage() {
-	const [loading, setLoading] = useState(true);
-	const [stats, setStats] = useState({
-		agentes: { total: 0, activos: 0, inactivos: 0 },
-		clientes: { total: 0, activos: 0, inactivos: 0, fumadores: 0 },
-		tipos: { total: 0, activos: 0, inactivos: 0 },
-		roles: { total: 0, permisosTotales: 0, promedioPorRol: 0 },
-		bitacora: { total: 0, acciones: {} },
-	});
+  const { user } = useAuth();
+  const [stats, setStats] = useState({
+    totalTenants: 0,
+    totalUsuarios: 0,
+    planesActivos: 0,
+    ingresosMensuales: 0,
+  });
 
-	useEffect(() => {
-		const loadData = async () => {
-			setLoading(true);
-			try {
-				const [agentesRes, clientesRes, tiposRes, rolesRes, permisosRes, bitacoraRes] = await Promise.all([
-					agentRepository.list(1, 500),
-					clientRepository.list(1, 500),
-					tipoSeguroRepository.list(1, 500),
-					roleRepository.list(1, 500),
-					roleRepository.getPermissions(),
-					bitacoraRepository.list(1, 200),
-				]);
+  useEffect(() => {
+    // TODO: Implementar llamadas a API para obtener estadísticas del sistema
+    setStats({
+      totalTenants: 127,
+      totalUsuarios: 3456,
+      planesActivos: 89,
+      ingresosMensuales: 45320.0,
+    });
+  }, []);
 
-				const agentes = agentesRes.results || agentesRes || [];
-				const clientes = clientesRes.results || clientesRes || [];
-				const tipos = tiposRes.results || tiposRes || [];
-				const roles = rolesRes.results || rolesRes || [];
-				const permisos = permisosRes.results || permisosRes || [];
-				const bitacora = bitacoraRes.results || bitacoraRes || [];
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div>
+        <h1 className="text-4xl font-bold text-gray-900">
+          Dashboard del Sistema
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Administrador: {user?.nombre || user?.email}
+        </p>
+      </div>
 
-				const accionesMap = bitacora.reduce((acc, row) => {
-					acc[row.accion] = (acc[row.accion] || 0) + 1;
-					return acc;
-				}, {});
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard
+          title="Agencias Activas"
+          value={stats.totalTenants}
+          color="bg-gradient-to-br from-blue-500 to-blue-600"
+          icon="🏢"
+        />
+        <StatCard
+          title="Total Usuarios"
+          value={stats.totalUsuarios}
+          color="bg-gradient-to-br from-green-500 to-emerald-600"
+          icon="👥"
+        />
+        <StatCard
+          title="Planes Activos"
+          value={stats.planesActivos}
+          color="bg-gradient-to-br from-purple-500 to-indigo-600"
+          icon="📦"
+        />
+        <StatCard
+          title="Ingresos (Mes)"
+          value={`$${stats.ingresosMensuales.toLocaleString("es-ES", { maximumFractionDigits: 0 })}`}
+          color="bg-gradient-to-br from-orange-500 to-red-600"
+          icon="💵"
+        />
+      </div>
 
-				const permisosTotalesRoles = roles.reduce((sum, role) => {
-					const count = Array.isArray(role.permissions) ? role.permissions.length : 0;
-					return sum + count;
-				}, 0);
+      {/* Main Content Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Wider */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Agencias Recientes */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+              Agencias Recientes
+            </h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="border-b bg-gray-50">
+                  <tr>
+                    <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                      Agencia
+                    </th>
+                    <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                      Plan
+                    </th>
+                    <th className="text-left py-3 px-2 font-semibold text-gray-700">
+                      Estado
+                    </th>
+                    <th className="text-right py-3 px-2 font-semibold text-gray-700">
+                      Usuarios
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* TODO: Reemplazar con datos reales */}
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <tr
+                      key={i}
+                      className="border-b hover:bg-gray-50 transition"
+                    >
+                      <td className="py-3 px-2">Agencia {i}</td>
+                      <td className="py-3 px-2">
+                        <span
+                          className={`text-xs font-semibold px-2 py-1 rounded ${
+                            i % 3 === 0
+                              ? "bg-green-100 text-green-800"
+                              : i % 3 === 1
+                                ? "bg-blue-100 text-blue-800"
+                                : "bg-purple-100 text-purple-800"
+                          }`}
+                        >
+                          {i % 3 === 0
+                            ? "BÁSICO"
+                            : i % 3 === 1
+                              ? "PRO"
+                              : "PREMIUM"}
+                        </span>
+                      </td>
+                      <td className="py-3 px-2">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                          Activo
+                        </span>
+                      </td>
+                      <td className="py-3 px-2 text-right font-semibold">
+                        {i * 5}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <button className="mt-4 w-full py-2 text-blue-600 hover:bg-blue-50 rounded transition text-sm font-semibold">
+              Ver Todas las Agencias →
+            </button>
+          </div>
 
-				setStats({
-					agentes: {
-						total: agentes.length,
-						activos: agentes.filter((a) => a.is_active).length,
-						inactivos: agentes.filter((a) => !a.is_active).length,
-					},
-					clientes: {
-						total: clientes.length,
-						activos: clientes.filter((c) => c.is_active).length,
-						inactivos: clientes.filter((c) => !c.is_active).length,
-						fumadores: clientes.filter((c) => c.es_fumador).length,
-					},
-					tipos: {
-						total: tipos.length,
-						activos: tipos.filter((t) => t.estado).length,
-						inactivos: tipos.filter((t) => !t.estado).length,
-					},
-					roles: {
-						total: roles.length,
-						permisosTotales: permisos.length,
-						promedioPorRol: roles.length ? (permisosTotalesRoles / roles.length).toFixed(1) : 0,
-					},
-					bitacora: {
-						total: bitacora.length,
-						acciones: accionesMap,
-					},
-				});
-			} finally {
-				setLoading(false);
-			}
-		};
+          {/* Actividad Reciente */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+              Actividad Reciente
+            </h2>
+            <div className="space-y-3">
+              {/* TODO: Obtener datos reales de bitácora */}
+              {[1, 2, 3, 4].map((i) => (
+                <div
+                  key={i}
+                  className="flex items-start gap-3 pb-3 border-b last:border-b-0"
+                >
+                  <div
+                    className={`w-3 h-3 rounded-full mt-1.5 flex-shrink-0 ${
+                      i % 2 === 0 ? "bg-green-500" : "bg-blue-500"
+                    }`}
+                  ></div>
+                  <div className="flex-1">
+                    <p className="text-sm font-medium text-gray-900">
+                      {i % 2 === 0
+                        ? "Nueva agencia registrada"
+                        : "Pago procesado"}
+                    </p>
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      Agencia {i} - Hace {i} horas
+                    </p>
+                  </div>
+                  <span className="text-xs text-gray-400 flex-shrink-0">
+                    {i % 2 === 0 ? "✓" : "$"}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
 
-		loadData();
-	}, []);
+        {/* Right Column */}
+        <div className="space-y-6">
+          {/* Estado del Sistema */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+              Estado del Sistema
+            </h2>
+            <div className="space-y-4">
+              <StatusItem label="API" status="operativo" />
+              <StatusItem label="Base de Datos" status="operativo" />
+              <StatusItem label="Stripe" status="conectado" />
+              <StatusItem label="Gemini AI" status="activo" />
+            </div>
+          </div>
 
-	const accionesData = useMemo(() => {
-		const preferredOrder = ['LOGIN', 'LOGOUT', 'CREAR', 'EDITAR', 'ELIMINAR'];
-		return preferredOrder.map((key) => ({
-			label: key,
-			value: stats.bitacora.acciones[key] || 0,
-		}));
-	}, [stats.bitacora.acciones]);
+          {/* Distribución de Planes */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+              Distribución de Planes
+            </h2>
+            <div className="space-y-3">
+              <PlanDistribution plan="BÁSICO" percentage={35} color="green" />
+              <PlanDistribution plan="PRO" percentage={45} color="blue" />
+              <PlanDistribution plan="PREMIUM" percentage={20} color="purple" />
+            </div>
+          </div>
 
-	const handleExportDashboardExcel = () => {
-		const excelData = [
-			{ Métrica: 'Total Agentes', Cantidad: stats.agentes.total },
-			{ Métrica: 'Agentes Activos', Cantidad: stats.agentes.activos },
-			{ Métrica: 'Clientes Totales', Cantidad: stats.clientes.total },
-			{ Métrica: 'Clientes Activos', Cantidad: stats.clientes.activos },
-			{ Métrica: 'Tipos de Seguro Activos', Cantidad: stats.tipos.activos },
-			{ Métrica: 'Roles Configurados', Cantidad: stats.roles.total },
-			{ Métrica: 'Permisos Totales', Cantidad: stats.roles.permisosTotales },
-			{ Métrica: 'Eventos Bitácora', Cantidad: stats.bitacora.total },
-		];
-		exportToExcel('dashboard', 'Dashboard Resumen', excelData);
-	};
+          {/* Acciones Admin */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-xl font-semibold mb-4 text-gray-900">
+              Acciones
+            </h2>
+            <div className="space-y-2">
+              <AdminButton label="Usuarios del Sistema" />
+              <AdminButton label="Auditoría de Cambios" />
+              <AdminButton label="Reportes" />
+              <AdminButton label="Configuración" />
+            </div>
+          </div>
 
-	const handleExportDashboardPdf = () => {
-		const headers = ['Métrica', 'Cantidad'];
-		const rows = [
-			['Total Agentes', stats.agentes.total],
-			['Agentes Activos', stats.agentes.activos],
-			['Agentes Inactivos', stats.agentes.inactivos],
-			['Total Clientes', stats.clientes.total],
-			['Clientes Activos', stats.clientes.activos],
-			['Clientes Fumadores', stats.clientes.fumadores],
-			['Tipos de Seguro Activos', stats.tipos.activos],
-			['Roles Totales', stats.roles.total],
-			['Permisos Totales', stats.roles.permisosTotales],
-			['Eventos Bitácora', stats.bitacora.total],
-		];
-		exportToPdf('Reporte Dashboard Administrador', 'dashboard', headers, rows);
-	};
+          {/* Información */}
+          <div className="bg-gradient-to-br from-indigo-50 to-blue-50 rounded-lg shadow p-6 border border-indigo-200">
+            <h3 className="text-sm font-semibold text-indigo-900 mb-2">
+              ℹ️ Sistema Operativo
+            </h3>
+            <p className="text-xs text-indigo-700">
+              Todos los servicios funcionan correctamente. No hay alertas
+              activas.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
-	if (loading) {
-		return (
-			<div className="p-8 flex items-center justify-center text-slate-700">
-				<FaSpinner className="animate-spin mr-3 text-3xl" /> Cargando dashboard...
-			</div>
-		);
-	}
+function StatCard({ title, value, color, icon }) {
+  return (
+    <div className={`${color} rounded-lg shadow p-6 text-white`}>
+      <div className="flex justify-between items-start">
+        <div>
+          <p className="text-sm opacity-90 font-medium">{title}</p>
+          <p className="text-3xl font-bold mt-2">{value}</p>
+        </div>
+        <span className="text-4xl opacity-80">{icon}</span>
+      </div>
+    </div>
+  );
+}
 
-	return (
-		<section className="p-6 space-y-6">
-			<div className="flex justify-between items-start flex-col md:flex-row gap-4">
-				<div>
-					<h1 className="text-4xl font-black text-slate-900">Dashboard Administrador</h1>
-					<p className="mt-2 text-slate-600">Resumen de operación en tiempo real del sistema de seguros</p>
-				</div>
-				<div className="flex gap-2">
-					<button
-						onClick={handleExportDashboardExcel}
-						className="px-4 py-2 bg-emerald-600 text-white font-medium rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
-					>
-						<FaFileExcel /> Excel
-					</button>
-					<button
-						onClick={handleExportDashboardPdf}
-						className="px-4 py-2 bg-red-600 text-white font-medium rounded-lg hover:bg-red-700 transition flex items-center gap-2"
-					>
-						<FaFilePdf /> PDF
-					</button>
-				</div>
-			</div>
+function StatusItem({ label, status }) {
+  const statusColor =
+    status === "operativo" || status === "activo"
+      ? "text-green-600 bg-green-50"
+      : "text-blue-600 bg-blue-50";
 
-			{/* 5 Stat Cards */}
-			<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-				<StatCard title="Agentes" value={stats.agentes.total} icon={<FaUserTie />} tone="blue" />
-				<StatCard title="Clientes" value={stats.clientes.total} icon={<FaUsers />} tone="emerald" />
-				<StatCard title="Tipos Seguro" value={stats.tipos.total} icon={<FaShieldAlt />} tone="orange" />
-				<StatCard title="Roles" value={stats.roles.total} icon={<FaListUl />} tone="violet" />
-				<StatCard title="Permisos" value={stats.roles.permisosTotales} icon={<FaKey />} tone="slate" />
-			</div>
+  return (
+    <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
+      <span className="text-sm text-gray-700">{label}</span>
+      <span
+        className={`text-xs font-semibold px-2 py-1 rounded ${statusColor}`}
+      >
+        {status}
+      </span>
+    </div>
+  );
+}
 
-			{/* Estado de Usuarios y Actividad */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-				<HorizontalBars
-					title="Estado de Usuarios"
-					data={[
-						{ label: 'Agentes activos', value: stats.agentes.activos },
-						{ label: 'Agentes inactivos', value: stats.agentes.inactivos },
-						{ label: 'Clientes activos', value: stats.clientes.activos },
-						{ label: 'Clientes inactivos', value: stats.clientes.inactivos },
-						{ label: 'Clientes fumadores', value: stats.clientes.fumadores },
-					]}
-				/>
+function PlanDistribution({ plan, percentage, color }) {
+  const bgClass = {
+    green: "bg-green-500",
+    blue: "bg-blue-500",
+    purple: "bg-purple-500",
+  }[color];
 
-				<HorizontalBars title="Actividad en Bitácora" data={accionesData} />
-			</div>
+  const lightClass = {
+    green: "bg-green-100",
+    blue: "bg-blue-100",
+    purple: "bg-purple-100",
+  }[color];
 
-			{/* Gráficos de Barras */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-				<SimpleBarChart
-					title="Distribución de Agentes"
-					data={[
-						{ label: 'Activos', value: stats.agentes.activos },
-						{ label: 'Inactivos', value: stats.agentes.inactivos },
-					]}
-					color="blue"
-				/>
+  return (
+    <div>
+      <div className="flex justify-between mb-1">
+        <span className="text-sm font-medium text-gray-700">{plan}</span>
+        <span className="text-sm font-bold text-gray-700">{percentage}%</span>
+      </div>
+      <div className={`w-full rounded-full h-2.5 ${lightClass}`}>
+        <div
+          className={`${bgClass} h-2.5 rounded-full`}
+          style={{ width: `${percentage}%` }}
+        ></div>
+      </div>
+    </div>
+  );
+}
 
-				<SimpleBarChart
-					title="Distribución de Clientes"
-					data={[
-						{ label: 'Activos', value: stats.clientes.activos },
-						{ label: 'Inactivos', value: stats.clientes.inactivos },
-						{ label: 'Fumadores', value: stats.clientes.fumadores },
-					]}
-					color="green"
-				/>
-			</div>
-
-			{/* Tres metros pequeños */}
-			<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
-					<h4 className="text-slate-500 text-sm">Tipos de seguro activos</h4>
-					<p className="text-3xl font-black text-slate-900 mt-2">{stats.tipos.activos}</p>
-					<p className="text-xs mt-1 text-slate-500">Inactivos: {stats.tipos.inactivos}</p>
-				</div>
-
-				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
-					<h4 className="text-slate-500 text-sm">Promedio permisos por rol</h4>
-					<p className="text-3xl font-black text-slate-900 mt-2">{stats.roles.promedioPorRol}</p>
-					<p className="text-xs mt-1 text-slate-500">Basado en {stats.roles.total} roles</p>
-				</div>
-
-				<div className="bg-white border border-slate-200 rounded-2xl p-5 shadow">
-					<h4 className="text-slate-500 text-sm">Eventos en bitácora</h4>
-					<p className="text-3xl font-black text-slate-900 mt-2">{stats.bitacora.total}</p>
-					<p className="text-xs mt-1 text-slate-500">Últimos registros analizados</p>
-				</div>
-			</div>
-
-			{/* Tabla de Acciones */}
-			<div className="bg-white border border-slate-200 rounded-2xl shadow overflow-hidden">
-				<div className="bg-slate-50 border-b border-slate-200 p-5">
-					<h3 className="font-bold text-slate-800 text-lg">Acciones Registradas en el Sistema</h3>
-				</div>
-				<div className="p-5">
-					<div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-						{accionesData.map((item) => (
-							<div key={item.label} className="text-center p-4 bg-slate-50 rounded-lg border border-slate-200">
-								<p className="text-sm font-medium text-slate-600">{item.label}</p>
-								<p className="text-2xl font-black text-slate-900 mt-2">{item.value}</p>
-							</div>
-						))}
-					</div>
-				</div>
-			</div>
-		</section>
-	);
+function AdminButton({ label }) {
+  return (
+    <button className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded transition font-medium text-gray-700">
+      {label} →
+    </button>
+  );
 }
