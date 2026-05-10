@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { notify } from "../../components/notifications/notify";
 import { tenantRepository } from "../../../infrastructure/repositories/tenantRepository";
+import { authRepository } from "../../../infrastructure/repositories/authRepository";
 
 export default function StripeCheckoutPage() {
   const navigate = useNavigate();
@@ -26,22 +27,60 @@ export default function StripeCheckoutPage() {
           return;
         }
 
-        // Consumir endpoint real de Stripe
-        const response = await tenantRepository.crearCheckoutSession({
+        // Paso 1: Registrar el tenant (sin autenticación requerida)
+        notify.info("Registrando agencia...");
+        const tenantResponse = await tenantRepository.registrarTenant({
+          nombre_agencia: registrationData.nombre_agencia,
+          email_admin: registrationData.email_admin,
+          password: registrationData.password,
+          plan: selectedPlan,
+        });
+
+        if (!tenantResponse.tenant_id) {
+          throw new Error(
+            tenantResponse.error || "Error al registrar el tenant",
+          );
+        }
+
+        // Paso 2: Login automático para obtener el token JWT
+        notify.info("Autenticando...");
+        const loginResponse = await authRepository.login({
+          email: registrationData.email_admin,
+          password: registrationData.password,
+        });
+
+        if (!loginResponse.access) {
+          throw new Error("Error al obtener credenciales de acceso");
+        }
+
+        // Guardar el token y datos del usuario en localStorage
+        localStorage.setItem("access_token", loginResponse.access);
+        if (loginResponse.refresh) {
+          localStorage.setItem("refresh_token", loginResponse.refresh);
+        }
+        if (loginResponse.user) {
+          localStorage.setItem("auth_user", JSON.stringify(loginResponse.user));
+        }
+
+        // Paso 3: Crear la sesión de checkout (ahora con autenticación)
+        notify.info("Preparando sesión de pago...");
+        const checkoutResponse = await tenantRepository.crearCheckoutSession({
           nombre_agencia: registrationData.nombre_agencia,
           email_admin: registrationData.email_admin,
           plan: selectedPlan,
         });
 
-        if (response.checkout_url) {
-          // Guardar session ID para verificación posterior
-          sessionStorage.setItem("stripe_checkout_url", response.checkout_url);
-          setSessionData({ checkout_url: response.checkout_url });
+        if (checkoutResponse.checkout_url) {
+          sessionStorage.setItem(
+            "stripe_checkout_url",
+            checkoutResponse.checkout_url,
+          );
+          setSessionData({ checkout_url: checkoutResponse.checkout_url });
           notify.success("Sesión de pago creada. Redirigiendo a Stripe...");
 
           // Redirigir directamente a Stripe después de 2 segundos
           setTimeout(() => {
-            window.location.href = response.checkout_url;
+            window.location.href = checkoutResponse.checkout_url;
           }, 2000);
         } else {
           throw new Error("No se recibió URL de checkout");
@@ -49,8 +88,9 @@ export default function StripeCheckoutPage() {
       } catch (err) {
         const errorMessage =
           err.response?.data?.error ||
+          err.response?.data?.mensaje ||
           err.message ||
-          "Error al crear sesión de pago";
+          "Error al procesar tu solicitud";
         notify.error(errorMessage);
         setError(errorMessage);
       } finally {
