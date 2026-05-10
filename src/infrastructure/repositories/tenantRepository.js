@@ -13,11 +13,12 @@ export const tenantRepository = {
   /**
    * POST /api/tenants/crear-checkout-session/
    * Crea una sesión de pago en Stripe
+   * El backend obtiene el plan desde request.tenant.plan (usuario autenticado)
    */
-  async crearCheckoutSession(planData) {
+  async crearCheckoutSession() {
     const { data } = await apiClient.post(
       "tenants/crear-checkout-session/",
-      planData,
+      {},
     );
     return data;
   },

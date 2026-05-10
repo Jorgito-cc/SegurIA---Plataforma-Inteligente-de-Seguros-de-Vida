@@ -67,12 +67,9 @@ export default function StripeCheckoutPage() {
         localStorage.setItem("auth_user", JSON.stringify(userData));
 
         // Paso 3: Crear la sesión de checkout (ahora con autenticación)
+        // El backend obtiene el plan desde request.tenant.plan del usuario autenticado
         notify.info("Preparando sesión de pago...");
-        const checkoutResponse = await tenantRepository.crearCheckoutSession({
-          nombre_agencia: registrationData.nombre_agencia,
-          email_admin: registrationData.email_admin,
-          plan: selectedPlan,
-        });
+        const checkoutResponse = await tenantRepository.crearCheckoutSession();
 
         if (checkoutResponse.checkout_url) {
           sessionStorage.setItem(
