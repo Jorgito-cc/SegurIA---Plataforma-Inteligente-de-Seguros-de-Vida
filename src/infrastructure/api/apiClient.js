@@ -17,20 +17,6 @@ apiClient.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
-
-  // Agregar X-Tenant-Slug si existe (para multi-tenant)
-  const authUser = localStorage.getItem("auth_user");
-  if (authUser) {
-    try {
-      const user = JSON.parse(authUser);
-      if (user.tenant_slug) {
-        config.headers["X-Tenant-Slug"] = user.tenant_slug;
-      }
-    } catch (e) {
-      // Ignorar errores al parsear
-    }
-  }
-
   return config;
 });
 
