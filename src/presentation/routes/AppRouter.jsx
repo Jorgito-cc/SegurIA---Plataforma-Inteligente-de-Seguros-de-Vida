@@ -1,6 +1,7 @@
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
 import DashboardLayout from "../layouts/DashboardLayout";
+import AdminAgenciaLayout from "../layouts/AdminAgenciaLayout";
 import RequireAuth from "./guards/RequireAuth";
 import RequireRole from "./guards/RequireRole";
 import RedirectIfAuth from "./guards/RedirectIfAuth";
@@ -30,7 +31,11 @@ import AdminPermisosPage from "../pages/admin/AdminPermisosPage";
 import AdminProfilePage from "../pages/admin/AdminProfilePage";
 
 // Admin Agencia Pages
-import AdminAgenciaDashboardPage from "../pages/admin-agencia/AdminAgenciaDashboardPage";
+import AdminAgenciaDashboard from "../pages/admin-agencia/AdminAgenciaDashboard";
+import AdminAgenciaPlanesPage from "../pages/admin-agencia/AdminAgenciaPlanesPage";
+import AdminAgenciaAgentesPage from "../pages/admin-agencia/AdminAgenciaAgentesPage";
+import AdminAgenciaBitacoraPage from "../pages/admin-agencia/AdminAgenciaBitacoraPage";
+import AdminAgenciaReportesPage from "../pages/admin-agencia/AdminAgenciaReportesPage";
 
 import AgenteDashboardPage from "../pages/agente/AgenteDashboardPage";
 import AgenteClientesPage from "../pages/agente/AgenteClientesPage";
@@ -106,11 +111,15 @@ export default function AppRouter() {
             path="/admin-agencia"
             element={
               <RequireRole allow={["AdminAgencia"]}>
-                <DashboardLayout />
+                <AdminAgenciaLayout />
               </RequireRole>
             }
           >
-            <Route path="dashboard" element={<AdminAgenciaDashboardPage />} />
+            <Route path="dashboard" element={<AdminAgenciaDashboard />} />
+            <Route path="planes" element={<AdminAgenciaPlanesPage />} />
+            <Route path="agentes" element={<AdminAgenciaAgentesPage />} />
+            <Route path="bitacora" element={<AdminAgenciaBitacoraPage />} />
+            <Route path="reportes" element={<AdminAgenciaReportesPage />} />
           </Route>
 
           {/* Agente */}
