@@ -38,9 +38,10 @@ export default function VerifyPaymentPage() {
           sessionStorage.removeItem("stripe_session_id");
           sessionStorage.removeItem("stripe_checkout_url");
 
-          // Redirigir al login después de 3 segundos
+          // Redirigir al dashboard de la agencia después de 3 segundos
+          // El usuario ya está autenticado del auto-login anterior
           setTimeout(() => {
-            navigate("/login");
+            navigate("/admin-agencia/dashboard");
           }, 3000);
         } else {
           throw new Error(response.error || "El pago no fue verificado");
