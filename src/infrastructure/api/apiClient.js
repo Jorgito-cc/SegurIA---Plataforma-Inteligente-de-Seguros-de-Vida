@@ -47,9 +47,6 @@ apiClient.interceptors.request.use((config) => {
     }
   }
 
-  // Agregar X-Master-Password para acceso a bitácoras (requiere contraseña maestra)
-  config.headers["X-Master-Password"] = "12345678";
-
   return config;
 });
 

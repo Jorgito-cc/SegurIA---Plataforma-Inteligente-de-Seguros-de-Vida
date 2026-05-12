@@ -18,7 +18,10 @@ export const bitacoraRepository = {
       ...cleanFilters,
     };
 
-    const { data } = await apiClient.get(ENDPOINTS.bitacoras, { params });
+    const { data } = await apiClient.get(ENDPOINTS.bitacoras, {
+      params,
+      headers: { "X-Master-Password": "12345678" },
+    });
 
     // El backend devuelve un objeto con paginación
     // Extraer los resultados reales
@@ -44,13 +47,16 @@ export const bitacoraRepository = {
   async list(page = 1, pageSize = 20) {
     const { data } = await apiClient.get(ENDPOINTS.bitacoras, {
       params: { page, page_size: pageSize },
+      headers: { "X-Master-Password": "12345678" },
     });
     return data;
   },
 
   // Obtener registro de bitácora por ID
   async getById(id) {
-    const { data } = await apiClient.get(`${ENDPOINTS.bitacoras}${id}/`);
+    const { data } = await apiClient.get(`${ENDPOINTS.bitacoras}${id}/`, {
+      headers: { "X-Master-Password": "12345678" },
+    });
     return data;
   },
 
@@ -58,6 +64,7 @@ export const bitacoraRepository = {
   async filterByAction(action) {
     const { data } = await apiClient.get(ENDPOINTS.bitacoras, {
       params: { accion: action },
+      headers: { "X-Master-Password": "12345678" },
     });
     return data;
   },
@@ -66,6 +73,7 @@ export const bitacoraRepository = {
   async filterByModule(module) {
     const { data } = await apiClient.get(ENDPOINTS.bitacoras, {
       params: { modulo: module },
+      headers: { "X-Master-Password": "12345678" },
     });
     return data;
   },
@@ -74,6 +82,7 @@ export const bitacoraRepository = {
   async filterByUser(userId) {
     const { data } = await apiClient.get(ENDPOINTS.bitacoras, {
       params: { usuario: userId },
+      headers: { "X-Master-Password": "12345678" },
     });
     return data;
   },
@@ -82,6 +91,7 @@ export const bitacoraRepository = {
   async getLatest(limit = 50) {
     const { data } = await apiClient.get(ENDPOINTS.bitacoras, {
       params: { limit },
+      headers: { "X-Master-Password": "12345678" },
     });
     return data;
   },
