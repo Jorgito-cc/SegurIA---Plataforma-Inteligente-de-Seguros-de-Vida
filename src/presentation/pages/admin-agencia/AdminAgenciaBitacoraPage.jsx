@@ -33,11 +33,26 @@ export default function AdminAgenciaBitacoraPage() {
   const cargarBitacora = async () => {
     try {
       setLoading(true);
+      console.log("[Bitácora] Intentando cargar datos con filtros:", filters);
       const data = await bitacoraRepository.obtenerTodos(filters);
+      console.log("[Bitácora] Datos cargados exitosamente:", data);
       setRecords(data);
+      notify.success("Bitácora cargada correctamente");
     } catch (error) {
-      notify.error("Error al cargar bitácora");
-      console.error(error);
+      console.error("[Bitácora] Error completo:", error);
+
+      // Mejorar mensaje de error
+      let errorMsg = "Error al cargar bitácora";
+
+      if (error.status === 403) {
+        errorMsg = "Acceso denegado: No tienes permisos para ver la bitácora";
+      } else if (error.status === 401) {
+        errorMsg = "Sesión expirada. Por favor, inicia sesión nuevamente";
+      } else if (error.message) {
+        errorMsg = error.message;
+      }
+
+      notify.error(errorMsg);
     } finally {
       setLoading(false);
     }

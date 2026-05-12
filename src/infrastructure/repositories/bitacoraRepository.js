@@ -19,6 +19,24 @@ export const bitacoraRepository = {
     };
 
     const { data } = await apiClient.get(ENDPOINTS.bitacoras, { params });
+
+    // El backend devuelve un objeto con paginación
+    // Extraer los resultados reales
+    if (data.results) {
+      console.log(
+        "[bitacoraRepository] Registros obtenidos:",
+        data.results.length,
+      );
+      return data.results;
+    }
+
+    // Si no hay paginación, devolver directamente
+    if (Array.isArray(data)) {
+      return data;
+    }
+
+    // Fallback
+    console.warn("[bitacoraRepository] Formato de respuesta inesperado:", data);
     return data;
   },
 
