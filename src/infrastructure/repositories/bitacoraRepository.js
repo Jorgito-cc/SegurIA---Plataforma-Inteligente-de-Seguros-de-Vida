@@ -18,11 +18,7 @@ export const bitacoraRepository = {
       ...cleanFilters,
     };
 
-    // Usar el endpoint de bitácora de agencia (no la general que requiere superuser)
-    const endpoint = "bitacoras/mi-agencia/";
-
-    console.log("[bitacoraRepository] Accediendo a:", endpoint);
-    const { data } = await apiClient.get(endpoint, { params });
+    const { data } = await apiClient.get(ENDPOINTS.bitacoras, { params });
 
     // El backend devuelve un objeto con paginación
     // Extraer los resultados reales
