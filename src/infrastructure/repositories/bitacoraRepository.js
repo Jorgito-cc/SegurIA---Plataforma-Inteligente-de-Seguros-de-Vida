@@ -2,7 +2,7 @@ import apiClient from "../api/apiClient";
 import { ENDPOINTS } from "../api/endpoints";
 
 export const bitacoraRepository = {
-  // Obtener todos los registros con filtros opcionales
+  // Obtener bitácora de la agencia actual (para Admin Dueño)
   async obtenerTodos(filters = {}, page = 1, pageSize = 20) {
     // Limpiar filtros vacíos
     const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
@@ -18,7 +18,11 @@ export const bitacoraRepository = {
       ...cleanFilters,
     };
 
-    const { data } = await apiClient.get(ENDPOINTS.bitacoras, { params });
+    // Usar el endpoint de bitácora de agencia (no la general que requiere superuser)
+    const endpoint = "bitacoras/mi-agencia/";
+
+    console.log("[bitacoraRepository] Accediendo a:", endpoint);
+    const { data } = await apiClient.get(endpoint, { params });
 
     // El backend devuelve un objeto con paginación
     // Extraer los resultados reales
