@@ -67,7 +67,7 @@ export default function AdminAgenciaDashboard() {
               <table className="w-full text-sm">
                 <thead className="border-b">
                   <tr>
-                    <th className="text-left py-2">Nombre</th>
+                    <th className="text-left py-2">Nombre</th>Últimas Pólizas
                     <th className="text-left py-2">Email</th>
                     <th className="text-left py-2">Fecha</th>
                   </tr>
