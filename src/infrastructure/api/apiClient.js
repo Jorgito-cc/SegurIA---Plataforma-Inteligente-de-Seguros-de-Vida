@@ -2,7 +2,7 @@ import axios from "axios";
 
 const FALLBACK_API_BASE =
   "https://backendseguros-production.up.railway.app/api";
-const rawApiBase = import.meta.env.VITE_API_URL || FALLBACK_API_BASE;
+const rawApiBase = import.meta.env.VITE_API_BASE || FALLBACK_API_BASE;
 const API_BASE = rawApiBase.replace(/\/+$/, "");
 
 const apiClient = axios.create({
@@ -19,15 +19,22 @@ apiClient.interceptors.request.use((config) => {
   }
 
   // Agregar X-Tenant-Slug si existe (para que el middleware pueda encontrar el tenant)
-  const authUser = localStorage.getItem("auth_user");
-  if (authUser) {
-    try {
-      const user = JSON.parse(authUser);
-      if (user.tenant_slug) {
-        config.headers["X-Tenant-Slug"] = user.tenant_slug;
+  const tenantSlug = localStorage.getItem("tenant_slug");
+  if (tenantSlug) {
+    config.headers["X-Tenant-Slug"] = tenantSlug;
+  } else {
+    // Si no existe tenant_slug directo, intentar obtenerlo del auth_user
+    const authUser = localStorage.getItem("auth_user");
+    if (authUser) {
+      try {
+        const user = JSON.parse(authUser);
+        if (user.tenant_slug) {
+          config.headers["X-Tenant-Slug"] = user.tenant_slug;
+          localStorage.setItem("tenant_slug", user.tenant_slug);
+        }
+      } catch (e) {
+        console.error("Error parsing auth_user:", e);
       }
-    } catch (e) {
-      // Ignorar errores al parsear
     }
   }
 
@@ -44,6 +51,7 @@ apiClient.interceptors.response.use(
       localStorage.removeItem("access_token");
       localStorage.removeItem("refresh_token");
       localStorage.removeItem("auth_user");
+      localStorage.removeItem("tenant_slug");
     }
 
     const data = error?.response?.data;
@@ -73,17 +81,19 @@ apiClient.interceptors.response.use(
       status === 401 &&
       /agentes|clientes|administrador|bitacoras/i.test(requestUrl)
     ) {
-      message = "Sesion expirada o invalida. Inicia sesion nuevamente.";
+      message = "Sesión expirada o inválida. Inicia sesión nuevamente.";
     } else if (status === 403) {
-      message = "No tienes permisos para realizar esta accion.";
+      message = "No tienes permisos para realizar esta acción.";
     } else if (status === 405) {
-      message = "Metodo HTTP no permitido para este endpoint.";
+      message = "Método HTTP no permitido para este endpoint.";
     }
 
     const apiError = new Error(message);
     apiError.status = status;
     apiError.data = data;
     apiError.url = requestUrl;
+
+    console.error(`API Error [${status}]: ${requestUrl}`, data);
 
     return Promise.reject(apiError);
   },

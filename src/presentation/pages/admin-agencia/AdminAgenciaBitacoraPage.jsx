@@ -15,7 +15,7 @@ export default function AdminAgenciaBitacoraPage() {
     fecha_fin: "",
   });
 
-  const ADMIN_PASSWORD = "SegurIA2026Admin"; // En producción, esto debería estar en el backend
+  const ADMIN_PASSWORD = "12345678"; // En producción, esto debería estar en el backend
 
   const handleUnlock = (e) => {
     e.preventDefault();

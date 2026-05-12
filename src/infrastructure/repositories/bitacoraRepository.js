@@ -1,7 +1,27 @@
-import apiClient from '../api/apiClient';
-import { ENDPOINTS } from '../api/endpoints';
+import apiClient from "../api/apiClient";
+import { ENDPOINTS } from "../api/endpoints";
 
 export const bitacoraRepository = {
+  // Obtener todos los registros con filtros opcionales
+  async obtenerTodos(filters = {}, page = 1, pageSize = 20) {
+    // Limpiar filtros vacíos
+    const cleanFilters = Object.entries(filters).reduce((acc, [key, value]) => {
+      if (value && value !== "") {
+        acc[key] = value;
+      }
+      return acc;
+    }, {});
+
+    const params = {
+      page,
+      page_size: pageSize,
+      ...cleanFilters,
+    };
+
+    const { data } = await apiClient.get(ENDPOINTS.bitacoras, { params });
+    return data;
+  },
+
   // Listar registros de bitácora con paginación
   async list(page = 1, pageSize = 20) {
     const { data } = await apiClient.get(ENDPOINTS.bitacoras, {
