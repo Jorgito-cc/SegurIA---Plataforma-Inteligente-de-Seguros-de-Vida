@@ -225,13 +225,13 @@ export default function AdminAgenciaBitacoraPage() {
                   Acción
                 </th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-900">
-                  Modelo
+                  Módulo
                 </th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-900">
-                  ID Objeto
+                  IP
                 </th>
                 <th className="px-6 py-3 text-left font-semibold text-gray-900">
-                  Detalles
+                  Detalle
                 </th>
               </tr>
             </thead>
@@ -248,31 +248,35 @@ export default function AdminAgenciaBitacoraPage() {
               ) : (
                 records.map((record) => (
                   <tr key={record.id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4">
-                      {new Date(record.creado_en).toLocaleString("es-ES")}
+                    <td className="px-6 py-4 text-xs text-gray-600">
+                      {new Date(record.fecha).toLocaleString("es-ES")}
                     </td>
                     <td className="px-6 py-4 font-medium">
-                      {record.usuario || "Sistema"}
+                      {record.usuario_email || "Sistema"}
                     </td>
                     <td className="px-6 py-4">
                       <span
                         className={`px-2 py-1 rounded text-xs font-semibold ${
-                          record.accion === "CREATE"
+                          record.accion === "CREAR"
                             ? "bg-green-100 text-green-800"
-                            : record.accion === "UPDATE"
+                            : record.accion === "EDITAR"
                               ? "bg-blue-100 text-blue-800"
-                              : record.accion === "DELETE"
+                              : record.accion === "ELIMINAR"
                                 ? "bg-red-100 text-red-800"
-                                : "bg-gray-100 text-gray-800"
+                                : record.accion === "LOGIN"
+                                  ? "bg-yellow-100 text-yellow-800"
+                                  : record.accion === "LOGOUT"
+                                    ? "bg-purple-100 text-purple-800"
+                                    : "bg-gray-100 text-gray-800"
                         }`}
                       >
                         {record.accion}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-gray-600">{record.modelo}</td>
-                    <td className="px-6 py-4">{record.id_objeto}</td>
+                    <td className="px-6 py-4 text-gray-600">{record.modulo}</td>
+                    <td className="px-6 py-4 text-gray-600">{record.ip}</td>
                     <td className="px-6 py-4 text-gray-600 max-w-xs truncate">
-                      {record.detalles || "-"}
+                      {record.detalle || "-"}
                     </td>
                   </tr>
                 ))
