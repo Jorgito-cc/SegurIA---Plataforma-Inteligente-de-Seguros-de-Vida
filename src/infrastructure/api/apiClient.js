@@ -22,6 +22,7 @@ apiClient.interceptors.request.use((config) => {
   const tenantSlug = localStorage.getItem("tenant_slug");
   if (tenantSlug) {
     config.headers["X-Tenant-Slug"] = tenantSlug;
+    console.log("[API] X-Tenant-Slug enviado:", tenantSlug);
   } else {
     // Si no existe tenant_slug directo, intentar obtenerlo del auth_user
     const authUser = localStorage.getItem("auth_user");
@@ -31,10 +32,18 @@ apiClient.interceptors.request.use((config) => {
         if (user.tenant_slug) {
           config.headers["X-Tenant-Slug"] = user.tenant_slug;
           localStorage.setItem("tenant_slug", user.tenant_slug);
+          console.log(
+            "[API] X-Tenant-Slug obtenido de auth_user:",
+            user.tenant_slug,
+          );
+        } else {
+          console.warn("[API] auth_user no tiene tenant_slug");
         }
       } catch (e) {
-        console.error("Error parsing auth_user:", e);
+        console.error("[API] Error parsing auth_user:", e);
       }
+    } else {
+      console.warn("[API] No hay auth_user o tenant_slug en localStorage");
     }
   }
 

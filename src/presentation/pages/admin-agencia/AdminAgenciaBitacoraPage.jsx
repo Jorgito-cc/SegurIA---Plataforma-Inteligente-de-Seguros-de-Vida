@@ -80,6 +80,7 @@ export default function AdminAgenciaBitacoraPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Ingresa la contraseña"
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  autoComplete="new-password"
                   required
                 />
               </div>

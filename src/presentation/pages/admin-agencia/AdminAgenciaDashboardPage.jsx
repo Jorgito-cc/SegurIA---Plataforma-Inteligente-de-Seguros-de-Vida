@@ -11,7 +11,6 @@ export default function AdminAgenciaDashboardPage() {
   });
 
   useEffect(() => {
-    // TODO: Implementar llamadas a API para obtener estadísticas de la agencia
     setStats({
       totalClientes: 45,
       totalPolizas: 82,
