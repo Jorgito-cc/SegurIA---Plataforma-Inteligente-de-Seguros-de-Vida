@@ -92,12 +92,6 @@ export const sidebarByRole = {
         { label: "Renovaciones", to: "/agente/renovaciones" },
       ],
     },
-    {
-      key: "seguimiento",
-      icon: <FaShieldAlt />,
-      title: "Seguimiento",
-      items: [{ label: "Bitácora", to: "/agente/bitacora" }],
-    },
   ],
 
   Cliente: [

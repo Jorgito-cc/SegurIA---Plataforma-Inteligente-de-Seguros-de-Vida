@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import apiClient from '../../../infrastructure/api/apiClient';
 import { ENDPOINTS } from '../../../infrastructure/api/endpoints';
 import { notify } from '../notifications/notify';
-import { FiTimes, FiActivity, FiUser, FiMap, FiCheck } from 'react-icons/fi';
+import { FiX, FiActivity, FiUser, FiMap, FiCheck } from 'react-icons/fi';
 
 export default function CalculateCotizacionModal({ onClose }) {
   const [step, setStep] = useState(1);
@@ -87,7 +87,7 @@ export default function CalculateCotizacionModal({ onClose }) {
             </div>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition">
-            <FiTimes size={24} className="text-slate-500" />
+            <FiX size={24} className="text-slate-500" />
           </button>
         </div>
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import apiClient from '../../../infrastructure/api/apiClient';
 import { ENDPOINTS } from '../../../infrastructure/api/endpoints';
 import { notify } from '../notifications/notify';
-import { FiTimes, FiCheck, FiPlus, FiTrash2, FiUser } from 'react-icons/fi';
+import { FiX, FiCheck, FiPlus, FiTrash2, FiUser } from 'react-icons/fi';
 
 export default function EmitirPolizaModal({ onClose }) {
   const [cotizaciones, setCotizaciones] = useState([]);
@@ -69,7 +69,7 @@ export default function EmitirPolizaModal({ onClose }) {
         <div className="bg-slate-50 px-8 py-6 flex justify-between items-center border-b border-slate-100">
           <h2 className="text-2xl font-black text-slate-800">Emisión de Póliza</h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition">
-            <FiTimes size={24} className="text-slate-500" />
+            <FiX size={24} className="text-slate-500" />
           </button>
         </div>
 
