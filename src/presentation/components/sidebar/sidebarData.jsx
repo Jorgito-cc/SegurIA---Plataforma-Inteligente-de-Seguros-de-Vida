@@ -94,6 +94,8 @@ export const sidebarByRole = {
         { label: "Cotizaciones", to: "/agente/cotizaciones" },
         { label: "Pólizas", to: "/agente/polizas" },
         { label: "Renovaciones", to: "/agente/renovaciones" },
+        { label: "Expedientes KYC", to: "/agente/expedientes" },
+        { label: "Órdenes Médicas", to: "/agente/ordenes-medicas" },
       ],
     },
   ],

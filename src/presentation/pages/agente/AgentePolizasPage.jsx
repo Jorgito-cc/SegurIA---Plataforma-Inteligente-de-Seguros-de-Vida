@@ -13,11 +13,13 @@ export default function AgentePolizasPage() {
   const [showEmitModal, setShowEmitModal] = useState(false);
   const [selectedPoliza, setSelectedPoliza] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('todas'); // 'todas' | 'proximas'
 
   const fetchPolizas = async () => {
     try {
       setLoading(true);
-      const response = await apiClient.get(ENDPOINTS.polizas);
+      const endpoint = activeTab === 'proximas' ? ENDPOINTS.proximasVencer : ENDPOINTS.polizas;
+      const response = await apiClient.get(endpoint);
       setPolizas(response.data.results || response.data);
     } catch (error) {
       console.error('Error fetching polizas:', error);
@@ -29,7 +31,7 @@ export default function AgentePolizasPage() {
 
   useEffect(() => {
     fetchPolizas();
-  }, []);
+  }, [activeTab]);
 
   const handleSolicitarRenovacion = async (poliza) => {
     try {
@@ -52,7 +54,14 @@ export default function AgentePolizasPage() {
     { 
       key: 'cliente_email', 
       label: 'Cliente',
-      render: (_, item) => item.cotizacion?.cliente?.email || 'N/A'
+      render: (_, item) => (
+        <div className="flex flex-col">
+          <span className="text-sm font-bold text-slate-700">{item.cliente_nombre || item.cliente_email || 'N/A'}</span>
+          {item.cliente_nombre && item.cliente_email && (
+            <span className="text-[10px] text-slate-400">{item.cliente_email}</span>
+          )}
+        </div>
+      )
     },
     { 
       key: 'vencimiento', 
@@ -114,6 +123,21 @@ export default function AgentePolizasPage() {
       </div>
 
       <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
+        <div className="flex items-center gap-4 border-b border-slate-100 mb-6 pb-2">
+          <button
+            onClick={() => setActiveTab('todas')}
+            className={`px-4 py-2 font-bold text-sm transition border-b-2 ${activeTab === 'todas' ? 'border-blue-600 text-blue-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            Todas las Pólizas
+          </button>
+          <button
+            onClick={() => setActiveTab('proximas')}
+            className={`px-4 py-2 font-bold text-sm transition border-b-2 flex items-center gap-2 ${activeTab === 'proximas' ? 'border-amber-500 text-amber-600' : 'border-transparent text-slate-500 hover:text-slate-700'}`}
+          >
+            Próximas a Vencer
+          </button>
+        </div>
+
         <div className="relative mb-6">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input

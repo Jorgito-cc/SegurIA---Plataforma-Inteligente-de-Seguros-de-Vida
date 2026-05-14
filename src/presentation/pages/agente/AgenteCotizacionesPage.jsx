@@ -52,8 +52,8 @@ export default function AgenteCotizacionesPage() {
       label: 'Cliente',
       render: (_, item) => (
         <div className="flex flex-col">
-          <span className="text-sm font-bold text-slate-700">{item.cliente?.email || 'N/A'}</span>
-          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.plan?.nombre}</span>
+          <span className="text-sm font-bold text-slate-700">{item.cliente_email || item.cliente_nombre || 'N/A'}</span>
+          <span className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">{item.plan_detalle?.nombre}</span>
         </div>
       )
     },
@@ -107,10 +107,14 @@ export default function AgenteCotizacionesPage() {
     }
   ];
 
-  const filteredCotizaciones = cotizaciones.filter(c => 
-    c.cliente?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    c.plan?.nombre?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredCotizaciones = cotizaciones.filter(c => {
+    const search = searchTerm.toLowerCase();
+    return (
+      c.cliente_email?.toLowerCase().includes(search) ||
+      c.cliente_nombre?.toLowerCase().includes(search) ||
+      c.plan_detalle?.nombre?.toLowerCase().includes(search)
+    );
+  });
 
   return (
     <div className="p-6 space-y-6">
