@@ -60,26 +60,6 @@ export default function BackupsPage() {
     }
   };
 
-  const handleCreateMediaBackup = async () => {
-    try {
-      setActionLoading('media');
-      notify.info('Comprimiendo archivos multimedia...');
-      const response = await apiClient.post(ENDPOINTS.backups.media, {}, { responseType: 'blob' });
-      
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `backup_media_${new Date().getTime()}.zip`);
-      document.body.appendChild(link);
-      link.click();
-      
-      notify.success('Archivos multimedia comprimidos y descargados');
-    } catch (error) {
-      notify.error(error.message || 'Error al generar copia de multimedia');
-    } finally {
-      setActionLoading(null);
-    }
-  };
 
   const handleDownloadStored = async (id, tipo) => {
     try {
@@ -160,7 +140,7 @@ export default function BackupsPage() {
       </div>
 
       {/* Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="max-w-2xl">
         <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group">
           <div className="relative z-10">
             <div className="w-14 h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mb-6">
@@ -181,29 +161,6 @@ export default function BackupsPage() {
           </div>
           <div className="absolute top-[-20px] right-[-20px] opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
             <FiDatabase size={200} />
-          </div>
-        </div>
-
-        <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 relative overflow-hidden group">
-          <div className="relative z-10">
-            <div className="w-14 h-14 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center mb-6">
-              <FiFileText size={28} />
-            </div>
-            <h3 className="text-2xl font-black text-slate-800 mb-2">Archivos Multimedia</h3>
-            <p className="text-slate-500 text-sm mb-8 leading-relaxed">
-              Comprime en un archivo ZIP todos los documentos adjuntos: escaneos de identidad, firmas y exámenes médicos.
-            </p>
-            <button
-              onClick={handleCreateMediaBackup}
-              disabled={actionLoading === 'media'}
-              className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-black hover:bg-emerald-700 transition flex items-center justify-center gap-2 shadow-xl shadow-emerald-100 disabled:opacity-50"
-            >
-              {actionLoading === 'media' ? <FiRefreshCw className="animate-spin" /> : <FiDownload />}
-              Respaldar Multimedia
-            </button>
-          </div>
-          <div className="absolute top-[-20px] right-[-20px] opacity-[0.03] group-hover:opacity-[0.05] transition-opacity">
-            <FiFileText size={200} />
           </div>
         </div>
       </div>
