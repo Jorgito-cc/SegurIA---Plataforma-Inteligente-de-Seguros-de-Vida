@@ -339,6 +339,7 @@ export default function AdminAgenciaReportesPage() {
                 <div className="mt-8 border-t pt-8">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-black text-slate-800">Vista Previa (Top 10)</h3>
+                    <div className="flex gap-2">
                       <button 
                         onClick={() => exportData('html')}
                         className="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 hover:bg-blue-100 transition"
