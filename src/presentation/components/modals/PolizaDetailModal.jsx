@@ -1,4 +1,4 @@
-import { FiTimes, FiUser, FiFileText, FiShield, FiCheckCircle, FiXCircle } from "react-icons/fi";
+import { FiX, FiUser, FiFileText, FiShield, FiCheckCircle, FiXCircle } from "react-icons/fi";
 
 export default function PolizaDetailModal({ poliza, onClose }) {
   if (!poliza) return null;
@@ -12,7 +12,7 @@ export default function PolizaDetailModal({ poliza, onClose }) {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">{poliza.numero_poliza}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition">
-            <FiTimes size={24} className="text-slate-500" />
+            <FiX size={24} className="text-slate-500" />
           </button>
         </div>
 
