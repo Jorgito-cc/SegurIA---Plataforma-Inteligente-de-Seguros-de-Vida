@@ -16,7 +16,7 @@ export default function AdminDashboardPage() {
     totalUsuarios: 0,
     totalTenants: 0,
     totalPolizas: 0,
-    totalComisiones: 0,
+    ingresosSuscripciones: 0,
   });
   const [ultimosUsuarios, setUltimosUsuarios] = useState([]);
   const [ultimosTenants, setUltimosTenants] = useState([]);
@@ -81,25 +81,27 @@ export default function AdminDashboardPage() {
       setUltimosTenants(recentesTenants);
       console.log("[Admin Dashboard] Últimos tenants:", recentesTenants);
 
-      // 6️⃣ Total de Comisiones (suma de todas las primas * 10%)
-      const polizasRecientesRes = await apiClient.get("polizas/?limit=100");
-      const polizasData = Array.isArray(polizasRecientesRes.data)
-        ? polizasRecientesRes.data
-        : (polizasRecientesRes.data.results || []);
-        
-      const totalComisiones = polizasData.reduce((acc, pol) => {
-        const prima = parseFloat(pol.prima || 0);
-        const comision = prima * 0.1;
-        return acc + comision;
+      // 6️⃣ Total Ingresos Suscripciones (SaaS MRR)
+      const preciosPlan = {
+        basico: 150,
+        pro: 300,
+        premium: 600,
+      };
+
+      const ingresosSuscripciones = tenantsList.reduce((acc, tenant) => {
+        // Asumiendo que sumamos el precio del plan de todas las agencias registradas
+        // (Opcional: puedes agregar `if (tenant.suscripcion_activa)` si solo quieres contar a los que ya pagaron por Stripe)
+        const precio = preciosPlan[tenant.plan?.toLowerCase()] || 0;
+        return acc + precio;
       }, 0);
-      console.log("[Admin Dashboard] Total comisiones:", totalComisiones);
+      console.log("[Admin Dashboard] Total ingresos suscripciones:", ingresosSuscripciones);
 
       // Actualizar Stats
       setStats({
         totalUsuarios,
         totalTenants,
         totalPolizas,
-        totalComisiones,
+        ingresosSuscripciones,
       });
 
       notify.success("✅ Dashboard actualizado");
@@ -165,8 +167,8 @@ export default function AdminDashboardPage() {
         />
         <StatCard
           icon={<FiDollarSign size={24} />}
-          title="Total Comisiones"
-          value={`$${stats.totalComisiones.toFixed(2)}`}
+          title="Ingresos Mensuales"
+          value={`$${stats.ingresosSuscripciones.toFixed(2)}`}
           color="bg-orange-500"
           loading={loading}
         />
@@ -317,10 +319,10 @@ export default function AdminDashboardPage() {
               </div>
               <div className="flex justify-between border-t pt-2 mt-2">
                 <span className="text-gray-700 font-semibold">
-                  Comisiones Totales:
+                  Ingresos Mensuales SaaS:
                 </span>
                 <span className="font-bold text-orange-600">
-                  ${stats.totalComisiones.toFixed(2)}
+                  ${stats.ingresosSuscripciones.toFixed(2)}
                 </span>
               </div>
             </div>
