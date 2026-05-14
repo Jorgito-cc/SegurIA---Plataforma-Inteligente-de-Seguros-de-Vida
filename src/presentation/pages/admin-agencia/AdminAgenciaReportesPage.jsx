@@ -67,17 +67,32 @@ export default function AdminAgenciaReportesPage() {
       };
 
       recognitionRef.current.onerror = (event) => {
+        console.error("Error de micrófono:", event.error);
+        if (event.error === 'not-allowed') {
+          notify.error("Debes permitir el acceso al micrófono en el navegador.");
+        } else {
+          notify.error("Error con el reconocimiento de voz.");
+        }
         setIsListening(false);
       };
+    } else {
+      console.warn("El navegador no soporta reconocimiento de voz (Usa Chrome o Edge).");
     }
   }, []);
 
   const toggleListening = () => {
+    if (!recognitionRef.current) {
+      return notify.error("Tu navegador no soporta control por voz. Usa Chrome o Microsoft Edge.");
+    }
     if (isListening) {
-      recognitionRef.current?.stop();
+      recognitionRef.current.stop();
     } else {
       setTranscript("");
-      recognitionRef.current?.start();
+      try {
+        recognitionRef.current.start();
+      } catch (err) {
+        console.error("Ya está iniciado", err);
+      }
     }
   };
 
@@ -148,6 +163,7 @@ export default function AdminAgenciaReportesPage() {
   const exportData = async (format) => {
     if (!selectedModelo) return;
     try {
+      notify.info(`Generando archivo ${format.toUpperCase()}...`);
       const params = {
         modelo: selectedModelo,
         campos: selectedFields.join(','),
@@ -155,12 +171,34 @@ export default function AdminAgenciaReportesPage() {
         ...filters
       };
       
-      // Para PDF/Excel usamos una descarga directa
-      const url = `${apiClient.defaults.baseURL}${ENDPOINTS.reportes.base}?${new URLSearchParams(params).toString()}`;
-      window.open(url, '_blank');
-      notify.info(`Generando archivo ${format.toUpperCase()}...`);
+      // Enviar el token y descargar como Blob (Binario)
+      const res = await apiClient.get(ENDPOINTS.reportes.base, { 
+        params, 
+        responseType: format === 'json' ? 'json' : 'blob' 
+      });
+      
+      if (format === 'json') return; // El json se maneja en previsualizar
+
+      // Crear archivo para descargar
+      const blob = new Blob([res.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // Extensiones según formato
+      const ext = format === 'excel' ? 'xlsx' : format;
+      const modelName = selectedModelo.split('.')[1] || 'reporte';
+      link.setAttribute('download', `${modelName}_${new Date().getTime()}.${ext}`);
+      
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+      
+      notify.success(`Exportación a ${format.toUpperCase()} exitosa`);
     } catch (error) {
-      notify.error("Error al exportar");
+      console.error(error);
+      notify.error("Error al exportar. Revisa si hay datos.");
     }
   };
 
@@ -301,7 +339,12 @@ export default function AdminAgenciaReportesPage() {
                 <div className="mt-8 border-t pt-8">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-black text-slate-800">Vista Previa (Top 10)</h3>
-                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => exportData('html')}
+                        className="bg-blue-50 text-blue-600 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 hover:bg-blue-100 transition"
+                      >
+                        <FiGrid /> Exportar HTML
+                      </button>
                       <button 
                         onClick={() => exportData('pdf')}
                         className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 hover:bg-red-100 transition"
