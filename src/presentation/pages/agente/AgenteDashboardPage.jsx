@@ -11,7 +11,9 @@ import {
   FiTrendingUp,
   FiRefreshCw,
   FiAlertTriangle,
-  FiChevronRight
+  FiChevronRight,
+  FiClock,
+  FiCheckCircle
 } from "react-icons/fi";
 
 export default function AgenteDashboardPage() {
@@ -23,6 +25,7 @@ export default function AgenteDashboardPage() {
     promedioPrima: 0,
   });
   const [proximasVencer, setProximasVencer] = useState([]);
+  const [cotizacionesPendientes, setCotizacionesPendientes] = useState([]);
   const [ultimosClientes, setUltimosClientes] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,15 +34,17 @@ export default function AgenteDashboardPage() {
       setLoading(true);
       
       // 1. Stats y listas básicas
-      const [clientesRes, polizasRes, proximasRes] = await Promise.all([
+      const [clientesRes, polizasRes, proximasRes, cotizacionesRes] = await Promise.all([
         apiClient.get(ENDPOINTS.clientes),
         apiClient.get(ENDPOINTS.polizas),
-        apiClient.get(ENDPOINTS.proximasVencer)
+        apiClient.get(ENDPOINTS.proximasVencer),
+        apiClient.get(ENDPOINTS.cotizaciones)
       ]);
 
       const clientes = clientesRes.data.results || clientesRes.data;
       const polizas = polizasRes.data.results || polizasRes.data;
       const proximas = proximasRes.data.polizas || [];
+      const cotizaciones = cotizacionesRes.data.results || cotizacionesRes.data;
 
       // Calcular stats
       const totalClientes = clientes.length;
@@ -62,6 +67,7 @@ export default function AgenteDashboardPage() {
 
       setUltimosClientes(clientes.slice(0, 5));
       setProximasVencer(proximas.slice(0, 5));
+      setCotizacionesPendientes(cotizaciones.filter(c => c.estado === 'PENDIENTE').slice(0, 5));
 
       notify.success("Dashboard actualizado");
     } catch (error) {
@@ -129,19 +135,50 @@ export default function AgenteDashboardPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Alertas de Renovación */}
+        {/* Alertas y Cotizaciones Pendientes */}
         <div className="lg:col-span-1 space-y-6">
+          {/* Cotizaciones Pendientes */}
           <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-6 border-b border-slate-50 flex items-center justify-between">
               <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
-                <FiAlertTriangle className="text-amber-500" /> Alertas de Renovación
+                <FiClock className="text-blue-500" /> Por Aceptar
+              </h2>
+              <Link to="/agente/cotizaciones" className="text-xs font-bold text-blue-600 hover:underline">Gestionar</Link>
+            </div>
+            <div className="p-4 space-y-3">
+              {cotizacionesPendientes.length === 0 ? (
+                <div className="py-8 text-center">
+                  <p className="text-sm text-slate-400">Todo al día. No hay cotizaciones pendientes.</p>
+                </div>
+              ) : (
+                cotizacionesPendientes.map(cot => (
+                  <div key={cot.id} className="flex items-center justify-between p-3 rounded-2xl bg-blue-50/50 border border-blue-100 hover:bg-blue-50 transition cursor-pointer">
+                    <div>
+                      <p className="text-xs font-black text-blue-900">{cot.cliente?.email}</p>
+                      <p className="text-[10px] text-blue-600 font-bold uppercase">{cot.plan?.nombre}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-black text-blue-900">${Number(cot.prima_ajustada_anual).toLocaleString()}</p>
+                      <FiChevronRight className="inline text-blue-400" />
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+
+          {/* Alertas de Renovación */}
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+            <div className="p-6 border-b border-slate-50 flex items-center justify-between">
+              <h2 className="text-lg font-black text-slate-800 flex items-center gap-2">
+                <FiAlertTriangle className="text-amber-500" /> Próximos Vencimientos
               </h2>
               <Link to="/agente/polizas" className="text-xs font-bold text-blue-600 hover:underline">Ver todas</Link>
             </div>
             <div className="p-4 space-y-3">
               {proximasVencer.length === 0 ? (
                 <div className="py-8 text-center">
-                  <p className="text-sm text-slate-400">No hay pólizas por vencer próximamente.</p>
+                  <p className="text-sm text-slate-400">No hay vencimientos cercanos.</p>
                 </div>
               ) : (
                 proximasVencer.map(pol => (
@@ -156,24 +193,11 @@ export default function AgenteDashboardPage() {
               )}
             </div>
           </div>
-
-          <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
-             <div className="relative z-10">
-               <h3 className="text-xl font-black mb-2">Potencia tus ventas</h3>
-               <p className="text-slate-400 text-sm mb-6">Usa nuestra IA para predecir qué clientes tienen más probabilidad de renovar.</p>
-               <Link to="/agente/cotizaciones" className="inline-block bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition">
-                 Nueva Cotización
-               </Link>
-             </div>
-             <div className="absolute top-[-20px] right-[-20px] opacity-10">
-               <FiTrendingUp size={150} />
-             </div>
-          </div>
         </div>
 
         {/* Clientes Recientes */}
         <div className="lg:col-span-2">
-          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
+          <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden h-full">
             <div className="p-6 border-b border-slate-50 flex items-center justify-between">
               <h2 className="text-lg font-black text-slate-800">Clientes Recientes</h2>
               <Link to="/agente/clientes" className="text-xs font-bold text-blue-600 hover:underline">Gestionar todos</Link>
@@ -211,6 +235,21 @@ export default function AgenteDashboardPage() {
                   ))}
                 </tbody>
               </table>
+            </div>
+            
+            <div className="p-6 mt-auto">
+               <div className="bg-slate-900 rounded-3xl p-6 text-white relative overflow-hidden shadow-xl">
+                 <div className="relative z-10">
+                   <h3 className="text-xl font-black mb-2">Potencia tus ventas</h3>
+                   <p className="text-slate-400 text-sm mb-6">Usa nuestra IA para predecir qué clientes tienen más probabilidad de renovar.</p>
+                   <Link to="/agente/cotizaciones" className="inline-block bg-blue-600 text-white px-6 py-2 rounded-xl font-bold hover:bg-blue-700 transition">
+                     Nueva Cotización
+                   </Link>
+                 </div>
+                 <div className="absolute top-[-20px] right-[-20px] opacity-10">
+                   <FiTrendingUp size={150} />
+                 </div>
+               </div>
             </div>
           </div>
         </div>

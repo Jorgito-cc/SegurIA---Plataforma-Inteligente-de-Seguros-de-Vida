@@ -36,6 +36,7 @@ import AdminAgenciaPlanesPage from "../pages/admin-agencia/AdminAgenciaPlanesPag
 import AdminAgenciaAgentesPage from "../pages/admin-agencia/AdminAgenciaAgentesPage";
 import AdminAgenciaBitacoraPage from "../pages/admin-agencia/AdminAgenciaBitacoraPage";
 import AdminAgenciaReportesPage from "../pages/admin-agencia/AdminAgenciaReportesPage";
+import BackupsPage from "../pages/admin-agencia/BackupsPage";
 
 import AgenteDashboardPage from "../pages/agente/AgenteDashboardPage";
 import AgenteClientesPage from "../pages/agente/AgenteClientesPage";
@@ -107,6 +108,7 @@ export default function AppRouter() {
             <Route path="planes" element={<AdminPlanesPage />} />
             <Route path="roles" element={<AdminRolesPage />} />
             <Route path="permisos" element={<AdminPermisosPage />} />
+            <Route path="backups" element={<BackupsPage />} />
           </Route>
 
           {/* Admin Agencia - Dueño de la Agencia */}
@@ -123,6 +125,7 @@ export default function AppRouter() {
             <Route path="agentes" element={<AdminAgenciaAgentesPage />} />
             <Route path="bitacora" element={<AdminAgenciaBitacoraPage />} />
             <Route path="reportes" element={<AdminAgenciaReportesPage />} />
+            <Route path="backups" element={<BackupsPage />} />
           </Route>
 
           {/* Agente */}

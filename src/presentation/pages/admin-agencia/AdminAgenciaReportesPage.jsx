@@ -1,292 +1,361 @@
 import { useState, useRef, useEffect } from "react";
 import { notify } from "../../components/notifications/notify";
-import { FiMic, FiMicOff, FiBarChart2, FiDownload } from "react-icons/fi";
+import { 
+  FiMic, 
+  FiMicOff, 
+  FiBarChart2, 
+  FiDownload, 
+  FiFileText, 
+  FiGrid, 
+  FiCheckCircle, 
+  FiAlertCircle,
+  FiTrash2,
+  FiFilter,
+  FiSettings,
+  FiRefreshCw
+} from "react-icons/fi";
+import apiClient from "../../../infrastructure/api/apiClient";
+import { ENDPOINTS } from "../../../infrastructure/api/endpoints";
 
 export default function AdminAgenciaReportesPage() {
   const [isListening, setIsListening] = useState(false);
   const [transcript, setTranscript] = useState("");
-  const [selectedTables, setSelectedTables] = useState([]);
+  const [metadata, setMetadata] = useState({});
+  const [selectedModelo, setSelectedModelo] = useState("");
+  const [selectedFields, setSelectedFields] = useState([]);
+  const [filters, setFilters] = useState({});
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
   const recognitionRef = useRef(null);
 
-  // Lista de tablas disponibles en el backend
-  const availableTables = [
-    { id: "usuarios", label: "Usuarios", icon: "👤" },
-    { id: "clientes", label: "Clientes", icon: "👥" },
-    { id: "polizas", label: "Pólizas", icon: "📋" },
-    { id: "cotizaciones", label: "Cotizaciones", icon: "💰" },
-    { id: "ordenes_medicas", label: "Órdenes Médicas", icon: "🏥" },
-    { id: "comisiones", label: "Comisiones", icon: "💵" },
-    { id: "bitacora", label: "Bitácora", icon: "📊" },
-  ];
+  // Cargar metadatos del backend
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const res = await apiClient.get(ENDPOINTS.reportes.metadata);
+        setMetadata(res.data);
+      } catch (error) {
+        notify.error("Error al cargar modelos de reporte");
+      }
+    };
+    fetchMetadata();
+  }, []);
 
   // Inicializar Web Speech API
   useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
       recognitionRef.current.lang = "es-ES";
+      recognitionRef.current.continuous = true;
       recognitionRef.current.interimResults = true;
 
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-      };
+      recognitionRef.current.onstart = () => setIsListening(true);
+      recognitionRef.current.onend = () => setIsListening(false);
 
       recognitionRef.current.onresult = (event) => {
-        let interimTranscript = "";
+        let finalTranscript = "";
         for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
           if (event.results[i].isFinal) {
-            setTranscript((prev) => prev + transcript + " ");
-          } else {
-            interimTranscript += transcript;
+            finalTranscript += event.results[i][0].transcript;
           }
         }
-        if (interimTranscript) {
-          setTranscript(
-            (prev) =>
-              prev.split(" ").slice(0, -1).join(" ") + " " + interimTranscript,
-          );
+        if (finalTranscript) {
+          setTranscript(prev => (prev + " " + finalTranscript).trim());
+          processVoiceCommand(finalTranscript);
         }
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
       };
 
       recognitionRef.current.onerror = (event) => {
-        notify.error(`Error: ${event.error}`);
         setIsListening(false);
       };
-    } else {
-      notify.error("Tu navegador no soporta reconocimiento de voz");
     }
   }, []);
 
-  const startListening = () => {
-    if (recognitionRef.current) {
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
       setTranscript("");
-      recognitionRef.current.start();
+      recognitionRef.current?.start();
     }
   };
 
-  const stopListening = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-    }
-  };
-
-  const handleTableToggle = (tableId) => {
-    setSelectedTables((prev) =>
-      prev.includes(tableId)
-        ? prev.filter((id) => id !== tableId)
-        : [...prev, tableId],
-    );
-  };
-
-  const generateReport = async () => {
-    if (selectedTables.length === 0) {
-      notify.error("Selecciona al menos una tabla");
-      return;
-    }
-
+  const processVoiceCommand = async (text) => {
     try {
       setLoading(true);
-      // Simular generación de reporte (en producción, llamaría al backend)
-      // const data = await reporteRepository.generarReporte({
-      //   tablas: selectedTables,
-      //   filtros: transcript,
-      // });
-
-      // Por ahora, mostrar datos simulados
-      setReportData({
-        timestamp: new Date().toLocaleString("es-ES"),
-        tables: selectedTables,
-        filtros: transcript || "Sin filtros",
-        rows: Math.floor(Math.random() * 1000) + 100,
-      });
-
-      notify.success("Reporte generado");
+      const res = await apiClient.post(ENDPOINTS.reportes.voice, { text });
+      const { modelo_detectado, debug_ia } = res.data;
+      
+      if (modelo_detectado) {
+        setSelectedModelo(modelo_detectado);
+        // Seleccionar todos los campos por defecto si cambia el modelo
+        if (metadata[modelo_detectado]) {
+          setSelectedFields(metadata[modelo_detectado].fields.map(f => f.name));
+        }
+        // Aplicar filtros detectados por la IA
+        setFilters(debug_ia.filtros || {});
+        notify.success(`IA detectó: ${metadata[modelo_detectado]?.verbose_name}`);
+      }
     } catch (error) {
-      notify.error("Error al generar reporte");
+      console.error("Voice process error", error);
     } finally {
       setLoading(false);
     }
   };
 
-  const downloadReport = () => {
-    if (!reportData) return;
+  const handleModeloChange = (modelo) => {
+    setSelectedModelo(modelo);
+    if (metadata[modelo]) {
+      setSelectedFields(metadata[modelo].fields.map(f => f.name));
+    }
+    setFilters({});
+    setReportData(null);
+  };
 
-    const csvContent = `
-REPORTE GENERADO
-${new Date().toLocaleString("es-ES")}
+  const toggleField = (fieldName) => {
+    setSelectedFields(prev => 
+      prev.includes(fieldName) 
+        ? prev.filter(f => f !== fieldName)
+        : [...prev, fieldName]
+    );
+  };
 
-Tablas: ${reportData.tables.join(", ")}
-Filtros: ${reportData.filtros}
-Total de filas: ${reportData.rows}
+  const handleFilterChange = (key, value) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
 
-Instrucción de voz: "${transcript}"
-    `.trim();
+  const generatePreview = async () => {
+    if (!selectedModelo) return notify.error("Seleccione un modelo");
+    setLoading(true);
+    try {
+      const params = {
+        modelo: selectedModelo,
+        campos: selectedFields.join(','),
+        limit: 10,
+        ...filters
+      };
+      const res = await apiClient.get(ENDPOINTS.reportes.base, { params });
+      setReportData(res.data.data);
+      notify.success("Vista previa cargada");
+    } catch (error) {
+      notify.error("Error al generar vista previa");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    const blob = new Blob([csvContent], { type: "text/plain" });
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `reporte-${Date.now()}.txt`;
-    link.click();
-    window.URL.revokeObjectURL(url);
+  const exportData = async (format) => {
+    if (!selectedModelo) return;
+    try {
+      const params = {
+        modelo: selectedModelo,
+        campos: selectedFields.join(','),
+        export: format,
+        ...filters
+      };
+      
+      // Para PDF/Excel usamos una descarga directa
+      const url = `${apiClient.defaults.baseURL}${ENDPOINTS.reportes.base}?${new URLSearchParams(params).toString()}`;
+      window.open(url, '_blank');
+      notify.info(`Generando archivo ${format.toUpperCase()}...`);
+    } catch (error) {
+      notify.error("Error al exportar");
+    }
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-        <FiBarChart2 /> Generador de Reportes (Con Comando de Voz)
-      </h2>
+    <div className="p-6 space-y-8 bg-slate-50/30 min-h-screen">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+            <FiBarChart2 className="text-blue-600" /> Generador de Reportes IA
+          </h1>
+          <p className="text-slate-500 font-medium">Control por voz con Gemini y exportación profesional.</p>
+        </div>
+      </div>
 
-      {/* Voice Command Section */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-          <FiMic /> Comando de Voz
-        </h3>
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+        {/* Panel Izquierdo: Voz y Configuración */}
+        <div className="lg:col-span-1 space-y-6">
+          {/* Micrófono */}
+          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Asistente Vocal</h3>
+              {isListening && <span className="flex h-3 w-3 rounded-full bg-red-500 animate-ping"></span>}
+            </div>
+            
+            <button
+              onClick={toggleListening}
+              className={`w-full py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition-all ${
+                isListening 
+                  ? "bg-red-500 text-white shadow-lg shadow-red-200" 
+                  : "bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-100"
+              }`}
+            >
+              {isListening ? <FiMicOff size={22} /> : <FiMic size={22} />}
+              {isListening ? "Escuchando..." : "Dictar Reporte"}
+            </button>
 
-        <div className="space-y-4">
-          <div className="flex gap-2">
-            <button
-              onClick={startListening}
-              disabled={isListening}
-              className="flex-1 flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white px-4 py-3 rounded-lg transition font-semibold"
-            >
-              <FiMic size={20} /> Iniciar Grabación
-            </button>
-            <button
-              onClick={stopListening}
-              disabled={!isListening}
-              className="flex-1 flex items-center justify-center gap-2 bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 text-white px-4 py-3 rounded-lg transition font-semibold"
-            >
-              <FiMicOff size={20} /> Detener
-            </button>
+            <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 min-h-[80px]">
+              <p className="text-xs text-slate-500 italic">
+                {transcript || "Ej: 'Reporte de pólizas activas del mes pasado'"}
+              </p>
+            </div>
           </div>
 
-          {isListening && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-800 font-semibold flex items-center gap-2">
-                <span className="inline-block w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
-                Escuchando...
+          {/* Selector de Modelo */}
+          <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest mb-4">Fuente de Datos</h3>
+            <div className="space-y-2">
+              {Object.keys(metadata).map(modelKey => (
+                <button
+                  key={modelKey}
+                  onClick={() => handleModeloChange(modelKey)}
+                  className={`w-full p-4 rounded-2xl text-left font-bold transition-all border ${
+                    selectedModelo === modelKey 
+                      ? "bg-blue-50 border-blue-200 text-blue-700" 
+                      : "bg-white border-slate-100 hover:border-slate-200 text-slate-600"
+                  }`}
+                >
+                  {metadata[modelKey].verbose_name}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Panel Central: Filtros y Campos */}
+        <div className="lg:col-span-3 space-y-6">
+          {selectedModelo ? (
+            <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100 space-y-8 animate-in fade-in slide-in-from-right-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-2xl font-black text-slate-800 flex items-center gap-2">
+                  <FiSettings className="text-slate-400" /> 
+                  Configuración: {metadata[selectedModelo]?.verbose_name}
+                </h2>
+                <div className="flex gap-2">
+                   <button 
+                    onClick={generatePreview}
+                    disabled={loading}
+                    className="bg-emerald-500 text-white px-6 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-emerald-600 transition"
+                   >
+                     {loading ? <FiRefreshCw className="animate-spin" /> : <FiBarChart2 />}
+                     Previsualizar
+                   </button>
+                </div>
+              </div>
+
+              {/* Atributos */}
+              <div>
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 block">Campos a incluir</label>
+                <div className="flex flex-wrap gap-2">
+                  {metadata[selectedModelo]?.fields.map(field => (
+                    <button
+                      key={field.name}
+                      onClick={() => toggleField(field.name)}
+                      className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                        selectedFields.includes(field.name)
+                          ? "bg-blue-600 border-blue-600 text-white shadow-md"
+                          : "bg-white border-slate-200 text-slate-500 hover:border-slate-300"
+                      }`}
+                    >
+                      {field.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Filtros Dinámicos */}
+              <div>
+                <label className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4 block">Filtros Activos</label>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {Object.keys(filters).length === 0 ? (
+                    <p className="text-sm text-slate-400 italic col-span-3">No hay filtros aplicados. Dicta uno para empezar.</p>
+                  ) : (
+                    Object.entries(filters).map(([key, value]) => (
+                      <div key={key} className="flex items-center gap-2 bg-slate-50 p-3 rounded-2xl border border-slate-100">
+                        <FiFilter className="text-blue-500" />
+                        <div>
+                          <p className="text-[10px] font-black text-slate-400 uppercase">{key}</p>
+                          <input 
+                            type="text" 
+                            value={value}
+                            onChange={(e) => handleFilterChange(key, e.target.value)}
+                            className="bg-transparent text-xs font-bold text-slate-700 outline-none w-full"
+                          />
+                        </div>
+                        <button onClick={() => {
+                          const newF = {...filters}; delete newF[key]; setFilters(newF);
+                        }} className="text-slate-300 hover:text-red-500 transition">
+                          <FiTrash2 />
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Vista Previa de Tabla */}
+              {reportData && (
+                <div className="mt-8 border-t pt-8">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-black text-slate-800">Vista Previa (Top 10)</h3>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => exportData('pdf')}
+                        className="bg-red-50 text-red-600 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 hover:bg-red-100 transition"
+                      >
+                        <FiFileText /> Exportar PDF
+                      </button>
+                      <button 
+                        onClick={() => exportData('excel')}
+                        className="bg-emerald-50 text-emerald-600 px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 hover:bg-emerald-100 transition"
+                      >
+                        <FiGrid /> Exportar Excel
+                      </button>
+                    </div>
+                  </div>
+                  <div className="overflow-x-auto rounded-2xl border border-slate-100">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-50">
+                        <tr>
+                          {selectedFields.map(f => (
+                            <th key={f} className="px-4 py-3 text-[10px] font-black text-slate-400 uppercase">
+                              {metadata[selectedModelo].fields.find(field => field.name === f)?.label || f}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-50">
+                        {reportData.map((row, idx) => (
+                          <tr key={idx} className="hover:bg-slate-50/50 transition">
+                            {selectedFields.map(f => (
+                              <td key={f} className="px-4 py-3 text-xs text-slate-600 font-medium">
+                                {String(row[f] ?? '-')}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white h-[400px] rounded-[2rem] shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center p-12">
+              <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6 text-blue-500">
+                <FiBarChart2 size={40} />
+              </div>
+              <h2 className="text-2xl font-black text-slate-800 mb-2">Inicie su reporte</h2>
+              <p className="text-slate-400 font-medium max-w-md">
+                Seleccione una fuente de datos a la izquierda o pulse el botón de micrófono y diga algo como 
+                <span className="text-blue-600 block mt-2">"Reporte de clientes que ingresaron el mes pasado"</span>
               </p>
             </div>
           )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Transcripción
-            </label>
-            <textarea
-              value={transcript}
-              onChange={(e) => setTranscript(e.target.value)}
-              placeholder="La transcripción de voz aparecerá aquí... Puedes editar manualmente también"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
-              rows="4"
-            />
-          </div>
-
-          <p className="text-xs text-gray-500">
-            💡 Ejemplo: "Mostrar reportes de usuarios activos en mayo" o "Listar
-            todas las comisiones del mes"
-          </p>
         </div>
-      </div>
-
-      {/* Table Selection */}
-      <div className="bg-white rounded-lg shadow p-6">
-        <h3 className="text-lg font-semibold mb-4">Selecciona Tablas</h3>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
-          {availableTables.map((table) => (
-            <button
-              key={table.id}
-              onClick={() => handleTableToggle(table.id)}
-              className={`p-4 rounded-lg border-2 transition flex items-center gap-2 ${
-                selectedTables.includes(table.id)
-                  ? "border-blue-600 bg-blue-50"
-                  : "border-gray-200 hover:border-gray-300"
-              }`}
-            >
-              <input
-                type="checkbox"
-                checked={selectedTables.includes(table.id)}
-                onChange={() => {}}
-                className="w-5 h-5 rounded cursor-pointer"
-              />
-              <div className="text-left flex-1">
-                <p className="text-sm font-semibold">{table.label}</p>
-              </div>
-              <span className="text-xl">{table.icon}</span>
-            </button>
-          ))}
-        </div>
-
-        <div className="mt-4 flex gap-2">
-          <button
-            onClick={generateReport}
-            disabled={loading || selectedTables.length === 0}
-            className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white px-6 py-3 rounded-lg transition font-semibold"
-          >
-            {loading ? "Generando..." : "Generar Reporte"}
-          </button>
-
-          <button
-            onClick={() => {
-              setSelectedTables([]);
-              setTranscript("");
-              setReportData(null);
-            }}
-            className="bg-gray-400 hover:bg-gray-500 text-white px-6 py-3 rounded-lg transition font-semibold"
-          >
-            Limpiar
-          </button>
-        </div>
-      </div>
-
-      {/* Report Results */}
-      {reportData && (
-        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
-          <h3 className="text-lg font-semibold text-green-900 mb-4">
-            ✓ Reporte Generado
-          </h3>
-
-          <div className="space-y-2 text-sm mb-4">
-            <p>
-              <strong>Fecha:</strong> {reportData.timestamp}
-            </p>
-            <p>
-              <strong>Tablas:</strong> {reportData.tables.join(", ")}
-            </p>
-            <p>
-              <strong>Filtros (voz):</strong> {reportData.filtros}
-            </p>
-            <p>
-              <strong>Filas encontradas:</strong> {reportData.rows}
-            </p>
-          </div>
-
-          <button
-            onClick={downloadReport}
-            className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded-lg transition font-semibold"
-          >
-            <FiDownload /> Descargar Reporte
-          </button>
-        </div>
-      )}
-
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
-        <p>
-          <strong>ℹ️ Cómo funciona:</strong> Habilita el micrófono, usa comandos
-          de voz para describir qué datos quieres, selecciona las tablas y
-          genera el reporte. Los datos se descargarán en formato que puedas
-          abrir en Excel o cualquier editor.
-        </p>
       </div>
     </div>
   );

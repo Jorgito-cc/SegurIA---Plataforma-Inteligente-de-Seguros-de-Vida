@@ -24,4 +24,16 @@ export const ENDPOINTS = {
   renovaciones: 'renovaciones/',
   expedientes: 'expedientes/',
   ordenesMedicas: 'ordenes-medicas/',
+  backups: {
+    base: 'backups/',
+    crear: 'backups/crear/',
+    media: 'backups/media/',
+    restaurar: 'backups/restaurar/',
+    listar: 'backups/listar/',
+  },
+  reportes: {
+    base: 'reportes/',
+    metadata: 'reportes/metadata/',
+    voice: 'reportes/voice-intent/',
+  }
 };

@@ -40,6 +40,7 @@ export const sidebarByRole = {
         { label: "Roles", to: "/admin/roles" },
         { label: "Permisos", to: "/admin/permisos" },
         { label: "Bitácora", to: "/admin/bitacora" },
+        { label: "Backups", to: "/admin/backups" },
       ],
     },
   ],
@@ -64,7 +65,10 @@ export const sidebarByRole = {
       key: "seguridad",
       icon: <FaShieldAlt />,
       title: "Seguridad",
-      items: [{ label: "Bitácora", to: "/admin-agencia/bitacora" }],
+      items: [
+        { label: "Bitácora", to: "/admin-agencia/bitacora" },
+        { label: "Backups", to: "/admin-agencia/backups" },
+      ],
     },
     {
       key: "reportes",
