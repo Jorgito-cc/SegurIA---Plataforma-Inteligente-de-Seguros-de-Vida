@@ -63,7 +63,17 @@ apiClient.interceptors.response.use(
       localStorage.removeItem("tenant_slug");
     }
 
-    const data = error?.response?.data;
+    let data = error?.response?.data;
+
+    // Si el error viene como un Blob (común en endpoints que devuelven archivos), intentamos leerlo como JSON
+    if (data instanceof Blob && data.type === "application/json") {
+      try {
+        const text = await data.text();
+        data = JSON.parse(text);
+      } catch (e) {
+        console.error("Error parsing Blob error data", e);
+      }
+    }
 
     let message = "Error de red o servidor";
 

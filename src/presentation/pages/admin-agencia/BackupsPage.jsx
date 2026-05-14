@@ -27,7 +27,7 @@ export default function BackupsPage() {
       setBackups(response.data.backups || []);
     } catch (error) {
       console.error('Error fetching backups:', error);
-      notify.error('No se pudo cargar el historial de backups');
+      notify.error(error.message || 'No se pudo cargar el historial de backups');
     } finally {
       setLoading(false);
     }
@@ -54,7 +54,7 @@ export default function BackupsPage() {
       notify.success('Copia de seguridad completada y descargada');
       fetchBackups();
     } catch (error) {
-      notify.error('Error al generar copia de seguridad');
+      notify.error(error.message || 'Error al generar copia de seguridad');
     } finally {
       setActionLoading(null);
     }
@@ -75,7 +75,7 @@ export default function BackupsPage() {
       
       notify.success('Archivos multimedia comprimidos y descargados');
     } catch (error) {
-      notify.error('Error al generar copia de multimedia');
+      notify.error(error.message || 'Error al generar copia de multimedia');
     } finally {
       setActionLoading(null);
     }
@@ -91,7 +91,7 @@ export default function BackupsPage() {
       document.body.appendChild(link);
       link.click();
     } catch (error) {
-      notify.error('Error al descargar el backup');
+      notify.error(error.message || 'Error al descargar el backup');
     }
   };
 
@@ -103,7 +103,9 @@ export default function BackupsPage() {
       await apiClient.post(ENDPOINTS.backups.restaurar, { backup_id: id });
       notify.success('Sistema restaurado con éxito');
     } catch (error) {
-      notify.error('Error durante la restauración');
+      notify.error(error.message || 'Error durante la restauración');
+    } finally {
+      setActionLoading(null);
     }
   };
 

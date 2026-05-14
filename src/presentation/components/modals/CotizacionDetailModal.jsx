@@ -1,4 +1,4 @@
-import { FiX, FiUser, FiActivity, FiShield, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import { FiTimes, FiUser, FiActivity, FiShield, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
 export default function CotizacionDetailModal({ cotizacion, onClose, onAccept }) {
   if (!cotizacion) return null;
@@ -12,7 +12,7 @@ export default function CotizacionDetailModal({ cotizacion, onClose, onAccept })
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">#{cotizacion.id}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition">
-            <FiX size={24} className="text-slate-500" />
+            <FiTimes size={24} className="text-slate-500" />
           </button>
         </div>
 
@@ -36,11 +36,10 @@ export default function CotizacionDetailModal({ cotizacion, onClose, onAccept })
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100">
                 <p className="text-[10px] font-black text-slate-400 uppercase mb-1">Nivel de Riesgo</p>
-                <span className={`px-2 py-1 rounded-full text-xs font-black ${
-                  cotizacion.nivel_riesgo === 'BAJO' ? 'bg-green-100 text-green-700' :
-                  cotizacion.nivel_riesgo === 'MEDIO' ? 'bg-yellow-100 text-yellow-700' :
-                  'bg-red-100 text-red-700'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-black ${cotizacion.nivel_riesgo === 'BAJO' ? 'bg-green-100 text-green-700' :
+                    cotizacion.nivel_riesgo === 'MEDIO' ? 'bg-yellow-100 text-yellow-700' :
+                      'bg-red-100 text-red-700'
+                  }`}>
                   {cotizacion.nivel_riesgo}
                 </span>
               </div>
@@ -87,7 +86,7 @@ export default function CotizacionDetailModal({ cotizacion, onClose, onAccept })
               </div>
             </div>
             <div className="absolute top-[-20px] right-[-20px] opacity-10">
-               <FiActivity size={150} />
+              <FiActivity size={150} />
             </div>
           </div>
         </div>
@@ -95,7 +94,7 @@ export default function CotizacionDetailModal({ cotizacion, onClose, onAccept })
         <div className="p-8 bg-slate-50 border-t border-slate-100 flex justify-end gap-4">
           <button onClick={onClose} className="px-6 py-3 font-bold text-slate-500 hover:text-slate-800 transition">Cerrar</button>
           {cotizacion.estado === 'PENDIENTE' && (
-            <button 
+            <button
               onClick={() => {
                 onAccept(cotizacion.id);
                 onClose();
