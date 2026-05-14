@@ -78,7 +78,7 @@ export default function AdminDashboardPage() {
         fecha: t.creado_en ? new Date(t.creado_en).toLocaleDateString("es-ES") : "N/A",
       }));
       setUltimosTenants(todosTenants);
-      console.log("[Admin Dashboard] Últimos tenants:", recentesTenants);
+      console.log("[Admin Dashboard] Últimos tenants:", todosTenants);
 
       // 6️⃣ Total Ingresos Suscripciones (SaaS MRR)
       const preciosPlan = {
