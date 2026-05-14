@@ -63,7 +63,6 @@ export default function AdminAgenciaReportesPage() {
         }
         if (finalTranscript) {
           setTranscript(prev => (prev + " " + finalTranscript).trim());
-          processVoiceCommand(finalTranscript);
         }
       };
 
@@ -97,7 +96,27 @@ export default function AdminAgenciaReportesPage() {
     }
   };
 
+  const fetchReportData = async (modelo, campos, filtros) => {
+    setLoading(true);
+    try {
+      const params = {
+        modelo: modelo,
+        campos: campos.join(','),
+        limit: 10,
+        ...filtros
+      };
+      const res = await apiClient.get(ENDPOINTS.reportes.base, { params });
+      setReportData(res.data.data);
+      notify.success("Vista de reporte generada exitosamente");
+    } catch (error) {
+      notify.error("Error al generar la vista del reporte");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const processVoiceCommand = async (text) => {
+    if (!text.trim()) return notify.warning("No hay comando para procesar");
     try {
       setLoading(true);
       const res = await apiClient.post(ENDPOINTS.reportes.voice, { text });
@@ -105,16 +124,23 @@ export default function AdminAgenciaReportesPage() {
       
       if (modelo_detectado) {
         setSelectedModelo(modelo_detectado);
-        // Seleccionar todos los campos por defecto si cambia el modelo
+        let fields = [];
         if (metadata[modelo_detectado]) {
-          setSelectedFields(metadata[modelo_detectado].fields.map(f => f.name));
+          fields = metadata[modelo_detectado].fields.map(f => f.name);
+          setSelectedFields(fields);
         }
-        // Aplicar filtros detectados por la IA
-        setFilters(debug_ia.filtros || {});
+        const currentFilters = debug_ia.filtros || {};
+        setFilters(currentFilters);
         notify.success(`IA detectó: ${metadata[modelo_detectado]?.verbose_name}`);
+        
+        // Auto-generar reporte inmediatamente
+        await fetchReportData(modelo_detectado, fields, currentFilters);
+      } else {
+        notify.warning("La IA no pudo detectar un reporte válido. Intenta de nuevo.");
       }
     } catch (error) {
       console.error("Voice process error", error);
+      notify.error("Error al procesar el comando de voz");
     } finally {
       setLoading(false);
     }
@@ -143,22 +169,7 @@ export default function AdminAgenciaReportesPage() {
 
   const generatePreview = async () => {
     if (!selectedModelo) return notify.error("Seleccione un modelo");
-    setLoading(true);
-    try {
-      const params = {
-        modelo: selectedModelo,
-        campos: selectedFields.join(','),
-        limit: 10,
-        ...filters
-      };
-      const res = await apiClient.get(ENDPOINTS.reportes.base, { params });
-      setReportData(res.data.data);
-      notify.success("Vista previa cargada");
-    } catch (error) {
-      notify.error("Error al generar vista previa");
-    } finally {
-      setLoading(false);
-    }
+    await fetchReportData(selectedModelo, selectedFields, filters);
   };
 
   const exportData = async (format) => {
@@ -267,9 +278,27 @@ export default function AdminAgenciaReportesPage() {
 
             {transcript && (
               <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
-                <p className="text-xs text-slate-600 italic font-medium">
+                <p className="text-xs text-slate-700 italic font-medium mb-4">
                   "{transcript}"
                 </p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => processVoiceCommand(transcript)}
+                    disabled={loading}
+                    className="flex-1 py-3 bg-emerald-600 text-white rounded-xl font-bold flex justify-center items-center gap-2 hover:bg-emerald-700 transition shadow-lg shadow-emerald-200"
+                  >
+                    <FiCheckCircle />
+                    Generar Reporte
+                  </button>
+                  <button
+                    onClick={() => setTranscript("")}
+                    disabled={loading}
+                    className="p-3 bg-slate-200 text-slate-600 rounded-xl hover:bg-slate-300 transition"
+                    title="Borrar comando"
+                  >
+                    <FiTrash2 />
+                  </button>
+                </div>
               </div>
             )}
           </div>
