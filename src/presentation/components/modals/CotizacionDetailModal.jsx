@@ -1,4 +1,4 @@
-import { FiTimes, FiUser, FiActivity, FiShield, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
+import { FiX, FiUser, FiActivity, FiShield, FiCheckCircle, FiAlertCircle } from "react-icons/fi";
 
 export default function CotizacionDetailModal({ cotizacion, onClose, onAccept }) {
   if (!cotizacion) return null;
@@ -12,7 +12,7 @@ export default function CotizacionDetailModal({ cotizacion, onClose, onAccept })
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">#{cotizacion.id}</p>
           </div>
           <button onClick={onClose} className="p-2 hover:bg-slate-200 rounded-full transition">
-            <FiTimes size={24} className="text-slate-500" />
+            <FiX size={24} className="text-slate-500" />
           </button>
         </div>
 
