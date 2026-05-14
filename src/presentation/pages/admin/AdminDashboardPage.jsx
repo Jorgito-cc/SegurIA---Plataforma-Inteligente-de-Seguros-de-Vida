@@ -83,8 +83,11 @@ export default function AdminDashboardPage() {
 
       // 6️⃣ Total de Comisiones (suma de todas las primas * 10%)
       const polizasRecientesRes = await apiClient.get("polizas/?limit=100");
-      const polizasRecientes = polizasRecientesRes.data.results || [];
-      const totalComisiones = polizasRecientes.reduce((acc, pol) => {
+      const polizasData = Array.isArray(polizasRecientesRes.data)
+        ? polizasRecientesRes.data
+        : (polizasRecientesRes.data.results || []);
+        
+      const totalComisiones = polizasData.reduce((acc, pol) => {
         const prima = parseFloat(pol.prima || 0);
         const comision = prima * 0.1;
         return acc + comision;
