@@ -13,6 +13,8 @@ import {
   FiChevronRight
 } from "react-icons/fi";
 import { Link } from "react-router-dom";
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import ExportButtons from "../../components/ui/ExportButtons";
 
 function StatCard({ icon, title, value, color, trend }) {
   return (
@@ -94,7 +96,18 @@ export default function AdminAgenciaDashboard() {
           </h1>
           <p className="text-slate-500 font-medium">Gestionando la agencia: <span className="text-blue-600 font-bold">{user?.tenant_slug?.toUpperCase() || "Global"}</span></p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col items-end gap-3">
+          <ExportButtons 
+            title="Reporte Resumen de Dashboard" 
+            fileName="dashboard_resumen" 
+            columns={["Métrica", "Valor"]} 
+            rows={[
+              ["Total Clientes", String(stats.totalClientes)],
+              ["Pólizas Activas", String(stats.totalPolizas)],
+              ["Fuerza de Ventas (Agentes)", String(stats.agentes)],
+              ["Comisiones Estimadas", `$${stats.comisionesDelMes.toLocaleString()}`]
+            ]}
+          />
           <button onClick={fetchStats} className="bg-white border border-slate-200 text-slate-600 px-4 py-2 rounded-xl font-bold flex items-center gap-2 hover:bg-slate-50 transition">
              <FiClock /> Sincronizar
           </button>
@@ -135,8 +148,42 @@ export default function AdminAgenciaDashboard() {
 
       {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Recent Activity */}
+        {/* Left Column: Recent Activity & Charts */}
         <div className="lg:col-span-2 space-y-8">
+          
+          {/* Gráfico de Evolución */}
+          <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden p-8">
+            <h2 className="text-xl font-black text-slate-800 mb-6">Evolución de Ingresos (Simulado)</h2>
+            <div className="h-[250px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={[
+                  { name: 'Ene', primas: 4000 },
+                  { name: 'Feb', primas: 3000 },
+                  { name: 'Mar', primas: 2000 },
+                  { name: 'Abr', primas: 2780 },
+                  { name: 'May', primas: 1890 },
+                  { name: 'Jun', primas: 2390 },
+                  { name: 'Jul', primas: stats.comisionesDelMes > 0 ? stats.comisionesDelMes * 10 : 3490 },
+                ]}>
+                  <defs>
+                    <linearGradient id="colorPrimas" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} />
+                  <YAxis axisLine={false} tickLine={false} tick={{fontSize: 10, fill: '#94a3b8'}} tickFormatter={(value) => `$${value}`} />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                    itemStyle={{ fontWeight: 'bold' }}
+                  />
+                  <Area type="monotone" dataKey="primas" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorPrimas)" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
           {/* Recent Clients */}
           <div className="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
             <div className="p-8 border-b border-slate-50 flex items-center justify-between">

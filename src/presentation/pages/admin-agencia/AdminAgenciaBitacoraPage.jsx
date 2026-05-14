@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { bitacoraRepository } from "../../../infrastructure/repositories/bitacoraRepository";
 import { notify } from "../../components/notifications/notify";
 import { FiLock, FiUnlock, FiFilter } from "react-icons/fi";
+import ExportButtons from "../../components/ui/ExportButtons";
 
 export default function AdminAgenciaBitacoraPage() {
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -123,16 +124,34 @@ export default function AdminAgenciaBitacoraPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <FiUnlock className="text-green-600" /> Bitácora de Auditoría
-          (Desbloqueada)
-        </h2>
-        <button
-          onClick={() => setIsUnlocked(false)}
-          className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
-        >
-          Bloquear
-        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+            <FiUnlock className="text-green-600" /> Bitácora de Auditoría
+            (Desbloqueada)
+          </h2>
+        </div>
+        <div className="flex items-center gap-4">
+          <ExportButtons 
+            title="Bitácora de Auditoría" 
+            fileName="bitacora" 
+            columns={["Fecha", "Usuario", "Acción", "Módulo", "IP", "Detalle"]} 
+            rows={records.map(r => [
+              new Date(r.fecha).toLocaleString("es-ES"), 
+              r.usuario_email || "Sistema", 
+              r.accion, 
+              r.modulo, 
+              r.ip, 
+              r.detalle || "-"
+            ])}
+            dataObject={records}
+          />
+          <button
+            onClick={() => setIsUnlocked(false)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            Bloquear
+          </button>
+        </div>
       </div>
 
       {/* Filters */}

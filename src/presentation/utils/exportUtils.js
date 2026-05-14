@@ -26,3 +26,40 @@ export function exportToPdf(title, fileName, columns, rows) {
 
   doc.save(`${fileName}.pdf`);
 }
+
+export function exportToHtml(title, columns, rows) {
+  const newWindow = window.open('', '_blank');
+  newWindow.document.write(`
+    <html>
+      <head>
+        <title>${title}</title>
+        <style>
+          body { font-family: sans-serif; padding: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+          th, td { border: 1px solid #ddd; padding: 8px; text-align: left; font-size: 12px; }
+          th { background-color: #2563eb; color: white; }
+          tr:nth-child(even) { background-color: #f2f2f2; }
+          .header { text-align: center; margin-bottom: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>${title}</h2>
+          <p>Generado automáticamente</p>
+        </div>
+        <table>
+          <thead>
+            <tr>${columns.map(col => `<th>${col}</th>`).join('')}</tr>
+          </thead>
+          <tbody>
+            ${rows.map(row => `<tr>${row.map(cell => `<td>${cell !== null && cell !== undefined ? cell : ''}</td>`).join('')}</tr>`).join('')}
+          </tbody>
+        </table>
+        <script>
+          window.onload = () => window.print();
+        </script>
+      </body>
+    </html>
+  `);
+  newWindow.document.close();
+}

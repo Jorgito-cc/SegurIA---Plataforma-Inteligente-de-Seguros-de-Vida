@@ -3,6 +3,7 @@ import agentRepository from "../../../infrastructure/repositories/agentRepositor
 import { notify } from "../../components/notifications/notify";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
 import CreateAgentForm from "../../components/forms/CreateAgentForm";
+import ExportButtons from "../../components/ui/ExportButtons";
 
 export default function AdminAgenciaAgentesPage() {
   const [agents, setAgents] = useState([]);
@@ -64,9 +65,28 @@ export default function AdminAgenciaAgentesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">Gestión de Agentes</h2>
-        <button
-          onClick={() => {
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Gestión de Agentes</h2>
+          <p className="text-sm text-gray-500">Administra los agentes de seguros de la agencia</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <ExportButtons 
+            title="Reporte de Agentes" 
+            fileName="agentes" 
+            columns={["Nombre", "Email", "CI", "Licencia", "Nivel", "Comisión", "Estado"]} 
+            rows={agents.map(a => [
+              `${a.first_name} ${a.last_name}`, 
+              a.email, 
+              a.ci, 
+              a.codigo_licencia || '-', 
+              a.nivel || '-', 
+              `${a.comision_base_porcentaje || '0'}%`, 
+              a.is_active ? 'Activo' : 'Inactivo'
+            ])}
+            dataObject={agents}
+          />
+          <button
+            onClick={() => {
             setEditingData(null);
             setShowForm(!showForm);
           }}
@@ -74,6 +94,7 @@ export default function AdminAgenciaAgentesPage() {
         >
           <FiPlus /> Nuevo Agente
         </button>
+        </div>
       </div>
 
       {showForm && (

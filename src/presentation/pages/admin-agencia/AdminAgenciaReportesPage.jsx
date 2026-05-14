@@ -16,6 +16,7 @@ import {
 } from "react-icons/fi";
 import apiClient from "../../../infrastructure/api/apiClient";
 import { ENDPOINTS } from "../../../infrastructure/api/endpoints";
+import { exportToPdf, exportToExcel, exportToHtml } from "../../utils/exportUtils";
 
 export default function AdminAgenciaReportesPage() {
   const [isListening, setIsListening] = useState(false);
@@ -167,33 +168,35 @@ export default function AdminAgenciaReportesPage() {
       const params = {
         modelo: selectedModelo,
         campos: selectedFields.join(','),
-        export: format,
+        export: 'json', // SIEMPRE pedimos JSON al backend
         ...filters
       };
       
-      // Enviar el token y descargar como Blob (Binario)
-      const res = await apiClient.get(ENDPOINTS.reportes.base, { 
-        params, 
-        responseType: format === 'json' ? 'json' : 'blob' 
-      });
+      // Obtener todos los datos (sin límite)
+      const res = await apiClient.get(ENDPOINTS.reportes.base, { params });
+      const rawData = res.data.data || [];
       
-      if (format === 'json') return; // El json se maneja en previsualizar
+      if (rawData.length === 0) {
+        return notify.warning("No hay datos para exportar.");
+      }
 
-      // Crear archivo para descargar
-      const blob = new Blob([res.data]);
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
+      const modelName = metadata[selectedModelo]?.verbose_name || "Reporte";
+      const fileName = `Reporte_${modelName.replace(/\s+/g, '_')}_${new Date().getTime()}`;
       
-      // Extensiones según formato
-      const ext = format === 'excel' ? 'xlsx' : format;
-      const modelName = selectedModelo.split('.')[1] || 'reporte';
-      link.setAttribute('download', `${modelName}_${new Date().getTime()}.${ext}`);
-      
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.URL.revokeObjectURL(url);
+      // Preparar columnas y filas para exportUtils
+      const columns = selectedFields.map(f => 
+        metadata[selectedModelo].fields.find(field => field.name === f)?.label || f
+      );
+      const rows = rawData.map(item => selectedFields.map(f => String(item[f] ?? '-')));
+
+      // Generar localmente
+      if (format === 'excel') {
+        exportToExcel(fileName, modelName, rawData); // Excel utils espera array de objetos
+      } else if (format === 'pdf') {
+        exportToPdf(`Reporte: ${modelName}`, fileName, columns, rows);
+      } else if (format === 'html') {
+        exportToHtml(`Reporte: ${modelName}`, columns, rows);
+      }
       
       notify.success(`Exportación a ${format.toUpperCase()} exitosa`);
     } catch (error) {
@@ -216,16 +219,15 @@ export default function AdminAgenciaReportesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Panel Izquierdo: Voz y Configuración */}
         <div className="lg:col-span-1 space-y-6">
-          {/* Micrófono */}
           <div className="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Asistente Vocal</h3>
+              <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Asistente IA</h3>
               {isListening && <span className="flex h-3 w-3 rounded-full bg-red-500 animate-ping"></span>}
             </div>
             
             <button
               onClick={toggleListening}
-              className={`w-full py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition-all ${
+              className={`w-full py-4 rounded-2xl font-black flex items-center justify-center gap-3 transition-all mb-4 ${
                 isListening 
                   ? "bg-red-500 text-white shadow-lg shadow-red-200" 
                   : "bg-blue-600 text-white hover:bg-blue-700 shadow-xl shadow-blue-100"
@@ -235,11 +237,41 @@ export default function AdminAgenciaReportesPage() {
               {isListening ? "Escuchando..." : "Dictar Reporte"}
             </button>
 
-            <div className="mt-4 p-4 bg-slate-50 rounded-2xl border border-slate-100 min-h-[80px]">
-              <p className="text-xs text-slate-500 italic">
-                {transcript || "Ej: 'Reporte de pólizas activas del mes pasado'"}
-              </p>
+            <div className="relative">
+              <input 
+                type="text" 
+                placeholder="O escribe aquí (Ej: pólizas activas)"
+                className="w-full bg-slate-50 border border-slate-200 text-sm font-medium text-slate-700 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors pr-12"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.target.value.trim() !== '') {
+                    processVoiceCommand(e.target.value);
+                    setTranscript(e.target.value);
+                    e.target.value = '';
+                  }
+                }}
+              />
+              <button 
+                onClick={(e) => {
+                  const input = e.currentTarget.previousElementSibling;
+                  if (input.value.trim() !== '') {
+                    processVoiceCommand(input.value);
+                    setTranscript(input.value);
+                    input.value = '';
+                  }
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-100 text-blue-600 p-2 rounded-lg hover:bg-blue-200"
+              >
+                <FiCheckCircle />
+              </button>
             </div>
+
+            {transcript && (
+              <div className="mt-4 p-4 bg-blue-50/50 rounded-xl border border-blue-100">
+                <p className="text-xs text-slate-600 italic font-medium">
+                  "{transcript}"
+                </p>
+              </div>
+            )}
           </div>
 
           {/* Selector de Modelo */}

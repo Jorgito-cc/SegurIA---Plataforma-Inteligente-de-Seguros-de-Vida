@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import tipoSeguroRepository from "../../../infrastructure/repositories/tipoSeguroRepository";
 import { notify } from "../../components/notifications/notify";
 import { FiPlus, FiEdit2, FiTrash2 } from "react-icons/fi";
+import ExportButtons from "../../components/ui/ExportButtons";
 
 export default function AdminAgenciaPlanesPage() {
   const [planes, setPlanes] = useState([]);
@@ -77,24 +78,41 @@ export default function AdminAgenciaPlanesPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-2xl font-bold text-gray-900">
-          Gestión de Planes/Tipos de Seguro
-        </h2>
-        <button
-          onClick={() => {
-            setFormData({
-              codigo_interno: "",
-              nombre: "",
-              descripcion: "",
-              estado: true,
-            });
-            setEditingId(null);
-            setShowForm(!showForm);
-          }}
-          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
-        >
-          <FiPlus /> Nuevo Plan
-        </button>
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">
+            Gestión de Planes/Tipos de Seguro
+          </h2>
+          <p className="text-sm text-gray-500">Administra los planes disponibles</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <ExportButtons 
+            title="Reporte de Planes de Seguro" 
+            fileName="planes" 
+            columns={["Código", "Nombre", "Descripción", "Estado"]} 
+            rows={planes.map(p => [
+              p.codigo_interno, 
+              p.nombre, 
+              p.descripcion, 
+              p.estado ? 'Activo' : 'Inactivo'
+            ])}
+            dataObject={planes}
+          />
+          <button
+            onClick={() => {
+              setFormData({
+                codigo_interno: "",
+                nombre: "",
+                descripcion: "",
+                estado: true,
+              });
+              setEditingId(null);
+              setShowForm(!showForm);
+            }}
+            className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            <FiPlus /> Nuevo Plan
+          </button>
+        </div>
       </div>
 
       {showForm && (
