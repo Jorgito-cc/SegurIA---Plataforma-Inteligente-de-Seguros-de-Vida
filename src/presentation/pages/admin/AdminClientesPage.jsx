@@ -5,7 +5,8 @@ import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import { notify } from '../../components/notifications/notify';
 import CreateClientForm from '../../components/forms/CreateClientForm';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
-import { FaEdit, FaFileExcel, FaFilePdf, FaFilter, FaPlus, FaSpinner, FaSyncAlt, FaToggleOff, FaToggleOn, FaTrash } from 'react-icons/fa';
+import ExportButtons from '../../components/ui/ExportButtons';
+import { FaEdit, FaFilter, FaPlus, FaSpinner, FaSyncAlt, FaToggleOff, FaToggleOn, FaTrash } from 'react-icons/fa';
 
 export default function AdminClientesPage() {
   const crud = useCrudManager(clientRepository);
@@ -180,18 +181,41 @@ export default function AdminClientesPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button
-          onClick={handleExportExcel}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
-        >
-          <FaFileExcel /> Excel
-        </button>
-        <button
-          onClick={handleExportPdf}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
-        >
-          <FaFilePdf /> PDF
-        </button>
+        <ExportButtons 
+          title="Reporte de Clientes" 
+          fileName="clientes-gestion" 
+          columns={['Usuario', 'Correo', 'Nombre', 'Apellido', 'CI', 'Telefono', 'Direccion', 'Nacimiento', 'Genero', 'Profesion', 'Fumador', 'Ingresos', 'Estado']} 
+          rows={filteredItems.map((item) => [
+            item.username,
+            item.email,
+            item.nombre_completo || item.first_name || '-',
+            item.last_name || '-',
+            item.ci,
+            item.telefono,
+            item.direccion,
+            item.fecha_nacimiento || '-',
+            item.genero || '-',
+            item.profesion_oficio || '-',
+            item.es_fumador ? 'Si' : 'No',
+            item.ingresos_mensuales ?? '-',
+            item.is_active ? 'Activo' : 'Inactivo',
+          ])}
+          dataObject={filteredItems.map((item) => ({
+            Usuario: item.username,
+            Correo: item.email,
+            Nombre: item.nombre_completo || item.first_name || '-',
+            Apellido: item.last_name || '-',
+            CI: item.ci,
+            Telefono: item.telefono,
+            Direccion: item.direccion,
+            Fecha_Nacimiento: item.fecha_nacimiento || '-',
+            Genero: item.genero || '-',
+            Profesion_Oficio: item.profesion_oficio || '-',
+            Fumador: item.es_fumador ? 'Si' : 'No',
+            Ingresos_Mensuales: item.ingresos_mensuales ?? '-',
+            Estado: item.is_active ? 'Activo' : 'Inactivo',
+          }))}
+        />
         <button
           onClick={() => crud.loadItems(crud.currentPage)}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"

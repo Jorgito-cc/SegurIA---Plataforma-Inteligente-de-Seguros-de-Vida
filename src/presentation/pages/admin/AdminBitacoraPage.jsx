@@ -1,18 +1,25 @@
 import { useEffect, useState } from 'react';
 import { bitacoraRepository } from '../../../infrastructure/repositories/bitacoraRepository';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
+import ExportButtons from '../../components/ui/ExportButtons';
 import { notify } from '../../components/notifications/notify';
-import { FaSpinner, FaFileExcel, FaFilePdf } from 'react-icons/fa';
+import { FaSpinner, FaLock, FaUnlock } from 'react-icons/fa';
 
 export default function AdminBitacoraPage() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [filteredRecords, setFilteredRecords] = useState([]);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [password, setPassword] = useState("");
+
+  const ADMIN_PASSWORD = "12345678"; // Contraseña en duro por ahora
 
   useEffect(() => {
-    loadRecords();
-  }, []);
+    if (isUnlocked) {
+      loadRecords();
+    }
+  }, [isUnlocked]);
 
   useEffect(() => {
     filterRecords();
@@ -59,30 +66,91 @@ export default function AdminBitacoraPage() {
       IP: record.ip || '-',
     }));
 
-  const handleExportExcel = () => {
-    exportToExcel('bitacora', 'Bitacora', buildExportRows());
+  const handleUnlock = (e) => {
+    e.preventDefault();
+    if (password === ADMIN_PASSWORD) {
+      setIsUnlocked(true);
+      notify.success("Bitácora desbloqueada");
+      setPassword("");
+    } else {
+      notify.error("Contraseña incorrecta");
+      setPassword("");
+    }
   };
 
-  const handleExportPdf = () => {
-    const rows = buildExportRows();
-    exportToPdf(
-      'Reporte de Bitacora',
-      'bitacora',
-      ['Fecha', 'Usuario', 'Accion', 'Modulo', 'Detalle', 'IP'],
-      rows.map((r) => [r.Fecha, r.Usuario, r.Accion, r.Modulo, r.Detalle, r.IP])
+  if (!isUnlocked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-full max-w-md">
+          <div className="bg-white rounded-lg shadow-lg p-8">
+            <div className="flex justify-center mb-6">
+              <div className="bg-red-100 p-4 rounded-full">
+                <FaLock size={32} className="text-red-600" />
+              </div>
+            </div>
+
+            <h2 className="text-2xl font-bold text-center text-gray-900 mb-2">
+              Bitácora Protegida
+            </h2>
+            <p className="text-center text-gray-600 mb-6">
+              Ingresa la contraseña para acceder al registro de auditoría global
+            </p>
+
+            <form onSubmit={handleUnlock} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Contraseña
+                </label>
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Ingresa la contraseña"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent outline-none"
+                  autoComplete="new-password"
+                  required
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded-lg transition"
+              >
+                Desbloquear
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
     );
-  };
+  }
 
   return (
     <div className="p-6 max-w-7xl mx-auto">
       <div className="flex justify-between items-center gap-3 mb-6">
-        <h1 className="text-3xl font-bold text-gray-800">Bitácora de Auditoría</h1>
-        <div className="flex items-center gap-2">
-          <button onClick={handleExportExcel} className="px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2">
-            <FaFileExcel /> Excel
-          </button>
-          <button onClick={handleExportPdf} className="px-3 py-2 bg-rose-600 text-white rounded-lg hover:bg-rose-700 transition flex items-center gap-2">
-            <FaFilePdf /> PDF
+        <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-2">
+          <FaUnlock className="text-green-600" /> Bitácora de Auditoría Global
+        </h1>
+        <div className="flex items-center gap-4">
+          <ExportButtons 
+            title="Bitácora de Auditoría Global" 
+            fileName="bitacora" 
+            columns={['Fecha', 'Usuario', 'Acción', 'Módulo', 'Detalle', 'IP']} 
+            rows={filteredRecords.map((r) => [
+              r.fecha ? new Date(r.fecha).toLocaleString('es-ES') : '-',
+              r.usuario || 'Sistema',
+              r.accion,
+              r.modulo,
+              r.detalle,
+              r.ip || '-'
+            ])}
+            dataObject={buildExportRows()}
+          />
+          <button
+            onClick={() => setIsUnlocked(false)}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition"
+          >
+            Bloquear
           </button>
         </div>
       </div>

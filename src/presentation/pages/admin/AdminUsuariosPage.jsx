@@ -2,11 +2,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { agentRepository } from '../../../infrastructure/repositories/agentRepository';
 import { clientRepository } from '../../../infrastructure/repositories/clientRepository';
 import { exportToExcel, exportToPdf } from '../../utils/exportUtils';
+import ExportButtons from '../../components/ui/ExportButtons';
 import { notify } from '../../components/notifications/notify';
 import { ConfirmDialog } from '../../components/common/ConfirmDialog';
 import CreateAgentForm from '../../components/forms/CreateAgentForm';
 import CreateClientForm from '../../components/forms/CreateClientForm';
-import { FaEdit, FaFileExcel, FaFilePdf, FaFilter, FaSearch, FaSpinner, FaUserCheck, FaUserFriends, FaUsers, FaTrash, FaToggleOff, FaToggleOn } from 'react-icons/fa';
+import { FaEdit, FaFilter, FaSearch, FaSpinner, FaUserCheck, FaUserFriends, FaUsers, FaTrash, FaToggleOff, FaToggleOn } from 'react-icons/fa';
 
 function StatCard({ title, value, tone = 'blue' }) {
   const tones = {
@@ -310,18 +311,29 @@ export default function AdminUsuariosPage() {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        <button
-          onClick={handleExportExcel}
-          className="px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition flex items-center gap-2"
-        >
-          <FaFileExcel /> Excel
-        </button>
-        <button
-          onClick={handleExportPdf}
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition flex items-center gap-2"
-        >
-          <FaFilePdf /> PDF
-        </button>
+        <ExportButtons 
+          title="Reporte de Usuarios" 
+          fileName="usuarios-gestion" 
+          columns={['Rol', 'Usuario', 'Nombre', 'Correo', 'Telefono', 'Documento', 'Estado']} 
+          rows={allUsers.map(user => [
+            user._role,
+            user.username,
+            user._displayName,
+            user.email || '-',
+            user.telefono || '-',
+            user.ci || '-',
+            user.is_active ? 'Activo' : 'Inactivo',
+          ])}
+          dataObject={allUsers.map((user) => ({
+            Rol: user._role,
+            Usuario: user.username,
+            Nombre: user._displayName,
+            Correo: user.email || '-',
+            Telefono: user.telefono || '-',
+            Documento: user.ci || '-',
+            Estado: user.is_active ? 'Activo' : 'Inactivo',
+          }))}
+        />
         <button
           onClick={loadUsers}
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
