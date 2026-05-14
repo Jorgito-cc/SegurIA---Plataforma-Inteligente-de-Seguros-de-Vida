@@ -61,24 +61,23 @@ export default function AdminDashboardPage() {
           id: u.id,
           email: u.email,
           nombre: u.first_name || "N/A",
-          fecha: new Date(u.date_joined).toLocaleDateString("es-ES"),
+          fecha: u.date_joined ? new Date(u.date_joined).toLocaleDateString("es-ES") : "N/A",
           esStaff: u.is_staff ? "✅ Staff" : "👤 Usuario",
         }),
       );
       setUltimosUsuarios(recientesUsuarios);
       console.log("[Admin Dashboard] Últimos usuarios:", recientesUsuarios);
 
-      // 5️⃣ Últimos 3 Tenants
-      const recentesTenants = (tenantsList.slice(0, 3) || []).map((t) => ({
+      // 5️⃣ Todas las Agencias (Desglose de Ingresos)
+      const todosTenants = tenantsList.map((t) => ({
         id: t.id,
         nombre: t.nombre_agencia || t.nombre || "N/A",
         slug: t.slug,
         plan: t.plan || "N/A",
-        fecha: new Date(t.date_created || t.created_at).toLocaleDateString(
-          "es-ES",
-        ),
+        ingreso: t.plan === "premium" ? 600 : t.plan === "pro" ? 300 : 150,
+        fecha: t.creado_en ? new Date(t.creado_en).toLocaleDateString("es-ES") : "N/A",
       }));
-      setUltimosTenants(recentesTenants);
+      setUltimosTenants(todosTenants);
       console.log("[Admin Dashboard] Últimos tenants:", recentesTenants);
 
       // 6️⃣ Total Ingresos Suscripciones (SaaS MRR)
@@ -232,10 +231,10 @@ export default function AdminDashboardPage() {
             )}
           </div>
 
-          {/* 🏢 Últimas Agencias */}
+          {/* 🏢 Ingresos por Agencia (SaaS) */}
           <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-xl font-semibold mb-4">
-              🏢 Últimas Agencias Registradas
+            <h2 className="text-xl font-semibold mb-4 text-gray-800">
+              🏢 Desglose de Ingresos por Agencia (SaaS)
             </h2>
             {loading ? (
               <div className="text-center py-8 text-gray-500">Cargando...</div>
@@ -244,14 +243,14 @@ export default function AdminDashboardPage() {
                 Sin agencias registradas
               </div>
             ) : (
-              <div className="overflow-x-auto">
+              <div className="overflow-x-auto max-h-96">
                 <table className="w-full text-sm">
-                  <thead className="border-b bg-gray-50">
+                  <thead className="border-b bg-gray-50 sticky top-0">
                     <tr>
-                      <th className="text-left py-2 px-3">Nombre</th>
-                      <th className="text-left py-2 px-3">Slug</th>
-                      <th className="text-left py-2 px-3">Plan</th>
-                      <th className="text-left py-2 px-3">Fecha Registro</th>
+                      <th className="text-left py-3 px-4 text-gray-600 font-semibold">Nombre</th>
+                      <th className="text-left py-3 px-4 text-gray-600 font-semibold">Plan</th>
+                      <th className="text-left py-3 px-4 text-gray-600 font-semibold">Fecha Registro</th>
+                      <th className="text-right py-3 px-4 text-gray-600 font-semibold">Pago (USD)</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -260,31 +259,42 @@ export default function AdminDashboardPage() {
                         key={tenant.id}
                         className="border-b hover:bg-gray-50 transition"
                       >
-                        <td className="py-3 px-3 font-medium">
+                        <td className="py-3 px-4 font-medium text-gray-900">
                           {tenant.nombre}
+                          <span className="block text-xs font-mono text-gray-400">{tenant.slug}</span>
                         </td>
-                        <td className="py-3 px-3 font-mono text-xs">
-                          {tenant.slug}
-                        </td>
-                        <td className="py-3 px-3">
+                        <td className="py-3 px-4">
                           <span
-                            className={`px-2 py-1 rounded text-xs font-semibold ${
+                            className={`px-3 py-1 rounded-full text-xs font-bold ${
                               tenant.plan === "premium"
-                                ? "bg-purple-100 text-purple-800"
+                                ? "bg-purple-100 text-purple-800 border border-purple-200"
                                 : tenant.plan === "pro"
-                                  ? "bg-blue-100 text-blue-800"
-                                  : "bg-gray-100 text-gray-800"
+                                  ? "bg-blue-100 text-blue-800 border border-blue-200"
+                                  : "bg-gray-100 text-gray-800 border border-gray-200"
                             }`}
                           >
-                            {tenant.plan}
+                            {tenant.plan.toUpperCase()}
                           </span>
                         </td>
-                        <td className="py-3 px-3 text-gray-600">
+                        <td className="py-3 px-4 text-gray-600">
                           {tenant.fecha}
+                        </td>
+                        <td className="py-3 px-4 text-right font-bold text-green-600">
+                          ${tenant.ingreso.toFixed(2)}
                         </td>
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot className="bg-gray-50 sticky bottom-0 border-t-2 border-gray-200">
+                    <tr>
+                      <td colSpan="3" className="py-3 px-4 text-right font-bold text-gray-800">
+                        Total Ingresos Generados:
+                      </td>
+                      <td className="py-3 px-4 text-right font-black text-orange-600 text-lg">
+                        ${stats.ingresosSuscripciones.toFixed(2)}
+                      </td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
             )}
