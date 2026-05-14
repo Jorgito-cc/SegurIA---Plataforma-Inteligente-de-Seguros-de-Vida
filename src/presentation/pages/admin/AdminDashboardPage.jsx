@@ -33,7 +33,7 @@ export default function AdminDashboardPage() {
 
       // 1️⃣ Total de Usuarios en el Sistema
       const usuariosRes = await apiClient.get("usuarios/?is_staff=false");
-      const totalUsuarios = usuariosRes.data.count || 0;
+      const totalUsuarios = usuariosRes.data.count || usuariosRes.data.length || 0;
       console.log("[Admin Dashboard] Total usuarios:", totalUsuarios);
 
       // 2️⃣ Total de Tenants/Agencias
@@ -46,14 +46,17 @@ export default function AdminDashboardPage() {
 
       // 3️⃣ Total de Pólizas en el Sistema
       const polizasRes = await apiClient.get("polizas/?estado=ACTIVA");
-      const totalPolizas = polizasRes.data.count || 0;
+      const totalPolizas = polizasRes.data.count || polizasRes.data.length || 0;
       console.log("[Admin Dashboard] Total pólizas activas:", totalPolizas);
 
       // 4️⃣ Últimos 3 Usuarios
       const usuariosRecientesRes = await apiClient.get(
         "usuarios/?ordering=-date_joined&limit=3",
       );
-      const recientesUsuarios = (usuariosRecientesRes.data.results || []).map(
+      const usuariosData = Array.isArray(usuariosRecientesRes.data) 
+        ? usuariosRecientesRes.data 
+        : (usuariosRecientesRes.data.results || []);
+      const recientesUsuarios = usuariosData.slice(0, 3).map(
         (u) => ({
           id: u.id,
           email: u.email,
