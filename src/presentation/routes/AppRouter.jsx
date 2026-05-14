@@ -39,6 +39,9 @@ import AdminAgenciaReportesPage from "../pages/admin-agencia/AdminAgenciaReporte
 
 import AgenteDashboardPage from "../pages/agente/AgenteDashboardPage";
 import AgenteClientesPage from "../pages/agente/AgenteClientesPage";
+import AgenteCotizacionesPage from "../pages/agente/AgenteCotizacionesPage";
+import AgentePolizasPage from "../pages/agente/AgentePolizasPage";
+import AgenteRenovacionesPage from "../pages/agente/AgenteRenovacionesPage";
 
 import ClienteDashboardPage from "../pages/client/ClienteDashboardPage";
 import ClientePerfilPage from "../pages/client/ClientePerfilPage";
@@ -133,6 +136,9 @@ export default function AppRouter() {
           >
             <Route path="dashboard" element={<AgenteDashboardPage />} />
             <Route path="clientes" element={<AgenteClientesPage />} />
+            <Route path="cotizaciones" element={<AgenteCotizacionesPage />} />
+            <Route path="polizas" element={<AgentePolizasPage />} />
+            <Route path="renovaciones" element={<AgenteRenovacionesPage />} />
           </Route>
 
           {/* Cliente */}

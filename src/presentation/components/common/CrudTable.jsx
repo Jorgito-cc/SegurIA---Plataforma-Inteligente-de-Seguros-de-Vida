@@ -7,7 +7,8 @@ export function CrudTable({
   onEdit, 
   onDelete, 
   onAdd,
-  pageInfo 
+  pageInfo,
+  customActions 
 }) {
   if (loading) {
     return (
@@ -53,18 +54,23 @@ export function CrudTable({
                 </td>
               ))}
               <td className="px-4 py-3 text-center flex justify-center gap-2">
-                <button
-                  onClick={() => onEdit(item)}
-                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center gap-1"
-                >
-                  <FaEdit size={14} />
-                </button>
-                <button
-                  onClick={() => onDelete(item.id)}
-                  className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition flex items-center gap-1"
-                >
-                  <FaTrash size={14} />
-                </button>
+                {customActions && customActions(item)}
+                {onEdit && (
+                  <button
+                    onClick={() => onEdit(item)}
+                    className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center gap-1"
+                  >
+                    <FaEdit size={14} />
+                  </button>
+                )}
+                {onDelete && (
+                  <button
+                    onClick={() => onDelete(item.id)}
+                    className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition flex items-center gap-1"
+                  >
+                    <FaTrash size={14} />
+                  </button>
+                )}
               </td>
             </tr>
           ))}

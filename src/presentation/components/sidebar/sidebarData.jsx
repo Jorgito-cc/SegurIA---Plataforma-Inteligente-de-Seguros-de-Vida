@@ -76,17 +76,25 @@ export const sidebarByRole = {
 
   Agente: [
     {
-      key: "agente",
-      icon: <FaUserFriends />,
-      title: "Clientes",
+      key: "dashboard",
+      icon: <FaHome />,
+      title: "Resumen",
+      items: [{ label: "Mi Dashboard", to: "/agente/dashboard" }],
+    },
+    {
+      key: "negocio",
+      icon: <FaClipboardList />,
+      title: "Negocio",
       items: [
-        { label: "Dashboard", to: "/agente/dashboard" },
-        { label: "Gestión de clientes", to: "/agente/clientes" },
+        { label: "Mis Clientes", to: "/agente/clientes" },
+        { label: "Cotizaciones", to: "/agente/cotizaciones" },
+        { label: "Pólizas", to: "/agente/polizas" },
+        { label: "Renovaciones", to: "/agente/renovaciones" },
       ],
     },
     {
-      key: "reportes",
-      icon: <FaChartBar />,
+      key: "seguimiento",
+      icon: <FaShieldAlt />,
       title: "Seguimiento",
       items: [{ label: "Bitácora", to: "/agente/bitacora" }],
     },

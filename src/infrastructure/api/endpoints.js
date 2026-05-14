@@ -16,4 +16,11 @@ export const ENDPOINTS = {
   roles: 'roles/',
   permisos: 'permisos/',
   tipoSeguros: 'tipo-seguros/',
+  planes: 'planes/',
+  clausulas: 'clausulas/',
+  cotizaciones: 'cotizaciones/',
+  polizas: 'polizas/',
+  renovaciones: 'renovaciones/',
+  expedientes: 'expedientes/',
+  ordenesMedicas: 'ordenes-medicas/',
 };

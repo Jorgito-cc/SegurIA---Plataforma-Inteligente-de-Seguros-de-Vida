@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../../../application/context/AuthContext";
 import { notify } from "../../components/notifications/notify";
 import apiClient from "../../../infrastructure/api/apiClient";
@@ -307,18 +308,18 @@ export default function AgenteDashboardPage() {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-lg font-semibold mb-4">🚀 Mis Acciones</h2>
             <div className="space-y-2">
-              <button className="w-full text-left px-4 py-2 hover:bg-blue-50 rounded transition font-medium text-blue-600">
+              <Link to="/agente/clientes" className="block w-full text-left px-4 py-2 hover:bg-blue-50 rounded transition font-medium text-blue-600">
                 ➕ Nuevo Cliente
-              </button>
-              <button className="w-full text-left px-4 py-2 hover:bg-green-50 rounded transition font-medium text-green-600">
+              </Link>
+              <Link to="/agente/cotizaciones" className="block w-full text-left px-4 py-2 hover:bg-green-50 rounded transition font-medium text-green-600">
                 ➕ Nueva Cotización
-              </button>
-              <button className="w-full text-left px-4 py-2 hover:bg-purple-50 rounded transition font-medium text-purple-600">
-                📊 Ver Comisiones
-              </button>
-              <button className="w-full text-left px-4 py-2 hover:bg-orange-50 rounded transition font-medium text-orange-600">
-                📋 Reportes
-              </button>
+              </Link>
+              <Link to="/agente/polizas" className="block w-full text-left px-4 py-2 hover:bg-purple-50 rounded transition font-medium text-purple-600">
+                📄 Gestionar Pólizas
+              </Link>
+              <Link to="/agente/renovaciones" className="block w-full text-left px-4 py-2 hover:bg-orange-50 rounded transition font-medium text-orange-600">
+                🔄 Renovaciones
+              </Link>
             </div>
           </div>
 
