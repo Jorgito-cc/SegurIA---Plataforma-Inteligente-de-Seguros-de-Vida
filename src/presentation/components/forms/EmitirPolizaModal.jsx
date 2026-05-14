@@ -45,6 +45,11 @@ export default function EmitirPolizaModal({ onClose }) {
   const handleEmitir = async () => {
     if (!selectedCotizacion) return notify.error('Seleccione una cotización');
     
+    const cotizacionObj = cotizaciones.find(c => c.id === parseInt(selectedCotizacion));
+    if (cotizacionObj && !cotizacionObj.expediente?.validado_por_analista) {
+      return notify.error('La documentación (Expediente) debe ser validada por un analista antes de emitir la póliza.');
+    }
+
     const totalPorcentaje = beneficiarios.reduce((acc, b) => acc + Number(b.porcentaje_asignado), 0);
     if (totalPorcentaje !== 100) return notify.error('La suma de porcentajes debe ser 100%');
 

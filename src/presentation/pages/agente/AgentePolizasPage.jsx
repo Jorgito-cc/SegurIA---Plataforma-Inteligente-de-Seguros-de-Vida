@@ -3,13 +3,15 @@ import apiClient from '../../../infrastructure/api/apiClient';
 import { ENDPOINTS } from '../../../infrastructure/api/endpoints';
 import { CrudTable } from '../../components/common/CrudTable';
 import { notify } from '../../components/notifications/notify';
-import { FiShield, FiPlus, FiRefreshCcw, FiSearch, FiFileText } from 'react-icons/fi';
+import { FiShield, FiPlus, FiRefreshCcw, FiSearch, FiEye, FiCheckCircle, FiXCircle, FiFileText } from 'react-icons/fi';
 import EmitirPolizaModal from '../../components/forms/EmitirPolizaModal';
+import PolizaDetailModal from '../../components/modals/PolizaDetailModal';
 
 export default function AgentePolizasPage() {
   const [polizas, setPolizas] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showEmitModal, setShowEmitModal] = useState(false);
+  const [selectedPoliza, setSelectedPoliza] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
 
   const fetchPolizas = async () => {
@@ -53,33 +55,35 @@ export default function AgentePolizasPage() {
       render: (_, item) => item.cotizacion?.cliente?.email || 'N/A'
     },
     { 
-      key: 'fecha_inicio_vigencia', 
-      label: 'Inicio',
-      render: (val) => new Date(val).toLocaleDateString()
-    },
-    { 
-      key: 'fecha_vencimiento', 
+      key: 'vencimiento', 
       label: 'Vencimiento',
-      render: (val) => (
-        <span className={new Date(val) < new Date() ? 'text-red-500 font-bold' : ''}>
-          {new Date(val).toLocaleDateString()}
-        </span>
-      )
+      render: (_, item) => {
+        const date = new Date(item.fecha_vencimiento);
+        const isClose = (date - new Date()) / (1000 * 60 * 60 * 24) < 30;
+        return (
+          <div className="flex flex-col">
+            <span className={`text-sm ${isClose ? 'text-amber-600 font-bold' : 'text-slate-600'}`}>
+              {date.toLocaleDateString()}
+            </span>
+            {isClose && item.estado === 'ACTIVA' && <span className="text-[10px] text-amber-500 font-black uppercase">Próxima a vencer</span>}
+          </div>
+        );
+      }
     },
     { 
-      key: 'prima_final_facturada', 
-      label: 'Prima',
-      render: (val) => <span className="font-bold text-slate-900">${Number(val).toLocaleString()}</span>
+      key: 'prima', 
+      label: 'Prima Anual',
+      render: (_, item) => <span className="font-black text-slate-900">${Number(item.prima_final_facturada).toLocaleString()}</span>
     },
     { 
       key: 'estado', 
       label: 'Estado',
       render: (val) => (
-        <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-          val === 'ACTIVA' ? 'bg-green-100 text-green-700' :
+        <span className={`px-2 py-1 rounded-full text-[10px] font-black tracking-wider uppercase ${
+          val === 'ACTIVA' ? 'bg-emerald-100 text-emerald-700' :
           val === 'VENCIDA' ? 'bg-red-100 text-red-700' :
           val === 'RENOVADA' ? 'bg-blue-100 text-blue-700' :
-          'bg-gray-100 text-gray-700'
+          'bg-slate-100 text-slate-700'
         }`}>
           {val}
         </span>
@@ -96,26 +100,26 @@ export default function AgentePolizasPage() {
     <div className="p-6 space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black text-slate-900 flex items-center gap-2">
-            <FiShield className="text-emerald-600" /> Pólizas Emitidas
+          <h1 className="text-3xl font-black text-slate-900 flex items-center gap-2 tracking-tight">
+            <FiShield className="text-blue-600" /> Pólizas de Seguro
           </h1>
-          <p className="text-slate-500">Administra las pólizas vigentes y gestiona sus renovaciones.</p>
+          <p className="text-slate-500 font-medium">Gestión administrativa de contratos y renovaciones.</p>
         </div>
         <button
           onClick={() => setShowEmitModal(true)}
-          className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-3 rounded-xl font-bold transition shadow-lg shadow-emerald-200"
+          className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-2xl font-black transition shadow-lg shadow-blue-200"
         >
-          <FiPlus /> Emitir Nueva Póliza
+          <FiPlus /> Emitir Póliza
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 p-6">
         <div className="relative mb-6">
           <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" />
           <input
             type="text"
-            placeholder="Buscar por número o cliente..."
-            className="w-full pl-12 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition"
+            placeholder="Buscar por número de póliza o email del cliente..."
+            className="w-full pl-12 pr-4 py-3 bg-slate-50/50 border border-slate-100 rounded-2xl outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -127,13 +131,20 @@ export default function AgentePolizasPage() {
           loading={loading}
           customActions={(item) => (
             <div className="flex gap-2">
+              <button
+                onClick={() => setSelectedPoliza(item)}
+                className="p-2 bg-slate-100 text-slate-600 rounded-xl hover:bg-slate-200 transition"
+                title="Ver Detalle"
+              >
+                <FiEye size={18} />
+              </button>
               {(item.estado === 'ACTIVA' || item.estado === 'VENCIDA') && (
                 <button
                   onClick={() => handleSolicitarRenovacion(item)}
-                  className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 transition flex items-center gap-1 text-xs"
+                  className="p-2 bg-amber-50 text-amber-600 rounded-xl hover:bg-amber-100 transition"
                   title="Solicitar Renovación"
                 >
-                  <FiRefreshCcw /> Renovar
+                  <FiRefreshCcw size={18} />
                 </button>
               )}
             </div>
@@ -147,6 +158,13 @@ export default function AgentePolizasPage() {
             setShowEmitModal(false);
             fetchPolizas();
           }} 
+        />
+      )}
+
+      {selectedPoliza && (
+        <PolizaDetailModal 
+          poliza={selectedPoliza} 
+          onClose={() => setSelectedPoliza(null)} 
         />
       )}
     </div>

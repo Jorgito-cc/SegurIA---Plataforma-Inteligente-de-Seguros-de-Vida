@@ -80,6 +80,17 @@ export default function AgenteCotizacionesPage() {
       )
     },
     { 
+      key: 'expediente', 
+      label: 'Documentos',
+      render: (_, item) => (
+        <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase ${
+          item.expediente?.validado_por_analista ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600'
+        }`}>
+          {item.expediente?.validado_por_analista ? 'Validado' : 'Pendiente'}
+        </span>
+      )
+    },
+    { 
       key: 'estado', 
       label: 'Estado',
       render: (val) => (

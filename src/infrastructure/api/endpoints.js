@@ -20,6 +20,7 @@ export const ENDPOINTS = {
   clausulas: 'clausulas/',
   cotizaciones: 'cotizaciones/',
   polizas: 'polizas/',
+  proximasVencer: 'polizas/proximas_a_vencer/',
   renovaciones: 'renovaciones/',
   expedientes: 'expedientes/',
   ordenesMedicas: 'ordenes-medicas/',
