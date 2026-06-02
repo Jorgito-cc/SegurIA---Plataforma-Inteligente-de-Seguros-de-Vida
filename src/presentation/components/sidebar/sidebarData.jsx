@@ -96,6 +96,7 @@ export const sidebarByRole = {
         { label: "Renovaciones", to: "/agente/renovaciones" },
         { label: "Expedientes KYC", to: "/agente/expedientes" },
         { label: "Órdenes Médicas", to: "/agente/ordenes-medicas" },
+        { label: "Pagos", to: "/agente/pagos" },
       ],
     },
   ],

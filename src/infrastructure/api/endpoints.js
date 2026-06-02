@@ -35,5 +35,6 @@ export const ENDPOINTS = {
     base: 'reportes/',
     metadata: 'reportes/metadata/',
     voice: 'reportes/voice-intent/',
-  }
+  },
+  pagos: 'pagos/',
 };
