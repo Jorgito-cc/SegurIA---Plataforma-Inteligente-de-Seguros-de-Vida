@@ -68,13 +68,20 @@ export default function AgenteExpedientesPage() {
     { 
       key: 'estado', 
       label: 'Validación',
-      render: (_, item) => (
-        <span className={`px-2 py-1 rounded-full text-[10px] font-black tracking-wider uppercase ${
-          item.validado_por_analista ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'
-        }`}>
-          {item.validado_por_analista ? 'Validado' : 'Pendiente'}
-        </span>
-      )
+      render: (_, item) => {
+        const estadoMap = {
+          VALIDADO:  { label: 'Validado',  css: 'bg-emerald-100 text-emerald-700' },
+          RECHAZADO: { label: 'Rechazado', css: 'bg-red-100 text-red-700' },
+          PENDIENTE: { label: 'Pendiente', css: 'bg-amber-100 text-amber-700' },
+        };
+        const key = item.estado || (item.validado_por_analista ? 'VALIDADO' : 'PENDIENTE');
+        const { label, css } = estadoMap[key] || estadoMap['PENDIENTE'];
+        return (
+          <span className={`px-2 py-1 rounded-full text-[10px] font-black tracking-wider uppercase ${css}`}>
+            {label}
+          </span>
+        );
+      }
     },
     {
       key: 'documentos',
