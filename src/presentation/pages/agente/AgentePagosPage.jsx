@@ -74,7 +74,8 @@ export default function AgentePagosPage() {
 
   // Filtrar clientes por búsqueda
   const filteredClientes = clientes.filter(c => {
-    const fullSearch = `${c.first_name || ''} ${c.last_name || ''} ${c.email || ''} ${c.ci || ''}`.toLowerCase();
+    const displayName = c.nombre_completo || `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.username || c.email || '';
+    const fullSearch = `${displayName} ${c.email || ''} ${c.ci || ''}`.toLowerCase();
     return fullSearch.includes(searchTerm.toLowerCase());
   });
 
@@ -134,7 +135,7 @@ export default function AgentePagosPage() {
                 filteredClientes.map((c) => (
                   <tr key={c.id} className="hover:bg-slate-50/50 transition">
                     <td className="p-4 pl-6 font-bold text-slate-800">
-                      {c.first_name} {c.last_name}
+                      {c.nombre_completo || `${c.first_name || ''} ${c.last_name || ''}`.trim() || c.username || c.email}
                     </td>
                     <td className="p-4">
                       <span className="bg-slate-100 text-slate-600 px-2.5 py-1 rounded-lg text-xs font-semibold">
@@ -172,7 +173,7 @@ export default function AgentePagosPage() {
             <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
               <div>
                 <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
-                  <FiUser className="text-indigo-600" /> Pagos de {selectedCliente.first_name} {selectedCliente.last_name}
+                  <FiUser className="text-indigo-600" /> Pagos de {selectedCliente.nombre_completo || `${selectedCliente.first_name || ''} ${selectedCliente.last_name || ''}`.trim() || selectedCliente.username || selectedCliente.email}
                 </h3>
                 <p className="text-xs text-slate-500 mt-1">C.I.: {selectedCliente.ci || 'N/A'} | Correo: {selectedCliente.email}</p>
               </div>

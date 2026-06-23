@@ -46,6 +46,7 @@ import AgenteRenovacionesPage from "../pages/agente/AgenteRenovacionesPage";
 import AgenteExpedientesPage from "../pages/agente/AgenteExpedientesPage";
 import AgenteOrdenesMedicasPage from "../pages/agente/AgenteOrdenesMedicasPage";
 import AgentePagosPage from "../pages/agente/AgentePagosPage";
+import AgenteSiniestrosEvaluacionPage from "../pages/agente/AgenteSiniestrosEvaluacionPage";
 
 import ClienteDashboardPage from "../pages/client/ClienteDashboardPage";
 import ClientePerfilPage from "../pages/client/ClientePerfilPage";
@@ -148,6 +149,7 @@ export default function AppRouter() {
             <Route path="expedientes" element={<AgenteExpedientesPage />} />
             <Route path="ordenes-medicas" element={<AgenteOrdenesMedicasPage />} />
             <Route path="pagos" element={<AgentePagosPage />} />
+            <Route path="siniestros" element={<AgenteSiniestrosEvaluacionPage />} />
           </Route>
 
           {/* Cliente */}
